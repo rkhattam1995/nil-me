@@ -49,21 +49,21 @@ class CrmLead(models.Model):
     students_details = fields.Html(string="Students' Details")
 
     def _lcp_html_table(self, title, rows):
-        """Compact bold table with content-width columns and optional merged rows."""
+        """Compact table matching the Training table palette."""
         rendered_rows = []
         for row in rows:
             if len(row) == 4:
-                label, value, bold, merged = row
+                label, value, shaded, merged = row
             else:
-                label, value, bold = row
+                label, value, shaded = row
                 merged = False
 
-            background = 'background:#f8fcfd;' if bold else ''
+            background = 'background:#EAF9FC;' if shaded else 'background:#fff;'
             if merged:
                 rendered_rows.append(
-                    '<tr><td colspan="2" style="padding:8px 11px;border:1px solid #dceff2;'
+                    '<tr><td colspan="2" style="padding:8px 11px;border:1px solid #cfe5ea;'
                     'font-family:Arial,Helvetica,sans-serif;font-size:16px;font-weight:700;'
-                    'white-space:nowrap;{0}">{1}</td></tr>'.format(
+                    'text-align:center;white-space:nowrap;{0}">{1}</td></tr>'.format(
                         background,
                         escape(label),
                     )
@@ -71,11 +71,11 @@ class CrmLead(models.Model):
             else:
                 rendered_rows.append(
                     '<tr>'
-                    '<td style="padding:8px 11px;border:1px solid #dceff2;'
+                    '<td style="padding:8px 11px;border:1px solid #cfe5ea;'
                     'font-family:Arial,Helvetica,sans-serif;font-size:16px;font-weight:700;'
                     'white-space:nowrap;{0}">{1}</td>'
-                    '<td style="padding:8px 11px;border:1px solid #dceff2;'
-                    'font-family:Arial,Helvetica,sans-serif;font-size:16px;font-weight:700;'
+                    '<td style="padding:8px 11px;border:1px solid #cfe5ea;'
+                    'font-family:Arial,Helvetica,sans-serif;font-size:16px;font-weight:400;'
                     'text-align:right;white-space:nowrap;{0}">{2}</td>'
                     '</tr>'.format(
                         background,
@@ -98,7 +98,7 @@ class CrmLead(models.Model):
             '%s'
             '<table style="width:auto;display:inline-table;border-collapse:collapse;'
             'table-layout:auto;font-family:Arial,Helvetica,sans-serif;font-size:16px;'
-            'font-weight:700;"><tbody>%s</tbody></table>'
+            'font-weight:400;"><tbody>%s</tbody></table>'
             '</div>'
         ) % (title_html, ''.join(rendered_rows))
 
@@ -107,15 +107,13 @@ class CrmLead(models.Model):
         end_customer = self.training_name.display_name if self.training_name else ''
         blocks = [
             '<div style="font-family:Arial,Helvetica,sans-serif;font-size:16px;'
-            'font-weight:700;line-height:1.45;margin-bottom:10px;">'
+            'font-weight:400;line-height:1.45;margin-bottom:10px;">'
             '<strong>End Customer:</strong> %s'
             '</div>' % escape(end_customer)
         ]
 
         for course in courses.filtered(lambda c: c.payment_method == 'clc'):
             online = course.location == 'Online'
-            rate_card_per_seat = course.lcp_rate_card_per_seat or 0.0
-            seats = max(course.no_of_student or 0, 0)
             total_revenue = course.lcp_total_rate_card or 0.0
             flight = 0.0 if online else (course.lcp_ticket_total or 0.0)
             hotel = 0.0 if online else (course.lcp_hotel_total or 0.0)
@@ -130,10 +128,8 @@ class CrmLead(models.Model):
             nilme_invoice = nilme + flight + hotel + instructor
 
             rows = [
-                ('Rate Card', self._lcp_money(rate_card_per_seat), True),
-                ('Seats', str(seats), False),
                 ('Total Revenue', self._lcp_money(total_revenue), True),
-                ('Deductible amounts', '', True, True),
+                ('Deductible Amounts', '', True, True),
             ]
             if not online:
                 rows.extend([
@@ -152,12 +148,11 @@ class CrmLead(models.Model):
                 ('NIL ME Share 80%', self._lcp_money(nilme), False),
                 ('NIL ME Invoice', self._lcp_money(nilme_invoice), True),
             ])
-            # No Training name/title in SO terms.
             blocks.append(self._lcp_html_table('', rows))
 
         blocks.append(
             '<div style="font-family:Arial,Helvetica,sans-serif;font-size:16px;'
-            'font-weight:700;line-height:1.45;margin-top:14px;">'
+            'font-weight:400;line-height:1.45;margin-top:14px;">'
             '<strong>Participants\' Details:</strong>'
             '</div>'
         )
