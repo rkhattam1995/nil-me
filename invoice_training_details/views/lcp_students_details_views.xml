@@ -8,9 +8,9 @@
             <xpath expr="//page[@id='training']" position="after">
                 <page string="Students' Details" name="students_details">
                     <field name="students_details"
-                           widget="html"
+                           widget="nil_terms_editor"
                            nolabel="1"
-                           placeholder="Enter participants' details here..."/>
+                           class="w-100 o_nil_terms_full_width"/>
                 </page>
             </xpath>
         </field>
