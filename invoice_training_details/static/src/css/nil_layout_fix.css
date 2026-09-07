@@ -37,11 +37,6 @@
     flex-direction: column !important;
     flex-wrap: nowrap !important;
 
-    /*
-     * Odoo adds h-100 on wide layouts. In a forced vertical layout that
-     * would squeeze the sheet/chatter into one viewport and can collapse
-     * the sheet. Override it here.
-     */
     height: auto !important;
     min-height: 100% !important;
 
@@ -61,6 +56,29 @@
     min-width: 0 !important;
 
     overflow: visible !important;
+}
+
+/* =========================================================
+   FORM SHEET: TRUE FULL WIDTH
+
+   The renderer and sheet background were already full width, but Odoo's
+   inner .o_form_sheet still kept its desktop max-width and auto margins.
+   That is exactly what was squeezing the LCP into the middle of the screen.
+   Use the existing o_nil_force_bottom_chatter class instead of :has(), so
+   the rule is stable and does not depend on parent-selector support.
+   ========================================================= */
+
+.o_form_renderer.o_nil_force_bottom_chatter
+    > .o_form_sheet_bg
+    > .o_form_sheet {
+    width: 100% !important;
+    max-width: none !important;
+    min-width: 0 !important;
+
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+
+    box-sizing: border-box !important;
 }
 
 .o_form_renderer.o_nil_force_bottom_chatter
