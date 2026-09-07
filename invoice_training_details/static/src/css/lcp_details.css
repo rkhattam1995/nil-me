@@ -42,76 +42,33 @@
     font-weight: 700;
 }
 
-/* Per-training LCP only. Keep the original page width. */
-.o_lcp_per_training {
+/* Per-training LCP: remove the Odoo sheet max-width only on the CRM form
+   that contains this widget, so the LCP uses the full available width. */
+.o_form_sheet_bg:has(.o_lcp_per_training) > .o_form_sheet,
+.o_form_sheet:has(.o_lcp_per_training) {
     width: 100% !important;
     max-width: none !important;
 }
 
+.o_lcp_per_training,
+.o_lcp_per_training.o_field_widget,
 .o_lcp_per_training > .border.rounded.shadow-sm.p-3.mb-4.bg-white {
     width: 100% !important;
     max-width: none !important;
+    min-width: 0 !important;
+}
+
+/* The repeated wrapper must not add another frame/padding around the
+   original LCP layout. */
+.o_lcp_per_training > .border.rounded.shadow-sm.p-3.mb-4.bg-white {
     border: 0 !important;
     border-radius: 0 !important;
     box-shadow: none !important;
     padding: 0 !important;
 }
 
-/* Remove all helper messages that were added by the per-training widget. */
-.o_lcp_per_training > .alert,
+/* Hide only the two helper messages that were added with the repeated LCP. */
 .o_lcp_per_training > .border.rounded.shadow-sm.p-3.mb-4.bg-white > .alert.alert-warning,
 .o_lcp_per_training .alert.alert-success.h-100.d-flex.align-items-center.mb-0 {
     display: none !important;
-}
-
-/* Remove the extra descriptive subtitle and payment/location pills.
-   The training name stays in the LCP title. */
-.o_lcp_per_training .card.bg-dark .small.text-white-50,
-.o_lcp_per_training .card.bg-dark .d-flex.gap-2.flex-wrap {
-    display: none !important;
-}
-
-/* Clean, consistent palette for the repeated LCP. */
-.o_lcp_per_training .card.bg-dark {
-    background: #243447 !important;
-    color: #ffffff !important;
-}
-
-.o_lcp_per_training .card.bg-dark .fs-4,
-.o_lcp_per_training .card.bg-dark .fa {
-    color: #ffffff !important;
-}
-
-.o_lcp_per_training .badge.bg-primary,
-.o_lcp_per_training .badge.bg-success,
-.o_lcp_per_training .card-header.bg-primary,
-.o_lcp_per_training .card-header.bg-info,
-.o_lcp_per_training .card-header.bg-success {
-    background: #355b7d !important;
-    color: #ffffff !important;
-}
-
-.o_lcp_per_training .border-primary,
-.o_lcp_per_training .border-info,
-.o_lcp_per_training .border-success,
-.o_lcp_per_training .border-warning {
-    border-color: #7890a6 !important;
-}
-
-.o_lcp_per_training .text-primary,
-.o_lcp_per_training .text-info,
-.o_lcp_per_training .text-success,
-.o_lcp_per_training .text-warning {
-    color: #355b7d !important;
-}
-
-.o_lcp_per_training .alert-info,
-.o_lcp_per_training .table-primary {
-    background: #edf3f8 !important;
-    border-color: #d8e3ec !important;
-    color: #22384a !important;
-}
-
-.o_lcp_per_training .table-warning {
-    background: #f3f5f7 !important;
 }
