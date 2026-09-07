@@ -6,15 +6,15 @@
         <field name="priority" eval="25"/>
         <field name="inherit_id" ref="purchase.res_config_settings_view_form_purchase"/>
         <field name="arch" type="xml">
-            <!-- Locate the correct setting block based on the updated Odoo 17 structure -->
             <xpath expr="//block[@name='purchase_setting_container']" position="inside">
-                <!-- Add your custom setting for PO approval route -->
                 <div class="col-12 col-lg-6 o_setting_box" id="po_order_approval_route">
                     <div class="o_setting_left_pane"/>
                     <div class="o_setting_right_pane">
                         <label for="po_order_approval_route"/>
-                        <span class="fa fa-lg fa-building-o" title="Values set here are company-specific."
-                              aria-label="Values set here are company-specific." groups="base.group_multi_company"
+                        <span class="fa fa-lg fa-building-o"
+                              title="Values set here are company-specific."
+                              aria-label="Values set here are company-specific."
+                              groups="base.group_multi_company"
                               role="img"/>
                         <div class="text-muted">
                             Use PO team based approval route for purchase orders
@@ -26,78 +26,7 @@
                         </div>
                     </div>
                 </div>
-
-                <!-- Add your custom setting for SO approval route -->
-                <div class="col-12 col-lg-6 o_setting_box" id="so_order_approval_route">
-                    <div class="o_setting_left_pane"/>
-                    <div class="o_setting_right_pane">
-                        <label for="so_order_approval_route"/>
-                        <span class="fa fa-lg fa-building-o" title="Values set here are company-specific."
-                              aria-label="Values set here are company-specific." groups="base.group_multi_company"
-                              role="img"/>
-                        <div class="text-muted">
-                            Use SO team based approval route for sales orders
-                        </div>
-                        <div class="content-group">
-                            <div class="mt16">
-                                <field name="so_order_approval_route" class="o_light_label" widget="radio"/>
-                            </div>
-                        </div>
-                    </div>
-                </div>
             </xpath>
         </field>
     </record>
 </odoo>
-
-
-        <!--<?xml version="1.0" encoding="utf-8"?>-->
-        <!--<odoo>-->
-
-        <!--    <record id="res_config_settings_view_form_purchase_approval_route" model="ir.ui.view">-->
-        <!--        <field name="name">res.config.settings.view.form.inherit.purchase.approval.route</field>-->
-        <!--        <field name="model">res.config.settings</field>-->
-        <!--        <field name="priority" eval="25"/>-->
-        <!--        <field name="inherit_id" ref="purchase.res_config_settings_view_form_purchase"/>-->
-        <!--        <field name="arch" type="xml">-->
-        <!--            <xpath expr="//div[@id='po_order_approval']" position="after">-->
-        <!--                <div class="col-12 col-lg-6 o_setting_box" id="po_order_approval_route">-->
-        <!--                    <div class="o_setting_left_pane"/>-->
-        <!--                    <div class="o_setting_right_pane">-->
-        <!--                        <label for="po_order_approval_route"/>-->
-        <!--                        <span class="fa fa-lg fa-building-o" title="Values set here are company-specific."-->
-        <!--                              aria-label="Values set here are company-specific." groups="base.group_multi_company"-->
-        <!--                              role="img"/>-->
-        <!--                        <div class="text-muted">-->
-        <!--                            Use PO team based approval route for purchase orders-->
-        <!--                        </div>-->
-        <!--                        <div class="content-group">-->
-        <!--                            <div class="mt16">-->
-        <!--                                <field name="po_order_approval_route" class="o_light_label" widget="radio"/>-->
-        <!--                            </div>-->
-        <!--                        </div>-->
-        <!--                    </div>-->
-        <!--                </div>-->
-        <!--&lt;!&ndash;                Sale Order&ndash;&gt;-->
-        <!--                <div class="col-12 col-lg-6 o_setting_box" id="so_order_approval_route">-->
-        <!--                    <div class="o_setting_left_pane"/>-->
-        <!--                    <div class="o_setting_right_pane">-->
-        <!--                        <label for="so_order_approval_route"/>-->
-        <!--                        <span class="fa fa-lg fa-building-o" title="Values set here are company-specific."-->
-        <!--                              aria-label="Values set here are company-specific." groups="base.group_multi_company"-->
-        <!--                              role="img"/>-->
-        <!--                        <div class="text-muted">-->
-        <!--                            Use SO team based approval route for purchase orders-->
-        <!--                        </div>-->
-        <!--                        <div class="content-group">-->
-        <!--                            <div class="mt16">-->
-        <!--                                <field name="so_order_approval_route" class="o_light_label" widget="radio"/>-->
-        <!--                            </div>-->
-        <!--                        </div>-->
-        <!--                    </div>-->
-        <!--                </div>-->
-        <!--            </xpath>-->
-        <!--        </field>-->
-        <!--    </record>-->
-
-        <!--</odoo>-->

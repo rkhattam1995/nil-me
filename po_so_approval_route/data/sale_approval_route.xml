@@ -1,35 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <data>
-        <template id="request_to_approve_so">
-            <p>
-                Dear
-                <t t-esc="object.sudo().current_approver.user_id.name"/>,
-            </p>
-            <p>
-                You have been requested to approve the Sale Order
-                <t t-esc="object.name"/>.
-            </p>
-            <p>
-                <a t-att-href="'/mail/view?model=%s&amp;res_id=%s' % (object._name, object.id)">
-                    View Sale Order
-                </a>
-            </p>
+        <template id="request_to_approve_so" active="False">
+            <t/>
         </template>
-
-        <template id="order_approval">
-            <p>
-                Dear
-                <t t-esc="object.user_id.sudo().name if object.user_id else object.create_uid.sudo().name"/>,
-            </p>
-            <p>
-                Sale Order "<t t-esc="object.name"/>" was approved.
-            </p>
-            <p>
-                <a t-att-href="'/mail/view?model=%s&amp;res_id=%s' % (object._name, object.id)">
-                    View Sale Order
-                </a>
-            </p>
+        <template id="order_approval" active="False">
+            <t/>
         </template>
     </data>
 </odoo>
