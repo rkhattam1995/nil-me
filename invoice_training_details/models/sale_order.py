@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+import re
+
 from odoo import api, models, fields
 
 
@@ -20,7 +22,6 @@ class SaleOrder(models.Model):
     descriptions = fields.Char(string='Description')
     # ordering_partner_id = fields.Many2one('res.partner',string='Ordering Partner')
     training_id = fields.Many2one('product.template',string='Training Name')
-    train_language = fields.Char(string='Training Language')
     location = fields.Selection([('Cisco U','Cisco U'),('ILT','ILT'),('VILT','VILT')])
     where_location = fields.Char(string='Where?')
     payment_method = fields.Selection([('cash','Cash'),('clc','CLC')],default='cash')
@@ -51,9 +52,65 @@ class SaleOrder(models.Model):
     details = fields.Html(string="Details")
     cost = fields.Float(string="Cost")
     currency_total = fields.Float(string="Total in Currency",compute='_compute_cur_tot')
+
     
     training_vendor = fields.Char(string="Training Vendor")
     training_type = fields.Char(string="Training Type")
+
+    # Keep quotation / SO pricing in USD.
+    def _nil_get_usd_pricelist(self, company=None):
+        company = company or self.company_id or self.env.company
+        usd_currency = self.env.ref('base.USD')
+
+        domain = [
+            ('currency_id', '=', usd_currency.id),
+            ('active', '=', True),
+            ('company_id', 'in', [False, company.id]),
+        ]
+
+        pricelist = self.env['product.pricelist'].search(
+            [('name', '=ilike', 'USD')] + domain,
+            order='company_id desc, id asc',
+            limit=1,
+        )
+        if not pricelist:
+            pricelist = self.env['product.pricelist'].search(
+                domain,
+                order='company_id desc, id asc',
+                limit=1,
+            )
+        return pricelist
+
+    @api.depends('partner_id', 'company_id')
+    def _compute_pricelist_id(self):
+        super()._compute_pricelist_id()
+        for order in self:
+            if order.state not in ('draft', 'sent'):
+                continue
+            usd_pricelist = order._nil_get_usd_pricelist()
+            if usd_pricelist:
+                order.pricelist_id = usd_pricelist
+
+    def write(self, vals):
+        # Do not allow a draft quotation to drift away from the USD pricelist,
+        # even if the customer or pricelist is changed manually.
+        sensitive_fields = {'partner_id', 'company_id', 'pricelist_id'}
+        if sensitive_fields.intersection(vals):
+            for order in self:
+                order_vals = dict(vals)
+                target_state = order_vals.get('state', order.state)
+                if target_state in ('draft', 'sent'):
+                    company = (
+                        self.env['res.company'].browse(order_vals['company_id'])
+                        if order_vals.get('company_id')
+                        else order.company_id
+                    )
+                    usd_pricelist = order._nil_get_usd_pricelist(company=company)
+                    if usd_pricelist:
+                        order_vals['pricelist_id'] = usd_pricelist.id
+                super(SaleOrder, order).write(order_vals)
+            return True
+        return super().write(vals)
     
     
     @api.depends('amount_total', 'currency_id')
@@ -88,10 +145,70 @@ class SaleOrder(models.Model):
 
     # logistics tab
     instructor_logistics = fields.Char(string='Instructor Logistics')
-    catering = fields.Selection([('NIL MM','NIL MN'),('Others','Others')],string='Catering')
+    ctrng = fields.Float(string='Catering')  # Now it's manually editable
     
-    bank_details = fields.Html(string='Bank Details',default='We kindly request you to transfer OR deposit cheque payment to below bank account details </br> Account Name: NIL Data Communications Middle East DMCC Emirates Islamic Bank JLT Branch - Dubai- UAE </br> Swiftcode: MEBLAEAD </br> Account Currency: USD </br> IBAN: AE690340003528215597102')
-    term_and_cond = fields.Html(string='Term and conditions',default=' 1. PO Reference #: PCD-006-2024 </br> 2. PO Amendment PCD-006-2024 </br> 3. End customer name: Saudi Authority for Data and Artificial Intelligence, Saudi Arabia. </br>4. The invoice amount does not include VAT or Withholding tajes - it must be paid by Taqnia Cyber if any, without any charging or deduction from the invoice amount.5. Taqnia Cyber will pay the taxes to KSA authorities directly.</br> 6. Taqnia Cyber must bear Money transfers or bank charges on payment.</br>')
+    bank_details = fields.Html(
+        string='Bank Details',
+        default='''
+            <div>
+                <strong>Bank Details:</strong><br/>
+                We kindly request you to transfer OR deposit cheque payment to below bank account details:<br/>
+                <strong>Account Name:</strong> NIL Data Communications Middle East DMCC<br/>
+                <strong>Bank Name:</strong> Emirates Islamic Bank<br/>
+                <strong>Bank Branch:</strong> JLT – Dubai- UAE<br/>
+                <strong>Swift code:</strong> MEBLAEAD<br/>
+                <strong>Account Currency:</strong> USD<br/>
+                <strong>IBAN:</strong> AE690340003528215597102
+            </div>
+        '''
+    )
+
+    _CASH_TERMS_HEADER = (
+        '<div class="o_order_terms_header">'
+        '<strong>Instructor From:</strong><br/>'
+        '<strong>End Customer:</strong><br/>'
+        '<strong>Candidate Details:</strong><br/>'
+        '</div>'
+    )
+
+    _CLC_TERMS_HEADER = (
+        '<div class="o_order_terms_header">'
+        '<strong>Instructor From:</strong><br/>'
+        '<strong>End Customer:</strong><br/>'
+        '<strong>Candidate Details:</strong><br/>'
+        '<strong>#of CLCs Utilized:</strong><br/>'
+        '</div>'
+    )
+
+    term_and_cond = fields.Html(
+        string='Term and conditions',
+        default=lambda self: self._default_term_and_cond()
+    )
+
+    @api.model
+    def _default_term_and_cond(self):
+        return self._CASH_TERMS_HEADER
+
+    @api.model
+    def _remove_order_terms_header(self, value):
+        return re.sub(
+            r'<div[^>]*class=["\'][^"\']*o_order_terms_header[^"\']*["\'][^>]*>.*?</div>',
+            '',
+            value or '',
+            flags=re.IGNORECASE | re.DOTALL
+        ).strip()
+
+    @api.onchange('payment_method')
+    def _onchange_payment_method_terms(self):
+        for rec in self:
+            existing_terms = rec._remove_order_terms_header(rec.term_and_cond)
+
+            if rec.payment_method == 'clc':
+                header = rec._CLC_TERMS_HEADER
+            else:
+                header = rec._CASH_TERMS_HEADER
+
+            rec.term_and_cond = header + existing_terms
     
     @api.depends('pro_service_ids.price')
     def _compute_service_price(self):
@@ -122,7 +239,7 @@ class SaleOrder(models.Model):
             'so_no': self.so_no,
             'tr_expiry_date': self.tr_expiry_date,
             'instructor_logistics': self.instructor_logistics,
-            'catering': self.catering,
+            'ctrng': self.ctrng,
             # 'descriptions': self.descriptions,
             # 'ordering_partner_id': self.ordering_partner_id.id,
             # 'where_location': self.where_location,
@@ -192,6 +309,10 @@ class SaleOrder(models.Model):
             rec.total_training_price = sum(rec.training_course_ids.mapped('price'))
             
     def synch_order(self):
+        usd_pricelist = self._nil_get_usd_pricelist()
+        if usd_pricelist and self.pricelist_id != usd_pricelist:
+            self.write({'pricelist_id': usd_pricelist.id})
+
         l = []
        
         for rec in self.training_course_ids:
@@ -212,6 +333,10 @@ class SaleOrder(models.Model):
         self.write({'order_line': l})
             
     def synch_pro_order(self):
+        usd_pricelist = self._nil_get_usd_pricelist()
+        if usd_pricelist and self.pricelist_id != usd_pricelist:
+            self.write({'pricelist_id': usd_pricelist.id})
+
         l = []
        
         for rec in self.pro_service_ids:
@@ -230,5 +355,3 @@ class SaleOrder(models.Model):
         
         self.write({'order_line': []})
         self.write({'order_line': l})
-            
-
