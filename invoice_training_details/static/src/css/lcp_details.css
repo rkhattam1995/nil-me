@@ -46,23 +46,36 @@
    REPEATED LCP: TRUE FULL WIDTH
    ========================================================= */
 
-/* The FormCompiler marks only the CRM form that contains the repeated LCP.
-   Remove Odoo's centered sheet max-width on that form only. */
+/* Remove every Odoo width cap on the CRM form that contains the LCP page. */
 .o_form_renderer.o_nil_lcp_full_width,
-.o_form_renderer.o_nil_lcp_full_width > .o_form_sheet_bg,
-.o_form_renderer.o_nil_lcp_full_width > .o_form_sheet_bg > .o_form_sheet {
+.o_form_renderer.o_nil_lcp_full_width .o_form_sheet_bg,
+.o_form_renderer.o_nil_lcp_full_width .o_form_sheet,
+.o_form_renderer.o_nil_lcp_full_width .o_notebook,
+.o_form_renderer.o_nil_lcp_full_width .o_notebook .tab-content,
+.o_form_renderer.o_nil_lcp_full_width .o_notebook .tab-pane,
+.o_form_renderer:has(.o_lcp_full_width_page),
+.o_form_renderer:has(.o_lcp_full_width_page) .o_form_sheet_bg,
+.o_form_renderer:has(.o_lcp_full_width_page) .o_form_sheet,
+.o_form_renderer:has(.o_lcp_full_width_page) .o_notebook,
+.o_form_renderer:has(.o_lcp_full_width_page) .o_notebook .tab-content,
+.o_form_renderer:has(.o_lcp_full_width_page) .o_notebook .tab-pane {
     width: 100% !important;
     max-width: none !important;
     min-width: 0 !important;
 }
 
-.o_form_renderer.o_nil_lcp_full_width > .o_form_sheet_bg > .o_form_sheet {
+.o_form_renderer.o_nil_lcp_full_width .o_form_sheet,
+.o_form_renderer:has(.o_lcp_full_width_page) .o_form_sheet {
     margin-left: 0 !important;
     margin-right: 0 !important;
 }
 
 .o_lcp_full_width_page,
-.o_lcp_full_width_page .o_field_widget,
+.o_lcp_full_width_page > .o_field_widget,
+.o_lcp_full_width_page .o_lcp_full_width_field,
+.o_lcp_full_width_page .o_field_x2many,
+.o_lcp_full_width_page .o_field_x2many_kanban,
+.o_lcp_full_width_page .o_field_x2many_list,
 .o_lcp_per_training,
 .o_lcp_per_training.o_field_widget,
 .o_lcp_per_training > .border.rounded.shadow-sm.p-3.mb-4.bg-white {
@@ -73,9 +86,26 @@
     box-sizing: border-box !important;
 }
 
+/* Desktop fallback: even if an Odoo parent tries to shrink-to-fit the custom
+   x2many widget, make the LCP span the visible form width. */
+@media (min-width: 992px) {
+    .o_lcp_full_width_page .o_lcp_full_width_field,
+    .o_lcp_full_width_page > .o_field_widget:has(.o_lcp_per_training) {
+        width: calc(100vw - 4rem) !important;
+        max-width: calc(100vw - 4rem) !important;
+    }
+}
+
 .o_lcp_full_width_page {
     padding-left: 0 !important;
     padding-right: 0 !important;
+}
+
+/* Make every card row consume the complete LCP width. */
+.o_lcp_per_training .row.g-3.mb-4,
+.o_lcp_per_training .row.g-3.mb-3 {
+    width: 100% !important;
+    max-width: none !important;
 }
 
 /* Do not add a second narrow frame around each repeated LCP. */
