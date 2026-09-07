@@ -11,6 +11,7 @@
                     <field name="training_course_ids"
                            widget="lcp_per_training"
                            nolabel="1"
+                           class="o_lcp_full_width_field"
                            options="{'no_create': True, 'no_delete': True}">
                         <tree create="false" delete="false">
                             <field name="name"/>
