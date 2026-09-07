@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <template id="report_quotation_document_lcp_patch"
+              inherit_id="invoice_training_details.report_quotation_document_training">
+
+        <xpath expr="//table[@name='training_line_table']" position="before">
+            <t t-set="lcp_enterone_clc_pdf"
+               t-value="bool(o.training_course_ids) and len(o.training_course_ids.filtered(lambda t: t.payment_method == 'clc' and t.lcp_cost_learning_partner == 'EnterOne')) == len(o.training_course_ids)"/>
+        </xpath>
+
+        <xpath expr="//table[@name='training_line_table']//th[span[normalize-space()='Training Price']]" position="replace">
+            <th name="th_training_rate_card"
+                style="text-align:center; vertical-align:middle;">
+                <span t-if="lcp_enterone_clc_pdf">Rate Card</span>
+                <span t-else="">Training Price</span>
+            </th>
+        </xpath>
+
+        <xpath expr="//table[@name='training_line_table']//tbody//span[@t-field='training.price']/.." position="replace">
+            <td style="text-align:center; vertical-align:middle;">
+                <span t-if="lcp_enterone_clc_pdf"
+                      t-esc="'$ {:,.2f}'.format(training.lcp_rate_card_per_seat or 0.0)"/>
+                <span t-else="" t-field="training.price"/>
+            </td>
+        </xpath>
+
+        <xpath expr="//table[@name='training_line_table']//th[span[normalize-space()='Total Price']]" position="replace">
+            <th t-if="o.display_total"
+                name="th_total_revenue"
+                style="max-width:80px; text-align:center; vertical-align:middle;">
+                <span t-if="lcp_enterone_clc_pdf">Total Revenue</span>
+                <span t-else="">Total Price</span>
+            </th>
+        </xpath>
+
+        <xpath expr="//table[@name='training_line_table']//tbody//span[@t-field='o.total_training_price']" position="replace">
+            <span t-if="lcp_enterone_clc_pdf"
+                  t-esc="'$ {:,.2f}'.format(o.total_training_price or 0.0)"/>
+            <span t-else="" t-field="o.total_training_price"/>
+        </xpath>
+
+    </template>
+</odoo>
