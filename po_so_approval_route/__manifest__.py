@@ -14,17 +14,19 @@
 Purchase Order Approval Cycle
 =============================
 This module provides a custom, flexible approval route for purchase orders.
-Sales Order approval has been removed.
+Sales Order approval is disabled completely.
     """,
     'data': [
         'security/ir.model.access.csv',
         'security/purchase_security.xml',
+        'security/sale_security.xml',
         'data/purchase_approval_route.xml',
-        'data/remove_sale_approval.xml',
+        'data/sale_approval_route.xml',
         'views/purchase_approval_route.xml',
+        'views/sale_approval_route.xml',
         'views/res_config_settings_views.xml',
     ],
-    'depends': ['purchase', 'account'],
+    'depends': ['purchase', 'sale', 'sales_team', 'sale_management'],
     'qweb': [],
     'images': [
         'static/description/icon.gif',
