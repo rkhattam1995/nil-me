@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <template id="report_po_document_layout_finishing"
+              inherit_id="invoice_training_details.report_po_document_training">
+
+        <xpath expr="//div[@class='row pt-3 pb-3']" position="replace">
+            <div class="row pt-3 pb-3 po-header-meta"
+                 style="font-family:Arial,Helvetica,sans-serif;font-size:18px;line-height:1.35;">
+                <div class="col-8" style="padding-left:0;">
+                    <div style="margin-bottom:5px;">
+                        <strong>Company Name:</strong>
+                        <span t-if="o.partner_id.is_company" t-field="o.partner_id.name"/>
+                        <span t-if="not o.partner_id.is_company" t-field="o.partner_id.parent_id.name"/>
+                    </div>
+
+                    <div style="margin-bottom:5px;">
+                        <strong>Company Address:</strong>
+                        <span t-if="o.partner_id.street" t-field="o.partner_id.street"/>
+                        <t t-if="o.partner_id.street2">
+                            <t t-if="o.partner_id.street">, </t>
+                            <span t-field="o.partner_id.street2"/>
+                        </t>
+                        <t t-if="o.partner_id.city">
+                            <t t-if="o.partner_id.street or o.partner_id.street2">, </t>
+                            <span t-field="o.partner_id.city"/>
+                        </t>
+                        <t t-if="o.partner_id.country_id">
+                            <t t-if="o.partner_id.street or o.partner_id.street2 or o.partner_id.city">, </t>
+                            <span t-field="o.partner_id.country_id.name"/>
+                        </t>
+                    </div>
+
+                    <div t-if="(o.partner_id.is_company and o.partner_id.vat) or (not o.partner_id.is_company and o.partner_id.parent_id.vat)"
+                         style="margin-bottom:5px;">
+                        <strong>Tax Number:</strong>
+                        <span t-if="o.partner_id.is_company" t-field="o.partner_id.vat"/>
+                        <span t-if="not o.partner_id.is_company" t-field="o.partner_id.parent_id.vat"/>
+                    </div>
+
+                    <div t-if="not o.partner_id.is_company">
+                        <strong>Attention:</strong>
+                        <span t-field="o.partner_id.name"/>
+                    </div>
+                </div>
+
+                <div class="col-4" style="padding-right:0;text-align:right;">
+                    <div style="margin-left:auto;margin-right:0;text-align:right;white-space:nowrap;">
+                        <div style="margin-bottom:5px;">
+                            <strong>
+                                <span t-if="is_clc_order">Work Order:</span>
+                                <span t-if="not is_clc_order">Purchase Order:</span>
+                            </strong>
+                            <span>&#160;</span>
+                            <span t-if="is_clc_order"
+                                  t-esc="o.name.replace('PO-', 'WO-', 1) if o.name.startswith('PO-') else 'WO-' + o.name"/>
+                            <span t-if="not is_clc_order" t-field="o.name"/>
+                        </div>
+                        <div style="margin-bottom:5px;">
+                            <strong>Date:</strong>
+                            <span>&#160;</span>
+                            <span t-field="o.date_order"
+                                  t-options="{&quot;widget&quot;:&quot;date&quot;,&quot;format&quot;:&quot;dd/MM/yyyy&quot;}"/>
+                        </div>
+                        <div t-if="o.validity_date">
+                            <strong>Validity Date:</strong>
+                            <span>&#160;</span>
+                            <span t-field="o.validity_date"
+                                  t-options="{&quot;widget&quot;:&quot;date&quot;,&quot;format&quot;:&quot;dd/MM/yyyy&quot;}"/>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </xpath>
+
+        <xpath expr="//table[@name='training_line_table']" position="before">
+            <style>
+                .po-header-meta,
+                .po-header-meta *,
+                table[name="training_line_table"],
+                table[name="training_line_table"] *,
+                .po-invoice-total-box,
+                .po-invoice-total-box *,
+                .po-party-details,
+                .po-party-details *,
+                .po-terms-content,
+                .po-terms-content *,
+                .po-bank-details,
+                .po-bank-details * {
+                    font-family: Arial, Helvetica, sans-serif !important;
+                    font-size: 18px !important;
+                    line-height: 1.35 !important;
+                }
+
+                .po-invoice-total-box tr.o_total td,
+                .po-invoice-total-box tr.o_total td *,
+                .po-invoice-total-box tr.o_total strong,
+                .po-invoice-total-box tr.o_total span {
+                    font-weight: 700 !important;
+                }
+            </style>
+        </xpath>
+
+        <xpath expr="//div[@t-field='o.term_and_cond']" position="before">
+            <div class="po-party-details" style="margin:8px 0 10px 0;">
+                <div>
+                    <strong>End Customer:</strong>
+                    <span t-if="o.end_customer_id" t-field="o.end_customer_id.name"/>
+                </div>
+            </div>
+        </xpath>
+
+        <xpath expr="//div[@t-field='o.term_and_cond']" position="attributes">
+            <attribute name="class">po-terms-content</attribute>
+            <attribute name="style">width:100%;font-family:Arial,Helvetica,sans-serif;font-size:18px;line-height:1.35;</attribute>
+        </xpath>
+
+        <xpath expr="//div[@t-field='o.term_and_cond']" position="after">
+            <div class="po-party-details" style="margin-top:12px;page-break-inside:avoid;">
+                <div style="font-weight:700;margin-bottom:5px;">Students' Details:</div>
+                <div t-if="o.crm_lead_id and o.crm_lead_id.students_details"
+                     t-field="o.crm_lead_id.students_details"/>
+            </div>
+        </xpath>
+
+        <xpath expr="//span[@t-field='o.bank_details']/ancestor::p[1]" position="attributes">
+            <attribute name="class">po-bank-details</attribute>
+            <attribute name="style">font-family:Arial,Helvetica,sans-serif;font-size:18px;line-height:1.35;</attribute>
+        </xpath>
+
+    </template>
+</odoo>
