@@ -30,7 +30,7 @@ class SaleOrder(models.Model):
     
     display_training_table = fields.Boolean(string='Display Training Table', help='display traning table in training invoice PDF.')
     display_signature = fields.Boolean(string='Display Signature', help='display signature in training invoice PDF.')
-    display_stamp = fields.Boolean(string='Display Stamp', help='display Stamp', help='display Stamp in training invoice PDF.')
+    display_stamp = fields.Boolean(string='Display Stamp', help='display Stamp in training invoice PDF.')
     display_ksa_qr = fields.Boolean(string='Display KSA QR', help='display KSA Qr in training invoice PDF.')
     
     display_instructor = fields.Boolean(string='Display Instructor', help='display Instructor in training invoice PDF.')
