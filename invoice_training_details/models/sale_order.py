@@ -17,7 +17,7 @@ class SaleOrder(models.Model):
     half_advance_payment_before = fields.Monetary(string='Advance payment amount 50% (paid)')
     half_payment_after = fields.Monetary(string='50% Amount after Training Delivery (Not Yet Paid)')
     training_course_ids = fields.One2many('training.course', 'sale_id', string='Training Courses')
-    pro_service_ids = fields.One2many('pro.service','pro_sale_id',srting='Professional Services')
+    pro_service_ids = fields.One2many('pro.service', 'pro_sale_id', string='Professional Services')
     
     #Add extera
     instructor_id = fields.Many2one('hr.employee',string="Instructor")
@@ -30,7 +30,7 @@ class SaleOrder(models.Model):
     
     display_training_table = fields.Boolean(string='Display Training Table', help='display traning table in training invoice PDF.')
     display_signature = fields.Boolean(string='Display Signature', help='display signature in training invoice PDF.')
-    display_stamp = fields.Boolean(string='Display Stamp', help='display Stamp in training invoice PDF.')
+    display_stamp = fields.Boolean(string='Display Stamp', help='display Stamp', help='display Stamp in training invoice PDF.')
     display_ksa_qr = fields.Boolean(string='Display KSA QR', help='display KSA Qr in training invoice PDF.')
     
     display_instructor = fields.Boolean(string='Display Instructor', help='display Instructor in training invoice PDF.')
