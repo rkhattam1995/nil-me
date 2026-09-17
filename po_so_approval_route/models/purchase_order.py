@@ -11,8 +11,11 @@ class PurchaseOrder(models.Model):
                                                string="Use Approval Route", readonly=True)
 
     team_id = fields.Many2one(
-        comodel_name="purchase.team", string="Purchase Team", domain="[('company_id', '=', company_id)]",
-        readonly=True, states={'draft': [('readonly', False)], 'sent': [('readonly', False)]}, ondelete="restrict"
+        comodel_name="purchase.team",
+        string="Purchase Team",
+        domain="[('company_id', '=', company_id)]",
+        readonly=False,
+        ondelete="restrict",
     )
 
     approver_ids = fields.One2many(
@@ -45,16 +48,12 @@ class PurchaseOrder(models.Model):
     def button_approve(self, force=False):
         for order in self:
             if not order.team_id:
-                # Do default behaviour if PO Team is not set
                 super(PurchaseOrder, order).button_approve(force)
             elif order.current_approver:
                 if order.current_approver.user_id == self.env.user or self.env.is_superuser():
-                    # If current user is current approver (or superuser) update state as "approved"
                     order.current_approver.state = 'approved'
                     order.message_post(body=_('PO approved by %s') % self.env.user.name)
-                    # Check is there is another approver
                     if order.next_approver:
-                        # Send request to approve is there is next approver
                         order.send_to_approve()
                     else:
                         partner = order.user_id.partner_id if order.user_id else order.create_uid.partner_id
@@ -65,39 +64,19 @@ class PurchaseOrder(models.Model):
                         )
                         return super(PurchaseOrder, order).button_approve(force)
 
-                # else:
-                    #     # If there is not next approval, than assume that approval is finished and send notification
-                    #     partner = order.user_id.partner_id if order.user_id else order.create_uid.partner_id
-                    #     order.message_post_with_view(
-                    #         'po_so_approval_route.order_approval',
-                    #         subject=_('PO Approved: %s') % (order.name,),
-                    #         composition_mode='mass_mail',
-                    #         partner_ids=[(4, partner.id)],
-                    #         auto_delete=True,
-                    #         auto_delete_message=True,
-                    #         parent_id=False,
-                    #         subtype_id=self.env.ref('mail.mt_note').id)
-                    #     # Do default behaviour to set state as "purchase" and update date_approve
-                    #     return super(PurchaseOrder, order).button_approve(force)
-
     def button_confirm(self):
         for order in self:
             if order.state not in ['draft', 'sent']:
                 continue
 
             if not order.team_id:
-                # Do default behaviour if PO Team is not set
                 super(PurchaseOrder, order).button_confirm()
             else:
-                # Generate approval route and send PO to approve
                 order.generate_approval_route()
                 if order.next_approver:
-                    # If approval route is generated and there is next approver mark the order "to approve"
                     order.write({'state': 'to approve'})
-                    # And send request to approve
                     order.send_to_approve()
                 else:
-                    # If there are not approvers, do default behaviour and move PO to the "Purchase Order" state
                     super(PurchaseOrder, order).button_approve()
 
             order._add_supplier_to_product()
@@ -106,21 +85,14 @@ class PurchaseOrder(models.Model):
         return True
 
     def generate_approval_route(self):
-        """
-        Generate approval route for order
-        :return:
-        """
         for order in self:
             if not order.team_id:
                 continue
             if order.approver_ids:
-                # reset approval route
                 order.approver_ids.unlink()
             for team_approver in order.team_id.approver_ids:
-
                 custom_condition = order.compute_custom_condition(team_approver)
                 if not custom_condition:
-                    # Skip approver, if custom condition for the approver is set and the condition result is not True
                     continue
 
                 min_amount = team_approver.company_currency_id._convert(
@@ -129,7 +101,6 @@ class PurchaseOrder(models.Model):
                     order.company_id,
                     order.date_order or fields.Date.today())
                 if min_amount > order.amount_total:
-                    # Skip approver if Minimum Amount is greater than Total Amount
                     continue
                 max_amount = team_approver.company_currency_id._convert(
                     team_approver.max_amount,
@@ -137,10 +108,8 @@ class PurchaseOrder(models.Model):
                     order.company_id,
                     order.date_order or fields.Date.today())
                 if max_amount and max_amount < order.amount_total:
-                    # Skip approver if Maximum Amount is set and less than Total Amount
                     continue
 
-                # Add approver to the PO
                 self.env['purchase.order.approver'].create({
                     'sequence': team_approver.sequence,
                     'team_id': team_approver.team_id.id,
@@ -182,7 +151,9 @@ class PurchaseOrder(models.Model):
     @api.depends('approver_ids.state', 'approver_ids.lock_amount_total')
     def _compute_lock_amount_total(self):
         for order in self:
-            order.lock_amount_total = len(order.approver_ids.filtered(lambda a: a.state == "approved" and a.lock_amount_total)) > 0
+            order.lock_amount_total = len(order.approver_ids.filtered(
+                lambda a: a.state == "approved" and a.lock_amount_total
+            )) > 0
 
     def send_to_approve(self):
         for order in self:
@@ -198,38 +169,9 @@ class PurchaseOrder(models.Model):
                 order.message_subscribe([current_approver_partner.id])
             order.message_post(
                 body=_("You have been requested to approve the purchase order %s.") % order.name,
-                partner_ids=[current_approver_partner.id],  # Pass only the partner ID as a plain list
+                partner_ids=[current_approver_partner.id],
                 subtype_id=self.env.ref('mail.mt_note').id
             )
-
-    # def send_to_approve(self):
-    #     for order in self:
-    #         if order.state != 'to approve' and not order.team_id:
-    #             continue
-    #
-    #         main_error_msg = _("Unable to send approval request to next approver.")
-    #         if order.current_approver:
-    #             reason_msg = _("The order must be approved by %s") % order.current_approver.user_id.name
-    #             raise UserError("%s %s" % (main_error_msg, reason_msg))
-    #
-    #         if not order.next_approver:
-    #             reason_msg = _("There are no approvers in the selected PO team.")
-    #             raise UserError("%s %s" % (main_error_msg, reason_msg))
-    #         # use sudo as purchase user cannot update purchase.order.approver
-    #         order.sudo().next_approver.state = 'pending'
-    #         # Now next approver became as current
-    #         current_approver_partner = order.current_approver.user_id.partner_id
-    #         if current_approver_partner not in order.message_partner_ids:
-    #             order.message_subscribe([current_approver_partner.id])
-    #         order.with_user(order.user_id).message_post_with_view(
-    #             'po_so_approval_route.request_to_approve',
-    #             subject=_('PO Approval: %s') % (order.name,),
-    #             composition_mode='mass_mail',
-    #             partner_ids=[(4, current_approver_partner.id)],
-    #             auto_delete=True,
-    #             auto_delete_message=True,
-    #             parent_id=False,
-    #             subtype_id=self.env.ref('mail.mt_note').id)
 
     def _check_lock_amount_total(self):
         msg = _('Sorry, you are not allowed to change Amount Total of PO. ')
@@ -243,4 +185,3 @@ class PurchaseOrder(models.Model):
                 reason = _('It is locked after generated approval route. ')
                 suggestion = _('To make changes, cancel and reset PO to draft. ')
                 raise UserError(msg + "\n\n" + reason + "\n\n" + suggestion)
-
