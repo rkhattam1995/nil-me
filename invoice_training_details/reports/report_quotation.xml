@@ -644,8 +644,8 @@
                             <img t-if="o.company_id.stamp and o.display_stamp"
                                  t-att-src="image_data_uri(o.company_id.stamp)"
                                  style="
-                                     max-height:135px;
-                                     max-width:165px;
+                                     max-height:155px;
+                                     max-width:190px;
                                      width:auto;
                                      height:auto;
                                      object-fit:contain;
