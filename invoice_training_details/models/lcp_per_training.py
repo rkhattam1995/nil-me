@@ -289,6 +289,7 @@ class TrainingCourse(models.Model):
         'duration',
         'no_of_student',
         'price',
+        'training_id.name',
         'payment_method',
         'location',
         'lcp_vat_rate',
@@ -316,6 +317,10 @@ class TrainingCourse(models.Model):
             days = line._lcp_line_days()
             seats = max(line.no_of_student or 0, 0)
             is_online = line.location == 'Online'
+            is_cisco_u = 'cisco u' in (
+                (line.training_id.name or line.name or '').lower()
+            )
+            no_logistics = is_online or is_cisco_u
 
             # Pricing
             if line.payment_method == 'clc':
@@ -336,8 +341,12 @@ class TrainingCourse(models.Model):
                     else 0
                 )
                 total_rate_card = (
-                    (line.lcp_rate_card_per_seat or 0.0)
-                    * seats
+                    (line.price or 0.0)
+                    if is_cisco_u
+                    else (
+                        (line.lcp_rate_card_per_seat or 0.0)
+                        * seats
+                    )
                 )
             else:
                 total_clcs = 0.0
@@ -354,7 +363,7 @@ class TrainingCourse(models.Model):
                 total_instructor_cost = total_instructor_md
                 total_per_diem = (
                     0.0
-                    if is_online
+                    if no_logistics
                     else (
                         (line.lcp_per_diem_rate or 0.0)
                         * max(line.lcp_per_diem_days or 0, 0)
@@ -372,7 +381,7 @@ class TrainingCourse(models.Model):
             # Uber
             total_uber = (
                 0.0
-                if is_online
+                if no_logistics
                 else (
                     (line.lcp_uber_day_rate or 0.0)
                     * (days + 2)
@@ -381,8 +390,9 @@ class TrainingCourse(models.Model):
                 )
             )
 
-            # Per-training ticket/hotel assignment.
-            if is_online:
+            # Cisco U is a subscription: no flight/hotel/venue/catering logistics.
+            # Online training keeps the same no-onsite-logistics behavior.
+            if no_logistics:
                 ticket_total = 0.0
                 hotel_total = 0.0
                 venue_cost = 0.0
