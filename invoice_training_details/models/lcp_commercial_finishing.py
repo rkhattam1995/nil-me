@@ -116,9 +116,17 @@ class CrmLead(models.Model):
 
         for course in courses.filtered(lambda c: c.payment_method == 'clc'):
             online = course.location == 'Online'
-            total_revenue = course.lcp_total_rate_card or 0.0
-            flight = 0.0 if online else (course.lcp_ticket_total or 0.0)
-            hotel = 0.0 if online else (course.lcp_hotel_total or 0.0)
+            is_cisco_u = 'cisco u' in (
+                (course.training_id.name or course.name or '').lower()
+            )
+            no_logistics = online or is_cisco_u
+            total_revenue = (
+                (course.price or 0.0)
+                if is_cisco_u
+                else (course.lcp_total_rate_card or 0.0)
+            )
+            flight = 0.0 if no_logistics else (course.lcp_ticket_total or 0.0)
+            hotel = 0.0 if no_logistics else (course.lcp_hotel_total or 0.0)
             instructor = (
                 (course.lcp_total_instructor_md or 0.0)
                 if course.lcp_instructor_source == 'nil_me'
@@ -131,9 +139,10 @@ class CrmLead(models.Model):
 
             rows = [
                 ('Total Revenue', self._lcp_money(total_revenue), True),
-                ('Deductible Amounts', '', True, True),
             ]
-            if not online:
+            if (not is_cisco_u) or instructor:
+                rows.append(('Deductible Amounts', '', True, True))
+            if not no_logistics:
                 rows.extend([
                     ('Flight', self._lcp_money(flight), False),
                     ('Hotel', self._lcp_money(hotel), False),
@@ -180,9 +189,17 @@ class CrmLead(models.Model):
                 continue
 
             online = course.location == 'Online'
-            rate_card = course.lcp_total_rate_card or 0.0
-            flight = 0.0 if online else (course.lcp_ticket_total or 0.0)
-            hotel = 0.0 if online else (course.lcp_hotel_total or 0.0)
+            is_cisco_u = 'cisco u' in (
+                (course.training_id.name or course.name or '').lower()
+            )
+            no_logistics = online or is_cisco_u
+            rate_card = (
+                (course.price or 0.0)
+                if is_cisco_u
+                else (course.lcp_total_rate_card or 0.0)
+            )
+            flight = 0.0 if no_logistics else (course.lcp_ticket_total or 0.0)
+            hotel = 0.0 if no_logistics else (course.lcp_hotel_total or 0.0)
             instructor = (
                 (course.lcp_total_instructor_md or 0.0)
                 if course.lcp_instructor_source == 'nil_me'
