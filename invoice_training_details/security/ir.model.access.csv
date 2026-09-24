@@ -8,3 +8,9 @@ access_loca,loca_loca,model_loca_loca,base.group_user,1,1,1,1
 access_flight_class_type,flight.class.type,model_flight_class_type,base.group_user,1,1,1,1
 access_hotel_des,hotel.description,model_hotel_description,base.group_user,1,1,1,1
 access_training_course_audit_ruba,training.course.audit,model_training_course_audit,invoice_training_details.group_training_audit_ruba,1,0,0,0
+access_am_pricing_user,am.pricing user,model_am_pricing,base.group_user,1,0,0,0
+access_am_pricing_admin,am.pricing admin,model_am_pricing,base.group_system,1,1,1,1
+access_am_pricing_line_user,am.pricing.line user,model_am_pricing_line,base.group_user,1,0,0,0
+access_am_pricing_line_admin,am.pricing.line admin,model_am_pricing_line,base.group_system,1,1,1,1
+access_am_pricing_wizard_admin,am.pricing.wizard admin,model_am_pricing_wizard,base.group_system,1,1,1,1
+access_am_pricing_wizard_line_admin,am.pricing.wizard.line admin,model_am_pricing_wizard_line,base.group_system,1,1,1,1
