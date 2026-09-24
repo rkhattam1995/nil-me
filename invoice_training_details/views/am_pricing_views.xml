@@ -16,9 +16,10 @@
                         </group>
                         <group>
                             <field name="currency_id"/>
-                            <field name="subtotal"/>
-                            <field name="vat_amount"/>
-                            <field name="total"/>
+                            <field name="has_cash_pricing" invisible="1"/>
+                            <field name="has_clc_pricing" invisible="1"/>
+                            <field name="cash_total" invisible="not has_cash_pricing"/>
+                            <field name="clc_total" invisible="not has_clc_pricing"/>
                         </group>
                     </group>
 
@@ -30,14 +31,14 @@
                             <field name="training_name"/>
                             <field name="delivery_type"/>
                             <field name="students"/>
-                            <field name="rate_card_per_seat"/>
-                            <field name="training_value"/>
-                            <field name="clcs_per_seat"/>
-                            <field name="total_clcs_with_vat"/>
-                            <field name="price_before_vat"/>
-                            <field name="vat_rate"/>
-                            <field name="vat_amount"/>
-                            <field name="total"/>
+                            <field name="rate_card_per_seat" column_invisible="1"/>
+                            <field name="training_value" column_invisible="1"/>
+                            <field name="clcs_per_seat" invisible="payment_method != 'clc'"/>
+                            <field name="total_clcs_with_vat" invisible="payment_method != 'clc'"/>
+                            <field name="price_before_vat" invisible="payment_method == 'clc'"/>
+                            <field name="vat_rate" invisible="payment_method == 'clc'"/>
+                            <field name="vat_amount" invisible="payment_method == 'clc'"/>
+                            <field name="total" invisible="payment_method == 'clc'"/>
                         </tree>
                     </field>
                 </sheet>
@@ -78,8 +79,8 @@
 
                 <div class="alert alert-info" role="alert">
                     Select the Cash or CLC trainings you want to send.
-                    Cash uses the final Training Value. CLC Training Value is Rate Card / Seat × Students.
-                    Internal LCP costs, partner shares, and profitability are not sent to the Account Manager.
+                    Cash sends the final selling price. CLC sends CLC quantities only.
+                    Internal LCP costs, partner shares, profitability, Rate Card, and CLC Training Value are not sent to the Account Manager.
                 </div>
 
                 <field name="currency_mismatch" invisible="1"/>
@@ -99,21 +100,29 @@
                         <field name="training_name" readonly="1"/>
                         <field name="delivery_type" readonly="1"/>
                         <field name="students" readonly="1"/>
-                        <field name="rate_card_per_seat" readonly="1"/>
-                        <field name="training_value" readonly="1"/>
-                        <field name="clcs_per_seat" readonly="1"/>
-                        <field name="total_clcs_with_vat" readonly="1"/>
-                        <field name="price_before_vat" readonly="1"/>
-                        <field name="vat_rate" readonly="1"/>
-                        <field name="vat_amount" readonly="1"/>
-                        <field name="total" readonly="1"/>
+                        <field name="rate_card_per_seat" column_invisible="1"/>
+                        <field name="training_value" column_invisible="1"/>
+                        <field name="clcs_per_seat" readonly="1" invisible="payment_method != 'clc'"/>
+                        <field name="total_clcs_with_vat" readonly="1" invisible="payment_method != 'clc'"/>
+                        <field name="price_before_vat" readonly="1" invisible="payment_method == 'clc'"/>
+                        <field name="vat_rate" readonly="1" invisible="payment_method == 'clc'"/>
+                        <field name="vat_amount" readonly="1" invisible="payment_method == 'clc'"/>
+                        <field name="total" readonly="1" invisible="payment_method == 'clc'"/>
                     </tree>
                 </field>
 
+                <field name="has_cash_pricing" invisible="1"/>
+                <field name="has_clc_pricing" invisible="1"/>
+
                 <group class="oe_subtotal_footer oe_right">
-                    <field name="subtotal" readonly="1"/>
-                    <field name="vat_amount" readonly="1"/>
-                    <field name="total" readonly="1" class="oe_subtotal_footer_separator"/>
+                    <field name="cash_total"
+                           readonly="1"
+                           invisible="not has_cash_pricing"
+                           class="oe_subtotal_footer_separator"/>
+                    <field name="clc_total"
+                           readonly="1"
+                           invisible="not has_clc_pricing"
+                           class="oe_subtotal_footer_separator"/>
                 </group>
 
                 <footer>
@@ -141,7 +150,7 @@
                         string="Send Pricing to AM"
                         class="oe_highlight"
                         groups="base.group_system"
-                        invisible="not has_cash_training"/>
+                        invisible="not has_training"/>
             </xpath>
 
             <xpath expr="//sheet/notebook" position="inside">
@@ -151,9 +160,8 @@
                             <field name="sent_at"/>
                             <field name="account_manager_id"/>
                             <field name="sent_by_id"/>
-                            <field name="subtotal"/>
-                            <field name="vat_amount"/>
-                            <field name="total"/>
+                            <field name="cash_total"/>
+                            <field name="clc_total"/>
                         </tree>
                     </field>
                 </page>
