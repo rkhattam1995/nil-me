@@ -28,3 +28,5 @@ from . import lead_training_audit
 from . import lcp_enterone_vendor_fix
 from . import so_logistics_fix
 from . import crm_manual_order
+
+from . import am_pricing
