@@ -22,6 +22,7 @@
     "data": [
         "data/report_paperformat.xml",
         "security/training_audit_security.xml",
+        "security/am_pricing_security.xml",
         "security/ir.model.access.csv",
         "data/training_audit_setup.xml",
         "views/account_move_views.xml",
