@@ -702,11 +702,7 @@ class CrmLead(models.Model):
                 'students': course.no_of_student or 0,
                 'payment_method': course.payment_method,
                 'currency_id': currency.id,
-                'rate_card_per_seat': (
-                    course.lcp_rate_card_per_seat or 0.0
-                    if course.payment_method == 'clc'
-                    else 0.0
-                ),
+                'rate_card_per_seat': 0.0,
                 'clcs_per_seat': (
                     course.lcp_clcs_per_seat or 0.0
                     if course.payment_method == 'clc'
@@ -717,14 +713,26 @@ class CrmLead(models.Model):
                     if course.payment_method == 'clc'
                     else 0
                 ),
-                'cost_amount': course.lcp_total_costs or 0.0,
+                'cost_amount': (
+                    course.lcp_total_costs or 0.0
+                    if course.payment_method == 'cash'
+                    else 0.0
+                ),
                 'markup_pct': (
                     course.lcp_markup_pct or 0.0
                     if course.payment_method == 'cash'
                     else 0.0
                 ),
-                'training_value': course.price or 0.0,
-                'vat_rate': course.lcp_vat_rate or 0.0,
+                'training_value': (
+                    course.price or 0.0
+                    if course.payment_method == 'cash'
+                    else 0.0
+                ),
+                'vat_rate': (
+                    course.lcp_vat_rate or 0.0
+                    if course.payment_method == 'cash'
+                    else 0.0
+                ),
                 'selected': False,
             }))
 
