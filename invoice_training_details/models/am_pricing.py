@@ -78,17 +78,48 @@ class AmPricing(models.Model):
         compute='_compute_totals',
         store=True,
     )
+    cash_total = fields.Monetary(
+        string='Cash Total',
+        currency_field='currency_id',
+        compute='_compute_totals',
+        store=True,
+    )
+    clc_total = fields.Integer(
+        string='CLC Total',
+        compute='_compute_totals',
+        store=True,
+    )
+    has_cash_pricing = fields.Boolean(
+        compute='_compute_totals',
+        store=True,
+    )
+    has_clc_pricing = fields.Boolean(
+        compute='_compute_totals',
+        store=True,
+    )
 
     @api.depends(
+        'line_ids.payment_method',
         'line_ids.price_before_vat',
         'line_ids.vat_amount',
         'line_ids.total',
+        'line_ids.total_clcs_with_vat',
     )
     def _compute_totals(self):
         for rec in self:
-            rec.subtotal = sum(rec.line_ids.mapped('price_before_vat'))
-            rec.vat_amount = sum(rec.line_ids.mapped('vat_amount'))
-            rec.total = sum(rec.line_ids.mapped('total'))
+            cash_lines = rec.line_ids.filtered(
+                lambda line: line.payment_method == 'cash'
+            )
+            clc_lines = rec.line_ids.filtered(
+                lambda line: line.payment_method == 'clc'
+            )
+            rec.subtotal = sum(cash_lines.mapped('price_before_vat'))
+            rec.vat_amount = sum(cash_lines.mapped('vat_amount'))
+            rec.total = sum(cash_lines.mapped('total'))
+            rec.cash_total = rec.total
+            rec.clc_total = sum(clc_lines.mapped('total_clcs_with_vat'))
+            rec.has_cash_pricing = bool(cash_lines)
+            rec.has_clc_pricing = bool(clc_lines)
 
     def _compute_display_name(self):
         for rec in self:
@@ -230,37 +261,72 @@ class AmPricingWizard(models.TransientModel):
         currency_field='currency_id',
         compute='_compute_totals',
     )
+    cash_total = fields.Monetary(
+        string='Cash Total',
+        currency_field='currency_id',
+        compute='_compute_totals',
+    )
+    clc_total = fields.Integer(
+        string='CLC Total',
+        compute='_compute_totals',
+    )
+    has_cash_pricing = fields.Boolean(
+        compute='_compute_totals',
+    )
+    has_clc_pricing = fields.Boolean(
+        compute='_compute_totals',
+    )
 
-    @api.depends('line_ids.selected', 'line_ids.currency_id')
+    @api.depends('line_ids.selected', 'line_ids.currency_id', 'line_ids.payment_method')
     def _compute_currency_id(self):
         usd = self.env.ref('base.USD')
         for rec in self:
             selected = rec.line_ids.filtered('selected')
-            currencies = selected.mapped('currency_id').filtered(lambda c: c)
+            cash_selected = selected.filtered(
+                lambda line: line.payment_method == 'cash'
+            )
+            currencies = cash_selected.mapped('currency_id').filtered(lambda c: c)
             if not currencies:
-                currencies = rec.line_ids.mapped('currency_id').filtered(lambda c: c)
+                cash_lines = rec.line_ids.filtered(
+                    lambda line: line.payment_method == 'cash'
+                )
+                currencies = cash_lines.mapped('currency_id').filtered(lambda c: c)
             rec.currency_mismatch = len(currencies) > 1
             rec.currency_id = currencies[:1] or usd
 
     @api.depends(
         'line_ids.selected',
+        'line_ids.payment_method',
         'line_ids.price_before_vat',
         'line_ids.vat_amount',
         'line_ids.total',
+        'line_ids.total_clcs_with_vat',
         'line_ids.currency_id',
     )
     def _compute_totals(self):
         for rec in self:
             selected = rec.line_ids.filtered('selected')
-            currencies = selected.mapped('currency_id').filtered(lambda c: c)
+            cash_lines = selected.filtered(
+                lambda line: line.payment_method == 'cash'
+            )
+            clc_lines = selected.filtered(
+                lambda line: line.payment_method == 'clc'
+            )
+            currencies = cash_lines.mapped('currency_id').filtered(lambda c: c)
             if len(currencies) > 1:
                 rec.subtotal = 0.0
                 rec.vat_amount = 0.0
                 rec.total = 0.0
-                continue
-            rec.subtotal = sum(selected.mapped('price_before_vat'))
-            rec.vat_amount = sum(selected.mapped('vat_amount'))
-            rec.total = sum(selected.mapped('total'))
+                rec.cash_total = 0.0
+            else:
+                rec.subtotal = sum(cash_lines.mapped('price_before_vat'))
+                rec.vat_amount = sum(cash_lines.mapped('vat_amount'))
+                rec.total = sum(cash_lines.mapped('total'))
+                rec.cash_total = rec.total
+
+            rec.clc_total = sum(clc_lines.mapped('total_clcs_with_vat'))
+            rec.has_cash_pricing = bool(cash_lines)
+            rec.has_clc_pricing = bool(clc_lines)
 
     def action_send(self):
         self.ensure_one()
@@ -272,9 +338,12 @@ class AmPricingWizard(models.TransientModel):
         if selected.filtered(lambda line: line.markup_pct < 0):
             raise UserError(_('Markup % cannot be negative.'))
 
-        currencies = selected.mapped('currency_id').filtered(lambda c: c)
+        cash_selected = selected.filtered(
+            lambda line: line.payment_method == 'cash'
+        )
+        currencies = cash_selected.mapped('currency_id').filtered(lambda c: c)
         if len(currencies) > 1:
-            raise UserError(_('Selected trainings must use the same currency.'))
+            raise UserError(_('Selected Cash trainings must use the same currency.'))
 
         if not self.account_manager_id:
             raise UserError(_('Select an Account Manager.'))
@@ -322,28 +391,14 @@ class AmPricingWizard(models.TransientModel):
                     '<td style="padding:6px;border:1px solid #ddd;">%s</td>'
                     '<td style="padding:6px;border:1px solid #ddd;">%s</td>'
                     '<td style="padding:6px;border:1px solid #ddd;text-align:center;">%s</td>'
-                    '<td style="padding:6px;border:1px solid #ddd;text-align:right;">%s</td>'
-                    '<td style="padding:6px;border:1px solid #ddd;text-align:right;"><strong>%s</strong></td>'
                     '<td style="padding:6px;border:1px solid #ddd;text-align:right;">%g</td>'
-                    '<td style="padding:6px;border:1px solid #ddd;text-align:right;">%g%%</td>'
                     '<td style="padding:6px;border:1px solid #ddd;text-align:right;"><strong>%s</strong></td>'
                     '</tr>'
                     % (
                         escape(line.training_name or ''),
                         escape(delivery),
                         line.students,
-                        escape(formatLang(
-                            self.env,
-                            line.rate_card_per_seat,
-                            currency_obj=currency,
-                        )),
-                        escape(formatLang(
-                            self.env,
-                            line.training_value,
-                            currency_obj=currency,
-                        )),
                         line.clcs_per_seat or 0.0,
-                        line.vat_rate or 0.0,
                         line.total_clcs_with_vat or 0,
                     )
                 )
@@ -407,10 +462,7 @@ class AmPricingWizard(models.TransientModel):
                 '<th style="padding:6px;border:1px solid #ddd;text-align:left;">Training</th>'
                 '<th style="padding:6px;border:1px solid #ddd;text-align:left;">Delivery Type</th>'
                 '<th style="padding:6px;border:1px solid #ddd;">Students</th>'
-                '<th style="padding:6px;border:1px solid #ddd;">Rate Card / Seat</th>'
-                '<th style="padding:6px;border:1px solid #ddd;">Training Value</th>'
                 '<th style="padding:6px;border:1px solid #ddd;">CLCs / Seat</th>'
-                '<th style="padding:6px;border:1px solid #ddd;">VAT</th>'
                 '<th style="padding:6px;border:1px solid #ddd;">Total CLCs + VAT</th>'
                 '</tr></thead><tbody>%s</tbody></table>'
                 % ''.join(clc_rows)
@@ -432,30 +484,30 @@ class AmPricingWizard(models.TransientModel):
         ]
         mentions_html = Markup(', ').join(mention_links)
 
+        totals_html = []
+        if pricing.has_cash_pricing:
+            totals_html.append(
+                '<strong>Cash Total:</strong> %s'
+                % escape(formatLang(
+                    self.env,
+                    pricing.cash_total,
+                    currency_obj=currency,
+                ))
+            )
+        if pricing.has_clc_pricing:
+            totals_html.append(
+                '<strong>CLC Total:</strong> %s CLCs'
+                % (pricing.clc_total or 0)
+            )
+
         body = Markup(
             '<p><strong>Pricing ready</strong> for %s</p>'
             '%s'
-            '<p><strong>Subtotal:</strong> %s<br/>'
-            '<strong>VAT:</strong> %s<br/>'
-            '<strong>Total:</strong> %s</p>'
+            '<p>%s</p>'
         ) % (
             mentions_html,
             Markup(''.join(pricing_tables)),
-            escape(formatLang(
-                self.env,
-                pricing.subtotal,
-                currency_obj=currency,
-            )),
-            escape(formatLang(
-                self.env,
-                pricing.vat_amount,
-                currency_obj=currency,
-            )),
-            escape(formatLang(
-                self.env,
-                pricing.total,
-                currency_obj=currency,
-            )),
+            Markup('<br/>'.join(totals_html)),
         )
 
         self.lead_id.message_post(
