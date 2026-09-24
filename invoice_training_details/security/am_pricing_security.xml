@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+
+    <record id="rule_am_pricing_recipient_or_sender" model="ir.rule">
+        <field name="name">AM Pricing: recipient or sender only</field>
+        <field name="model_id" ref="model_am_pricing"/>
+        <field name="groups" eval="[(4, ref('base.group_user'))]"/>
+        <field name="domain_force">['|', ('account_manager_id', '=', user.id), ('sent_by_id', '=', user.id)]</field>
+    </record>
+
+    <record id="rule_am_pricing_admin_all" model="ir.rule">
+        <field name="name">AM Pricing: administrators see all</field>
+        <field name="model_id" ref="model_am_pricing"/>
+        <field name="groups" eval="[(4, ref('base.group_system'))]"/>
+        <field name="domain_force">[(1, '=', 1)]</field>
+    </record>
+
+    <record id="rule_am_pricing_line_recipient_or_sender" model="ir.rule">
+        <field name="name">AM Pricing Lines: recipient or sender only</field>
+        <field name="model_id" ref="model_am_pricing_line"/>
+        <field name="groups" eval="[(4, ref('base.group_user'))]"/>
+        <field name="domain_force">['|', ('pricing_id.account_manager_id', '=', user.id), ('pricing_id.sent_by_id', '=', user.id)]</field>
+    </record>
+
+    <record id="rule_am_pricing_line_admin_all" model="ir.rule">
+        <field name="name">AM Pricing Lines: administrators see all</field>
+        <field name="model_id" ref="model_am_pricing_line"/>
+        <field name="groups" eval="[(4, ref('base.group_system'))]"/>
+        <field name="domain_force">[(1, '=', 1)]</field>
+    </record>
+
+</odoo>
