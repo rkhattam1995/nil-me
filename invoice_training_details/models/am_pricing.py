@@ -42,6 +42,7 @@ class AmPricing(models.Model):
         string='Markup %',
         digits=(16, 2),
         readonly=True,
+        groups='base.group_system',
     )
     currency_id = fields.Many2one(
         'res.currency',
@@ -107,6 +108,7 @@ class AmPricingLine(models.Model):
         string='Training Source',
         readonly=True,
         ondelete='set null',
+        groups='base.group_system',
     )
     training_name = fields.Char(
         string='Training',
@@ -202,6 +204,10 @@ class AmPricingWizard(models.TransientModel):
         currency_field='currency_id',
         compute='_compute_totals',
     )
+
+    @api.onchange('markup_pct')
+    def _onchange_markup_pct(self):
+        self.line_ids._compute_prices()
 
     @api.constrains('markup_pct')
     def _check_markup_pct(self):
