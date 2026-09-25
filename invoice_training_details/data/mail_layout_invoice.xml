@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="nil_invoice_email_layout" name="NIL Invoice Email Layout">
+        <html t-att-lang="lang">
+            <head>
+                <meta http-equiv="Content-Type" content="text/html charset=UTF-8"/>
+            </head>
+            <body style="font-family:Arial,Helvetica,sans-serif;color:#333333;margin:0;padding:0;">
+                <t t-call="mail.notification_preview"/>
+                <div style="max-width:900px;width:100%;margin:0;padding:0;">
+                    <div t-if="company and not company.uses_default_logo" style="margin:0 0 14px 0;">
+                        <img t-att-src="'/logo.png?company=%s' % company.id"
+                             t-att-alt="company.name"
+                             style="height:48px;max-width:180px;object-fit:contain;"/>
+                    </div>
+                    <div t-out="message.body" style="font-size:14px;line-height:1.5;"/>
+                    <div t-if="company" style="margin-top:24px;padding-top:10px;border-top:1px solid #dddddd;font-size:11px;color:#777777;">
+                        <strong t-out="company.name"/>
+                        <t t-if="company.email"><br/><span t-out="company.email"/></t>
+                        <t t-if="company.website"> | <span t-out="company.website"/></t>
+                    </div>
+                </div>
+            </body>
+        </html>
+    </template>
+</odoo>
