@@ -26,7 +26,7 @@ class AccountMoveSend(models.AbstractModel):
         """Use the editable NIL invoice email template for customer invoices."""
         if move.move_type == 'out_invoice':
             template = self.env.ref(
-                'invoice_training_details.mail_template_nil_invoice_sending',
+                'invoice_training_details.mail_template_nil_invoice_sending_v2',
                 raise_if_not_found=False,
             )
             if template:
@@ -34,3 +34,8 @@ class AccountMoveSend(models.AbstractModel):
 
         return super()._get_default_mail_template_id(move)
 
+
+    @api.model
+    def _get_mail_layout(self):
+        """Invoice emails use a clean layout without the portal View Invoice button."""
+        return 'invoice_training_details.nil_invoice_email_layout'
