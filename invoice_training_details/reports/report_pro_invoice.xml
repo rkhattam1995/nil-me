@@ -113,6 +113,7 @@
             <thead style="background-color: #F6F7F8;">
               <tr>
                 <th>Item</th>
+                <th>Service Name</th>
                 <th>Service Description</th>
                 <th t-if="o.display_instructor">Instructor Name</th>
                 <th># Of Students</th>
@@ -129,6 +130,7 @@
               <t t-foreach="o.pro_service_ids" t-as="training">
                 <tr>
                   <td><span t-esc="item"/></td>
+                  <td style="text-align:left;"><span t-field="training.training_id"/></td>
                   <td style="text-align:left;"><span t-field="training.descriptions"/></td>
                   <td t-if="o.display_instructor"><span t-field="o.instructor_id.name"/></td>
                   <td><span t-field="training.no_of_student"/></td>
