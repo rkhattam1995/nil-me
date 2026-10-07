@@ -68,7 +68,7 @@
                         <tree editable="bottom">
                             
                             <field name="training_id"/>
-                            <field name="descriptions"/>
+                            <field name="descriptions" string="Service Description"/>
                            <field name="cost_clc"/>
                             <field name="hyperlink"/>
                             <field name="wor_hour_number"/>
