@@ -2,7 +2,7 @@
 <odoo>
 
     <template id="report_invoice_pro_document_training" name="Invoice Professional Service Report Training">
-      <t t-call="web.html_container">
+          <t t-call="web.html_container">
             <t t-foreach="docs" t-as="o">
                 <t t-set="lang" t-value="o.partner_id.lang"/>
                 <t t-call="invoice_training_details.custom_invoice_report_layout">
@@ -85,7 +85,7 @@
 
                     <div class="row pt-3 pb-2">
                         <div class="col-12">
-                            Training Courses Details: <span t-field="o.training_name"/>
+                            Professional Services Details: <span t-field="o.service_name"/>
                         </div>
                     </div>
 
@@ -126,7 +126,7 @@
                                     <td style="text-align: center; vertical-align: middle;"><span t-field="training.training_date_start"/> - <span t-field="training.training_date_end"/></td>
                                     <td style="text-align: center; vertical-align: middle;"><span t-field="training.price"/></td>
                                     <t t-if="item == 1">
-                                        <td t-if="o.display_total" t-att-rowspan="total_rows" style="text-align: center; vertical-align: middle;"><span t-field="o.total_training_price"/></td>
+                                        <td t-if="o.display_total" t-att-rowspan="total_rows" style="text-align: center; vertical-align: middle;"><span t-field="o.total_service_price"/></td>
                                     </t>
                                 </tr>
                                 <t t-set="item" t-value="item + 1"/>
@@ -243,7 +243,7 @@
 
                 </t>
             </t>
-        </t>   
-          </template>
+        </t>
+                         </template>
 
 </odoo>
