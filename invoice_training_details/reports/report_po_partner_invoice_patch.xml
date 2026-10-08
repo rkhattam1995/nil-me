@@ -8,7 +8,7 @@
         </xpath>
 
         <xpath expr="//table[@name='training_line_table']//tbody//span[@t-field='training.price']/.." position="replace">
-            <td t-if="not is_cisco_u_all_access" style="font-size:18px; text-align:center; vertical-align:middle;">
+            <td t-if="not is_cisco_u_all_access" class="po-training-money" style="font-size:16px; text-align:center; vertical-align:middle;">
                 <span t-if="is_clc_order"
                       t-esc="'$ {:,.2f}'.format(training._nil_wo_clc_rate_per_seat())"/>
                 <span t-if="not is_clc_order"
