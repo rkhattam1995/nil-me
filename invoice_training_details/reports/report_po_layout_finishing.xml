@@ -182,12 +182,47 @@
                 }
 
 
-                /* TRAINING TABLE VALUES */
-                table[name="training_line_table"] tbody td,
-                table[name="training_line_table"] tbody td * {
-                    font-size: 18px !important;
+                /* TRAINING TABLE VALUES: balanced, readable PDF cells. */
+                table[name="training_line_table"] {
+                    width: 100% !important;
+                    table-layout: auto !important;
+                    border-collapse: collapse !important;
                 }
 
+                table[name="training_line_table"] tbody td,
+                table[name="training_line_table"] tbody td * {
+                    font-size: 16px !important;
+                    line-height: 1.45 !important;
+                }
+
+                table[name="training_line_table"] tbody td {
+                    padding: 8px 6px !important;
+                    text-align: center !important;
+                    vertical-align: middle !important;
+                    word-break: normal !important;
+                }
+
+                table[name="training_line_table"] tbody td.po-training-name {
+                    white-space: normal !important;
+                    padding-left: 10px !important;
+                    padding-right: 10px !important;
+                }
+
+                /* Keep the currency sign and full amount on the same line. */
+                table[name="training_line_table"] tbody td.po-training-money,
+                table[name="training_line_table"] tbody td.po-training-money * {
+                    white-space: nowrap !important;
+                }
+
+                table[name="training_line_table"] tbody td.po-training-compact,
+                table[name="training_line_table"] tbody td.po-training-compact * {
+                    white-space: nowrap !important;
+                }
+
+                /* Allow a date range to wrap, but never split a single date. */
+                table[name="training_line_table"] tbody td.po-training-dates span {
+                    white-space: nowrap !important;
+                }
 
                 .po-invoice-total-box tr.o_total td,
                 .po-invoice-total-box tr.o_total td *,
@@ -198,6 +233,33 @@
 
             </style>
 
+        </xpath>
+
+
+        <!-- Classes only: preserve every existing WO/PO table column and value. -->
+        <xpath expr="//table[@name='training_line_table']//tbody//td[span[@t-field='training.training_id']]"
+               position="attributes">
+            <attribute name="class" add="po-training-name" separator=" "/>
+        </xpath>
+
+        <xpath expr="//table[@name='training_line_table']//tbody//td[span[@t-field='training.no_of_student']]"
+               position="attributes">
+            <attribute name="class" add="po-training-compact" separator=" "/>
+        </xpath>
+
+        <xpath expr="//table[@name='training_line_table']//tbody//td[span[@t-field='training.duration']]"
+               position="attributes">
+            <attribute name="class" add="po-training-compact" separator=" "/>
+        </xpath>
+
+        <xpath expr="//table[@name='training_line_table']//tbody//td[span[@t-field='training.training_date_start']]"
+               position="attributes">
+            <attribute name="class" add="po-training-dates" separator=" "/>
+        </xpath>
+
+        <xpath expr="//table[@name='training_line_table']//tbody//td[@t-att-rowspan='total_rows']"
+               position="attributes">
+            <attribute name="class" add="po-training-money" separator=" "/>
         </xpath>
 
 
