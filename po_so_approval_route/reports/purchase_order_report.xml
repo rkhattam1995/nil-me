@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!--
+      Keep the standard Odoo 17 Purchase Order details and totals intact.
+      Only adjust the printable product-lines table:
+      - increase text size for readability
+      - let its width follow the contents rather than stretching to page width
+    -->
+    <template id="report_purchaseorder_document_compact_items"
+              inherit_id="purchase.report_purchaseorder_document"
+              name="Purchase Order: readable, content-width items table">
+        <xpath expr="//table[contains(concat(' ', normalize-space(@class), ' '), ' o_main_table ')]"
+               position="attributes">
+            <attribute name="class" add="po_items_compact" separator=" "/>
+            <attribute name="style"
+                       add="width: auto !important; max-width: 100% !important; table-layout: auto !important; display: inline-table !important;"
+                       separator=" "/>
+        </xpath>
+        <xpath expr="//table[contains(concat(' ', normalize-space(@class), ' '), ' o_main_table ')]"
+               position="before">
+            <style type="text/css">
+                table.po_items_compact {
+                    width: auto !important;
+                    max-width: 100% !important;
+                    display: inline-table !important;
+                    table-layout: auto !important;
+                }
+                table.po_items_compact th,
+                table.po_items_compact td {
+                    font-size: 13px !important;
+                    line-height: 1.35 !important;
+                    padding: 5px 7px !important;
+                    vertical-align: middle !important;
+                }
+                table.po_items_compact td#product {
+                    white-space: normal !important;
+                    overflow-wrap: break-word;
+                    word-wrap: break-word;
+                }
+            </style>
+        </xpath>
+    </template>
+</odoo>
