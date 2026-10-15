@@ -25,6 +25,7 @@ Sales Order approval is disabled completely.
         'views/purchase_approval_route.xml',
         'views/sale_approval_route.xml',
         'views/res_config_settings_views.xml',
+        'reports/purchase_order_report.xml',
     ],
     'depends': ['purchase', 'sale', 'sales_team', 'sale_management'],
     'qweb': [],
