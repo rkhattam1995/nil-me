@@ -440,6 +440,47 @@ class SalesCommission(models.Model):
                     'active': True,
                 })
 
+        # Odoo may still have more than one active row for a single
+        # invoice after older upgrades. Flush ORM writes and reconcile the
+        # actual SQL rows BEFORE trying to create a unique index.
+        # The previous version failed to initialize the registry here.
+        Commission.flush_model([
+            'active', 'invoice_id', 'auto_key', 'is_auto_ruba', 'state',
+        ])
+        self.env.cr.execute("""
+            WITH ranked AS (
+                SELECT
+                    id,
+                    ROW_NUMBER() OVER (
+                        PARTITION BY invoice_id
+                        ORDER BY
+                            CASE WHEN auto_key = 'ruba'
+                                      OR COALESCE(is_auto_ruba, FALSE)
+                                 THEN 1 ELSE 0 END,
+                            CASE state
+                                WHEN 'paid' THEN 0
+                                WHEN 'pending' THEN 1
+                                WHEN 'draft' THEN 2
+                                WHEN 'excluded' THEN 3
+                                ELSE 4
+                            END,
+                            id
+                    ) AS position
+                FROM nil_sales_commission
+                WHERE invoice_id IS NOT NULL AND active IS TRUE
+            )
+            UPDATE nil_sales_commission AS commission
+               SET active = FALSE
+              FROM ranked
+             WHERE commission.id = ranked.id
+               AND ranked.position > 1
+        """)
+        # Only the active flag changes; all commission amounts, payment
+        # states, invoices and linked accounting entries remain intact.
+        Commission.invalidate_model(['active'])
+
+        # Check the physical database rows, not a possibly stale ORM
+        # cache. A partial unique index enforces the rule for future rows.
         self.env.cr.execute("""
             CREATE UNIQUE INDEX IF NOT EXISTS
                 nil_commission_one_active_row_per_invoice
