@@ -465,7 +465,7 @@ class SalesCommission(models.Model):
                                 ELSE 4
                             END,
                             id
-                    ) AS position
+                    ) AS row_rank
                 FROM nil_sales_commission
                 WHERE invoice_id IS NOT NULL AND active IS TRUE
             )
@@ -473,7 +473,7 @@ class SalesCommission(models.Model):
                SET active = FALSE
               FROM ranked
              WHERE commission.id = ranked.id
-               AND ranked.position > 1
+               AND ranked.row_rank > 1
         """)
         # Only the active flag changes; all commission amounts, payment
         # states, invoices and linked accounting entries remain intact.
