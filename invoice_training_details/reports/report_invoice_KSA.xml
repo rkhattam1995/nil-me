@@ -97,7 +97,10 @@
                     <table class="table table-sm o_main_table table-borderless" name="invoice_line_table">
                         <thead class="bg-light text-info">
                             <tr>
-                                <th name="th_description" class="text-start"><span>DESCRIPTION</span></th>
+                                <th name="th_description" class="text-start">
+                                    <span t-if="o.company_id.country_id.code == 'SA'">PRODUCT NAME</span>
+                                    <span t-else="">DESCRIPTION</span>
+                                </th>
                                 <th name="th_quantity" class="text-end"><span>QTY</span></th>
                                 <th name="th_rate" class="text-end"><span>RATE</span></th>
                                 <th name="th_taxes" t-attf-class="text-end {{ 'd-none d-md-table-cell' if report_type == 'html' else '' }}"><span>Taxes</span></th>
@@ -108,7 +111,10 @@
                         <tbody>
                             <t t-foreach="o.invoice_line_ids" t-as="line">
                                 <tr>
-                                    <td class="text-start" style="max-width:50px;"><span t-field="line.name"/></td>
+                                    <td class="text-start" style="max-width:50px;">
+                                        <span t-if="o.company_id.country_id.code == 'SA' and line.product_id" t-field="line.product_id.name"/>
+                                        <span t-else="" t-field="line.name"/>
+                                    </td>
                                     <td class="text-end"><span t-field="line.quantity"/></td>
                                     <td class="text-end"><span t-field="line.price_unit"/></td>
                                     <t t-set="taxes" t-value="', '.join([(tax.invoice_label or tax.name) for tax in line.tax_ids])"/>
