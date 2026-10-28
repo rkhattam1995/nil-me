@@ -447,6 +447,12 @@ class SalesCommission(models.Model):
         Commission.flush_model([
             'active', 'invoice_id', 'auto_key', 'is_auto_ruba', 'state',
         ])
+        # Block concurrent commission INSERT/UPDATE while the existing
+        # duplicates are archived and the unique index is created.
+        # Readers can continue; the lock releases on transaction commit.
+        self.env.cr.execute(
+            "LOCK TABLE nil_sales_commission IN SHARE ROW EXCLUSIVE MODE"
+        )
         self.env.cr.execute("""
             WITH ranked AS (
                 SELECT
