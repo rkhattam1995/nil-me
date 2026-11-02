@@ -215,6 +215,12 @@ class TicketTicket(models.Model):
 
         if training_id:
             training = self.env['training.course'].browse(training_id)
+            if training.location != 'On site':
+                raise UserError(_('Flight expenses must belong to an On-site Training.'))
+            if vals.get('ticket_lead_id') and vals['ticket_lead_id'] != training.lead_id.id:
+                raise UserError(_('The Flight and Training must belong to the same Lead.'))
+            if training.lead_id:
+                vals['ticket_lead_id'] = training.lead_id.id
             if training.training_date_start:
                 vals['date'] = (
                     training.training_date_start - timedelta(days=1)
@@ -236,6 +242,11 @@ class TicketTicket(models.Model):
             training = self.env['training.course'].browse(
                 vals['lcp_training_course_id']
             )
+            if training.location != 'On site':
+                raise UserError(_('Flight expenses must belong to an On-site Training.'))
+            if any(row.ticket_lead_id and row.ticket_lead_id != training.lead_id for row in self):
+                raise UserError(_('The Flight and Training must belong to the same Lead.'))
+            vals['ticket_lead_id'] = training.lead_id.id
             if training.training_date_start:
                 vals['date'] = (
                     training.training_date_start - timedelta(days=1)
@@ -300,6 +311,12 @@ class HotelHotel(models.Model):
 
         if training_id:
             training = self.env['training.course'].browse(training_id)
+            if training.location != 'On site':
+                raise UserError(_('Hotel expenses must belong to an On-site Training.'))
+            if vals.get('hotel_lead_id') and vals['hotel_lead_id'] != training.lead_id.id:
+                raise UserError(_('The Hotel and Training must belong to the same Lead.'))
+            if training.lead_id:
+                vals['hotel_lead_id'] = training.lead_id.id
             if training.training_date_start:
                 vals['date_from'] = (
                     training.training_date_start - timedelta(days=1)
@@ -323,6 +340,11 @@ class HotelHotel(models.Model):
             training = self.env['training.course'].browse(
                 vals['lcp_training_course_id']
             )
+            if training.location != 'On site':
+                raise UserError(_('Hotel expenses must belong to an On-site Training.'))
+            if any(row.hotel_lead_id and row.hotel_lead_id != training.lead_id for row in self):
+                raise UserError(_('The Hotel and Training must belong to the same Lead.'))
+            vals['hotel_lead_id'] = training.lead_id.id
             if training.training_date_start:
                 vals['date_from'] = (
                     training.training_date_start - timedelta(days=1)
