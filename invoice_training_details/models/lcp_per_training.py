@@ -100,6 +100,45 @@ class TrainingCourse(models.Model):
         default=0.0,
     )
 
+    # Each on-site training owns its travel and accommodation entries.
+    # The existing ticket/hotel tables remain the source of truth.
+    lcp_ticket_ids = fields.One2many(
+        'ticket.ticket', 'lcp_training_course_id', string='Training Flights',
+    )
+    lcp_hotel_ids = fields.One2many(
+        'hotel.hotel', 'lcp_training_course_id', string='Training Hotels',
+    )
+    lcp_instructor_logistics = fields.Char(string='Instructor Logistics')
+    lcp_visa = fields.Boolean(string='Visa Required')
+    lcp_visa_start_date = fields.Date(string='Visa From')
+    lcp_visa_end_date = fields.Date(string='Visa To')
+    lcp_booking_details_ids = fields.Many2many(
+        'ir.attachment', 'lcp_training_booking_attach_rel',
+        'training_course_id', 'attachment_id',
+        string='Booking Documents', copy=False,
+    )
+    lcp_logistics_notes = fields.Text(string='Logistics Notes')
+
+    def action_open_lcp_logistics(self):
+        self.ensure_one()
+        if self.location != 'On site':
+            raise ValidationError('On-site Logistics are only available for On-site trainings.')
+        if not self.lead_id:
+            raise ValidationError('Save this training under a CRM Lead first.')
+        return {
+            'type': 'ir.actions.act_window',
+            'name': 'On-site Logistics: %s' % (self.display_name or 'Training'),
+            'res_model': 'training.course',
+            'res_id': self.id,
+            'views': [(
+                self.env.ref('invoice_training_details.view_training_course_onsite_logistics').id,
+                'form',
+            )],
+            'view_mode': 'form',
+            'target': 'new',
+            'context': {'default_lead_id': self.lead_id.id},
+        }
+
     # SO# remains the same CRM field and is only exposed through the
     # training card for visual parity with the old LCP.
     lcp_so_no = fields.Char(
@@ -191,6 +230,12 @@ class TrainingCourse(models.Model):
         string='Total Logistics',
         currency_field='lcp_currency_id',
         compute='_compute_lcp_per_training',
+    )
+    lcp_all_onsite_expenses = fields.Monetary(
+        string='All On-site Expenses',
+        currency_field='lcp_currency_id',
+        compute='_compute_lcp_per_training',
+        help='Flights, hotels, venue, catering, Uber and per diem for this training only.',
     )
 
     lcp_partner_share = fields.Monetary(
@@ -516,6 +561,10 @@ class TrainingCourse(models.Model):
             line.lcp_ticket_total = ticket_total
             line.lcp_hotel_total = hotel_total
             line.lcp_total_logistics = total_logistics
+            line.lcp_all_onsite_expenses = (
+                ticket_total + hotel_total + venue_cost + catering_cost
+                + total_uber + total_per_diem
+            )
             line.lcp_partner_share = partner_share
             line.lcp_total_costs = total_costs
             line.lcp_nilme_profit = profit
