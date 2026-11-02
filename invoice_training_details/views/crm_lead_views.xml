@@ -59,6 +59,10 @@
 
                             <field name="training_date_end" width="10"/>
 
+                            <button name="action_open_lcp_logistics"
+                                    type="object" string="Logistics" icon="fa-plane"
+                                    invisible="location != 'On site'"/>
+
                             <field name="price" widget="monetary" options="{'currency_field': 'currency_id'}"/>
 
                         </tree>
