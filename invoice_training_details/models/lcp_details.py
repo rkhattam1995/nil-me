@@ -526,6 +526,15 @@ class CrmLead(models.Model):
     def _get_lcp_uber_amount(self):
         self.ensure_one()
 
+        if len(self.training_course_ids) > 1:
+            # Mixed delivery modes calculate Uber only for onsite lines.
+            # The old lead-level days include online training as well.
+            return sum(
+                course.lcp_total_uber_estimate or 0.0
+                for course in self.training_course_ids
+                if course.location == 'On site'
+            )
+
         total_days = self._lcp_training_days()
 
         if self.lcp_is_online:
@@ -545,7 +554,8 @@ class CrmLead(models.Model):
 
             if (lead.uber or 0.0) != amount:
                 lead.with_context(
-                    skip_lcp_uber_sync=True
+                    skip_lcp_uber_sync=True,
+                    skip_lcp_logistics_sync=True,
                 ).write({
                     'uber': amount,
                 })

@@ -106,7 +106,9 @@ class TrainingCourse(models.Model):
 
     def _lcp_sync_to_lead_logistics(self):
         for lead in self.mapped('lead_id').filtered(lambda r: r):
-            courses = lead.training_course_ids
+            courses = lead.training_course_ids.filtered(
+                lambda c: c.location == 'On site'
+            )
             lead.with_context(skip_lcp_logistics_sync=True).write({
                 'venue': sum(courses.mapped('lcp_venue_cost')),
                 'ctrng': sum(courses.mapped('lcp_catering_cost')),
@@ -126,7 +128,9 @@ class TrainingCourse(models.Model):
             line._lcp_autofill_cash_price_if_blank()
             lead = line.lead_id
             if lead:
-                courses = lead.training_course_ids
+                courses = lead.training_course_ids.filtered(
+                    lambda c: c.location == 'On site'
+                )
                 lead.venue = sum(courses.mapped('lcp_venue_cost'))
                 lead.ctrng = sum(courses.mapped('lcp_catering_cost'))
                 lead.uber = sum(courses.mapped('lcp_total_uber_estimate'))
@@ -403,8 +407,22 @@ class CrmLead(models.Model):
             for lead in self:
                 onsite = lead.training_course_ids.filtered(lambda c: c.location == 'On site')
                 nonzero = any(vals.get(k) for k in ('venue', 'ctrng', 'uber') if k in vals)
-                if len(onsite) > 1 and nonzero:
-                    raise UserError(_('This Lead has more than one On-site Training. Enter Venue, Catering and Uber in each Training LCP.'))
+                if len(onsite) > 1:
+                    # Form onchanges copy the sums of the onsite LCP lines to
+                    # these lead-level summary fields. Saving those sums must
+                    # not be mistaken for manually distributing logistics.
+                    expected = {
+                        'venue': sum(onsite.mapped('lcp_venue_cost')),
+                        'ctrng': sum(onsite.mapped('lcp_catering_cost')),
+                        'uber': sum(onsite.mapped('lcp_total_uber_estimate')),
+                    }
+                    is_synced = all(
+                        abs((vals[key] or 0.0) - expected[key]) <= 0.01
+                        for key in expected if key in vals
+                    )
+                    if nonzero and not is_synced:
+                        raise UserError(_('This Lead has more than one On-site Training. Enter Venue, Catering and Uber in each Training LCP.'))
+                    continue
                 if len(onsite) == 1:
                     course = onsite[0]
                     data = {}
