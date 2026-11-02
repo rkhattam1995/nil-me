@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <!-- Every saved On-site Training owns its flights, hotels and local costs. -->
+    <record id="view_training_course_onsite_logistics" model="ir.ui.view">
+        <field name="name">training.course.onsite.logistics.form</field>
+        <field name="model">training.course</field>
+        <field name="arch" type="xml">
+            <form string="On-site Training Logistics" create="false" delete="false">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="training_id" readonly="1"/>
+                            <field name="lead_id" readonly="1"/>
+                            <field name="location" readonly="1"/>
+                        </group>
+                        <group>
+                            <field name="instructor_id" readonly="1"/>
+                            <field name="training_date_start" readonly="1"/>
+                            <field name="training_date_end" readonly="1"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Venue, Catering &amp; Transport" name="onsite_costs">
+                            <group>
+                                <group string="Local Logistics">
+                                    <field name="lcp_venue_cost"/>
+                                    <field name="lcp_catering_cost"/>
+                                    <field name="lcp_uber_day_rate"/>
+                                    <field name="lcp_total_uber_estimate" readonly="1"/>
+                                    <field name="lcp_instructor_logistics"/>
+                                </group>
+                                <group string="Per Diem &amp; Summary">
+                                    <field name="lcp_per_diem_rate"/>
+                                    <field name="lcp_per_diem_days"/>
+                                    <field name="lcp_total_per_diem" readonly="1"/>
+                                    <field name="lcp_total_instructor_cost" readonly="1"/>
+                                    <field name="lcp_ticket_total" readonly="1"/>
+                                    <field name="lcp_hotel_total" readonly="1"/>
+                                    <field name="lcp_all_onsite_expenses" readonly="1"/>
+                                </group>
+                            </group>
+                        </page>
+                        <page string="Flights" name="onsite_flights">
+                            <field name="lcp_ticket_ids"
+                                   context="{'default_ticket_lead_id': lead_id}">
+                                <tree editable="bottom">
+                                    <field name="airline_id"/>
+                                    <field name="origin_id"/>
+                                    <field name="destination_id"/>
+                                    <field name="date"/>
+                                    <field name="stop"/>
+                                    <field name="currency_id" column_invisible="1"/>
+                                    <field name="price"/>
+                                </tree>
+                            </field>
+                        </page>
+                        <page string="Hotels" name="onsite_hotels">
+                            <field name="lcp_hotel_ids"
+                                   context="{'default_hotel_lead_id': lead_id}">
+                                <tree editable="bottom">
+                                    <field name="hotel_id"/>
+                                    <field name="date_from"/>
+                                    <field name="date_to"/>
+                                    <field name="nights"/>
+                                    <field name="currency_id" column_invisible="1"/>
+                                    <field name="price_without_tax"/>
+                                    <field name="tax"/>
+                                    <field name="price"/>
+                                </tree>
+                            </field>
+                        </page>
+                        <page string="Visa &amp; Documents" name="onsite_visa">
+                            <group>
+                                <field name="lcp_visa"/>
+                                <field name="lcp_visa_start_date" invisible="not lcp_visa"/>
+                                <field name="lcp_visa_end_date" invisible="not lcp_visa"/>
+                                <field name="lcp_booking_details_ids" widget="many2many_binary"/>
+                                <field name="lcp_logistics_notes"/>
+                            </group>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+</odoo>
