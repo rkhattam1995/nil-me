@@ -732,11 +732,18 @@ class HotelHotel(models.Model):
     tax = fields.Monetary(string="Taxes",required=True,default=0.0)
     price = fields.Monetary(string="Price with Tax",compute='_compute_total',inverse='_inverse_total')
     
-    @api.constrains('hotel_lead_id')
+    @api.constrains('hotel_lead_id', 'lcp_training_course_id')
     def _check_hotel_row_limit(self):
+        # The two-row restriction is per training, not per opportunity.
+        # A Lead with several On-site trainings needs separate hotel rows.
         for lead in self.mapped('hotel_lead_id'):
-            if self.search_count([('hotel_lead_id', '=', lead.id)], limit=3) > 2:
-                raise UserError(_('Only two hotel rows are allowed per opportunity.'))
+            hotels = self.search([('hotel_lead_id', '=', lead.id)])
+            by_training = {}
+            for hotel in hotels:
+                course_id = hotel.lcp_training_course_id.id or False
+                by_training[course_id] = by_training.get(course_id, 0) + 1
+            if any(count > 2 for count in by_training.values()):
+                raise UserError(_('Only two hotel rows are allowed per Training.'))
 
     @api.depends('price_without_tax', 'tax')
     def _compute_total(self):
@@ -770,11 +777,17 @@ class TicketTicket(models.Model):
     currency_id = fields.Many2one('res.currency',string="Currency",required=True)
     price = fields.Monetary(string="Price with Taxes",required=True)
     
-    @api.constrains('ticket_lead_id')
+    @api.constrains('ticket_lead_id', 'lcp_training_course_id')
     def _check_ticket_row_limit(self):
+        # Each On-site course may have its own outbound/return ticket rows.
         for lead in self.mapped('ticket_lead_id'):
-            if self.search_count([('ticket_lead_id', '=', lead.id)], limit=3) > 2:
-                raise UserError(_('Only two flight rows are allowed per opportunity.'))
+            flights = self.search([('ticket_lead_id', '=', lead.id)])
+            by_training = {}
+            for ticket in flights:
+                course_id = ticket.lcp_training_course_id.id or False
+                by_training[course_id] = by_training.get(course_id, 0) + 1
+            if any(count > 2 for count in by_training.values()):
+                raise UserError(_('Only two flight rows are allowed per Training.'))
 
 class AirlineAirline(models.Model):
     _name = 'airline.airline'
