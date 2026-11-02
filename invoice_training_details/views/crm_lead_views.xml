@@ -93,9 +93,9 @@
                     </group>
 
 
-                    <field name="ticket_ids" widget="logistics_two_rows">
+                    <field name="ticket_ids">
 
-                        <tree editable="bottom" limit="2">
+                        <tree editable="bottom">
 
                             <field name="airline_id"/>
 
@@ -116,9 +116,9 @@
                     </field>
 
 
-                    <field name="hotel_ids" widget="logistics_two_rows">
+                    <field name="hotel_ids">
 
-                        <tree editable="bottom" limit="2">
+                        <tree editable="bottom">
 
                             <field name="hotel_id"/>
 
