@@ -63,7 +63,8 @@
                                     type="object" string="Logistics" icon="fa-plane"
                                     invisible="location != 'On site'"/>
 
-                            <field name="price" widget="monetary" options="{'currency_field': 'currency_id'}"/>
+                            <field name="lcp_currency_id" column_invisible="1"/>
+                            <field name="price" widget="monetary" options="{'currency_field': 'lcp_currency_id'}"/>
 
                         </tree>
 
