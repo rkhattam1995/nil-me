@@ -557,16 +557,11 @@
                                 font-family:inherit;
                              ">
 
-                            <p style="
-                                text-align:justify;
-                                margin:0;
-                                font-size:16px;
-                                font-family:inherit;
-                               ">
-
-                                <span t-field="o.term_and_cond"/>
-
-                            </p>
+                            <!-- Native ordered / nested Terms lists must not be
+                                 placed inside a paragraph or an inline span. -->
+                            <div t-field="o.term_and_cond"
+                                 style="text-align:justify; margin:0;
+                                        font-size:16px; font-family:inherit;"/>
 
                         </div>
 
