@@ -47,7 +47,46 @@ CLC_DISCLAIMER_BULLETS = (
     "All classes are delivered by certified instructors.",
 )
 
-CASH_ONSITE_TERMS = "General Terms & Conditions:\n1. All NIL Middle East (NIL ME) terms and conditions apply.\n2. Trainees should use their own laptop for the training.\n3. Training Location: Onsite at customer office in XXXXXXXX. Customers must secure good internet access for the students and the instructor.\n4. Catering included in NIL ME offer.\n5. Cancellation Policy:\n• Cancellations made at least 2 weeks prior to the program start date will incur no charges.\n• Cancellations made within 2 weeks of the start date will incur a 100% cancellation fee.\n6. Changes or replacements of participant names or email addresses are permitted only if requested at least 2 weeks before the start date.\n7. Schedule Changes: NIL Middle East reserves the right to modify program start dates, cohort schedules, or exam dates without prior notice. While every effort will be made to maintain the original schedule, NIL ME will provide alternative options if changes occur. Such changes will not result in any legal or financial liability for NIL Middle East.\n8. Payment:\na. Full payment (30%) must be made in advance, due on receipt of the invoice, and 2 weeks before the training start date.\nb. Remainign (70%) should be paid against final invoice after delivery- Net30\nc. All prices are exclusive of taxes. Any applicable taxes must be paid directly by the buyer to the relevant authorities and must not be deducted from the NIL ME fees.\nd. The buyer is responsible for all bank transfer fees and charges related to payments made to the NIL Middle East XXXXXXXX (XXXXXXXX) bank account.\n9. Schedule changes\nNIL Middle East reserves the right to modify program start dates, cohort schedules, or exam dates without prior notice. While every effort will be made to maintain the original schedule, NIL ME will provide alternative options if changes occur. Such changes will not result in any legal or financial liability for NIL Middle East.\n10. Exams & Vouchers: The price does not include exam costs, NIL Middle East is not an official exam testing center and only provides exam vouchers based on separated request.\n11. Prices for training do not include students’ cost of tickets, accommodation, visa, …. Etc.\n12. NIL Middle East selects certified instructors based on quality and availability.\n13. Training Language: All training is delivered in English.\n14. Offer Validity: This offer is valid for 15 days from the date of issuance.\n\nDisclaimer:\n- Certified Courses kits ((Materials and Labs)) offered, and CLCs redeeming are provided in full cooperation with NIL Middle East’s strategic Partner and CLP “Enterone”.\n- All classes are delivered by certified instructors."
+# Cash Onsite legal text. Ordered clause numbers come from editor lists only.
+CASH_ONSITE_TERMS = (
+    "All NIL Middle East (NIL ME) terms and conditions apply.",
+    "Trainees should use their own laptop for the training.",
+    "Training Location: Onsite at customer office in XXXXXXXX. Customers must secure good internet access for the students and the instructor.",
+    "Catering included in NIL ME offer.",
+    "Cancellation Policy:",
+    "Changes or replacements of participant names or email addresses are permitted only if requested at least 2 weeks before the start date.",
+    "Schedule Changes: NIL Middle East reserves the right to modify program start dates, cohort schedules, or exam dates without prior notice. While every effort will be made to maintain the original schedule, NIL ME will provide alternative options if changes occur. Such changes will not result in any legal or financial liability for NIL Middle East.",
+    "Payment:",
+    "Schedule changes\nNIL Middle East reserves the right to modify program start dates, cohort schedules, or exam dates without prior notice. While every effort will be made to maintain the original schedule, NIL ME will provide alternative options if changes occur. Such changes will not result in any legal or financial liability for NIL Middle East.",
+    "Exams & Vouchers: The price does not include exam costs, NIL Middle East is not an official exam testing center and only provides exam vouchers based on separated request.",
+    "Prices for training do not include students’ cost of tickets, accommodation, visa, …. Etc.",
+    "NIL Middle East selects certified instructors based on quality and availability.",
+    "Training Language: All training is delivered in English.",
+    "Offer Validity: This offer is valid for 15 days from the date of issuance.",
+)
+
+
+# Native bullet list nested under Cancellation Policy.
+CASH_CANCELLATION_BULLETS = (
+    "Cancellations made at least 2 weeks prior to the program start date will incur no charges.",
+    "Cancellations made within 2 weeks of the start date will incur a 100% cancellation fee.",
+)
+
+
+# Native alphabetic list nested under Payment.
+CASH_PAYMENT_SUBITEMS = (
+    "Full payment (30%) must be made in advance, due on receipt of the invoice, and 2 weeks before the training start date.",
+    "Remainign (70%) should be paid against final invoice after delivery- Net30",
+    "All prices are exclusive of taxes. Any applicable taxes must be paid directly by the buyer to the relevant authorities and must not be deducted from the NIL ME fees.",
+    "The buyer is responsible for all bank transfer fees and charges related to payments made to the NIL Middle East XXXXXXXX (XXXXXXXX) bank account.",
+)
+
+
+# Native bullet list under Disclaimer.
+CASH_DISCLAIMER_BULLETS = (
+    "Certified Courses kits ((Materials and Labs)) offered, and CLCs redeeming are provided in full cooperation with NIL Middle East’s strategic Partner and CLP “Enterone”.",
+    "All classes are delivered by certified instructors.",
+)
 
 
 def _clc_terms_html(clauses, expected_clauses):
@@ -119,87 +158,66 @@ def _cash_heading_html(text):
     for heading in _CASH_BOLD_HEADINGS:
         if text.startswith(heading):
             return '<strong>%s</strong>%s' % (
-                escape(heading), escape(text[len(heading):]),
+                escape(heading),
+                escape(text[len(heading):]).replace('\n', '<br/>'),
             )
-    return escape(text)
+    return escape(text).replace('\n', '<br/>')
 
 
 def _cash_onsite_terms_html():
-    """Native decimal, bullet, and alphabetic numbering for the Terms editor."""
-    lines = [line.strip() for line in CASH_ONSITE_TERMS.splitlines()]
+    """All numbering is native to the editable ordered/unordered lists."""
+    if len(CASH_ONSITE_TERMS) != 14:
+        raise ValueError('Cash Onsite Terms must have exactly 14 clauses')
+    if (len(CASH_CANCELLATION_BULLETS) != 2
+            or len(CASH_PAYMENT_SUBITEMS) != 4
+            or len(CASH_DISCLAIMER_BULLETS) != 2):
+        raise ValueError('Cash Onsite Terms have invalid sublists')
+
     html = [
         '<p><strong>General Terms &amp; Conditions:</strong></p>',
         '<ol style="list-style-type:decimal;padding-left:28px;">',
     ]
-    in_item = False
-    nested = None
-    in_disclaimer = False
-    expected_number = 1
+    cancellation_count = 0
+    payment_count = 0
+    catering_count = 0
 
-    for line in lines[1:]:
-        if not line:
-            continue
-        if line == 'Disclaimer:':
-            if nested:
-                html.append('</%s>' % nested)
-                nested = None
-            if in_item:
-                html.append('</li>')
-                in_item = False
-            html.append('</ol>')
-            html.append('<p><strong>Disclaimer:</strong></p>')
+    for clause in CASH_ONSITE_TERMS:
+        # Color this list item, INCLUDING its automatically generated "4.".
+        is_catering = clause == 'Catering included in NIL ME offer.'
+        item_style = ' style="color:#ff0000;"' if is_catering else ''
+        catering_count += int(is_catering)
+        html.append('<li%s>%s' % (item_style, _cash_heading_html(clause)))
+
+        if clause == 'Cancellation Policy:':
+            cancellation_count += 1
             html.append('<ul style="list-style-type:disc;padding-left:28px;">')
-            in_disclaimer = True
-            continue
+            for text in CASH_CANCELLATION_BULLETS:
+                html.append('<li>%s</li>' % escape(text))
+            html.append('</ul>')
 
-        if in_disclaimer:
-            if line.startswith('- '):
-                html.append('<li>%s</li>' % escape(line[2:]))
-            continue
+        if clause == 'Payment:':
+            payment_count += 1
+            html.append(
+                '<ol type="a" style="list-style-type:lower-alpha;padding-left:28px;">'
+            )
+            for text in CASH_PAYMENT_SUBITEMS:
+                html.append('<li>%s</li>' % escape(text))
+            html.append('</ol>')
 
-        numbered = re.match(r'^(\d+)\.\s+(.+)$', line)
-        if numbered:
-            if int(numbered.group(1)) != expected_number:
-                raise ValueError('Incorrect Cash Onsite clause numbering')
-            expected_number += 1
-            if nested:
-                html.append('</%s>' % nested)
-                nested = None
-            if in_item:
-                html.append('</li>')
-            html.append('<li%s>%s' % (
-                ' style="color:#ff0000;"' if numbered.group(1) == '4' else '',
-                _cash_heading_html(numbered.group(2)),
-            ))
-            in_item = True
-            continue
-
-        bullet = re.match(r'^•\s+(.+)$', line)
-        lettered = re.match(r'^[a-d]\.\s+(.+)$', line)
-        if bullet or lettered:
-            kind = 'ul' if bullet else 'ol'
-            if nested != kind:
-                if nested:
-                    html.append('</%s>' % nested)
-                html.append(
-                    '<ul style="list-style-type:disc;padding-left:28px;">'
-                    if bullet else
-                    '<ol type="a" style="list-style-type:lower-alpha;padding-left:28px;">'
-                )
-                nested = kind
-            html.append('<li>%s</li>' % escape((bullet or lettered).group(1)))
-            continue
-
-        # The paragraph beneath clause 9 remains part of clause 9.
-        html.append('<br/>%s' % escape(line))
-
-    if nested:
-        html.append('</%s>' % nested)
-    if in_item:
         html.append('</li>')
-    html.append('</ul>' if in_disclaimer else '</ol>')
-    if expected_number != 15:
-        raise ValueError('Cash Onsite terms must have exactly 14 clauses')
+
+    if (cancellation_count != 1 or payment_count != 1
+            or catering_count != 1):
+        raise ValueError('Cash Onsite special clauses are missing or duplicated')
+
+    html.extend([
+        '</ol>',
+        '<p><strong>Disclaimer:</strong></p>',
+        '<ul style="list-style-type:disc;padding-left:28px;">',
+    ])
+    for text in CASH_DISCLAIMER_BULLETS:
+        html.append('<li>%s</li>' % escape(text))
+    html.append('</ul>')
     return ''.join(html)
 
 
