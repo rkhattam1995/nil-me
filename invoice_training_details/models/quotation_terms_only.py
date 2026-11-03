@@ -10,113 +10,86 @@ from odoo import api, fields, models
 # Legal wording is intentionally copied without proofreading or alterations.
 # CLC Online differs only in delivery mode and removal of On-site Catering.
 # Its numbered clauses are renumbered sequentially without rewriting text.
-CLC_ONSITE_TERMS = "1. All NIL Middle East (NIL ME) terms and conditions apply; by accepting this quotation, you are accepting all terms with no exceptions.\n2. Training Location: Instructor-Led – Onsite.\n3. Trainees should use their own laptops for training.\n4. Catering: Not applicable.\n5. Cancellation Policy: Cancellations made at least 2 weeks prior to the start date will incur no charges. Cancellations made within 2 weeks of the start date will incur a 100% cancellation fee.\n6. Participant Changes: Changes or replacements of participant names or email addresses are permitted only if requested at least 2 weeks before the start date.\n7. Purchase Order and Payment: For CLC-based orders, there is no need for an official customer purchase order. Instead, an email accepting the quotation shall be shared with NIL Middle East with the following information included:\na. SO#\nb. Available CLCs in the SO#\nc. Expiry date of the CLCs\n8. All CLC prices are inclusive of VAT. Any other applicable taxes must be paid directly by the buyer to the relevant authorities and must not be deducted from the NIL ME fees.\n9. Schedule Changes: NIL Middle East reserves the right to modify program start dates and schedules. While every effort will be made to maintain the original schedule, NIL ME will provide alternative options if changes occur. Such changes will not result in any legal or financial liability for NIL Middle East.\n10. Exams & Vouchers: The price does not include exam costs. NIL ME is not an exam or testing center.\n11. Prices for training do not include students’ costs for tickets, accommodation, visa, etc.\n12. NIL Middle East selects certified instructors based on quality and availability.\n13. Training Language: All training is delivered in English.\n14. Offer Validity: This offer is valid until 15 days from the date of issuance.\n\nDisclaimer: \n-\tCertified Courses kits ((Materials and Labs)) offered, and CLCs redeeming are provided in full cooperation with NIL Middle East’s strategic Partner and CLP “Enterone”.\n-\tAll classes are delivered by certified instructors."
+# Original legal wording. Clause numbering is intentionally NOT stored as text.
+CLC_ONSITE_TERMS = (
+    "All NIL Middle East (NIL ME) terms and conditions apply; by accepting this quotation, you are accepting all terms with no exceptions.",
+    "Training Location: Instructor-Led – Onsite.",
+    "Trainees should use their own laptops for training.",
+    "Catering: Not applicable.",
+    "Cancellation Policy: Cancellations made at least 2 weeks prior to the start date will incur no charges. Cancellations made within 2 weeks of the start date will incur a 100% cancellation fee.",
+    "Participant Changes: Changes or replacements of participant names or email addresses are permitted only if requested at least 2 weeks before the start date.",
+    "Purchase Order and Payment: For CLC-based orders, there is no need for an official customer purchase order. Instead, an email accepting the quotation shall be shared with NIL Middle East with the following information included:",
+    "All CLC prices are inclusive of VAT. Any other applicable taxes must be paid directly by the buyer to the relevant authorities and must not be deducted from the NIL ME fees.",
+    "Schedule Changes: NIL Middle East reserves the right to modify program start dates and schedules. While every effort will be made to maintain the original schedule, NIL ME will provide alternative options if changes occur. Such changes will not result in any legal or financial liability for NIL Middle East.",
+    "Exams & Vouchers: The price does not include exam costs. NIL ME is not an exam or testing center.",
+    "Prices for training do not include students’ costs for tickets, accommodation, visa, etc.",
+    "NIL Middle East selects certified instructors based on quality and availability.",
+    "Training Language: All training is delivered in English.",
+    "Offer Validity: This offer is valid until 15 days from the date of issuance.",
+)
+
+# CLC Online has no catering; only the delivery location wording differs.
+CLC_ONLINE_TERMS = tuple(
+    'Training Location: Instructor-Led – Online.'
+    if clause == 'Training Location: Instructor-Led – Onsite.'
+    else clause
+    for clause in CLC_ONSITE_TERMS
+    if clause != 'Catering: Not applicable.'
+)
+
+CLC_PAYMENT_SUBITEMS = (
+    "SO#",
+    "Available CLCs in the SO#",
+    "Expiry date of the CLCs",
+)
+
+CLC_DISCLAIMER_BULLETS = (
+    "Certified Courses kits ((Materials and Labs)) offered, and CLCs redeeming are provided in full cooperation with NIL Middle East’s strategic Partner and CLP “Enterone”.",
+    "All classes are delivered by certified instructors.",
+)
 
 CASH_ONSITE_TERMS = "General Terms & Conditions:\n1. All NIL Middle East (NIL ME) terms and conditions apply.\n2. Trainees should use their own laptop for the training.\n3. Training Location: Onsite at customer office in XXXXXXXX. Customers must secure good internet access for the students and the instructor.\n4. Catering included in NIL ME offer.\n5. Cancellation Policy:\n• Cancellations made at least 2 weeks prior to the program start date will incur no charges.\n• Cancellations made within 2 weeks of the start date will incur a 100% cancellation fee.\n6. Changes or replacements of participant names or email addresses are permitted only if requested at least 2 weeks before the start date.\n7. Schedule Changes: NIL Middle East reserves the right to modify program start dates, cohort schedules, or exam dates without prior notice. While every effort will be made to maintain the original schedule, NIL ME will provide alternative options if changes occur. Such changes will not result in any legal or financial liability for NIL Middle East.\n8. Payment:\na. Full payment (30%) must be made in advance, due on receipt of the invoice, and 2 weeks before the training start date.\nb. Remainign (70%) should be paid against final invoice after delivery- Net30\nc. All prices are exclusive of taxes. Any applicable taxes must be paid directly by the buyer to the relevant authorities and must not be deducted from the NIL ME fees.\nd. The buyer is responsible for all bank transfer fees and charges related to payments made to the NIL Middle East XXXXXXXX (XXXXXXXX) bank account.\n9. Schedule changes\nNIL Middle East reserves the right to modify program start dates, cohort schedules, or exam dates without prior notice. While every effort will be made to maintain the original schedule, NIL ME will provide alternative options if changes occur. Such changes will not result in any legal or financial liability for NIL Middle East.\n10. Exams & Vouchers: The price does not include exam costs, NIL Middle East is not an official exam testing center and only provides exam vouchers based on separated request.\n11. Prices for training do not include students’ cost of tickets, accommodation, visa, …. Etc.\n12. NIL Middle East selects certified instructors based on quality and availability.\n13. Training Language: All training is delivered in English.\n14. Offer Validity: This offer is valid for 15 days from the date of issuance.\n\nDisclaimer:\n- Certified Courses kits ((Materials and Labs)) offered, and CLCs redeeming are provided in full cooperation with NIL Middle East’s strategic Partner and CLP “Enterone”.\n- All classes are delivered by certified instructors."
 
 
-def _clc_online_terms():
-    lines = []
-    for line in CLC_ONSITE_TERMS.split('\n'):
-        if line == '4. Catering: Not applicable.':
-            continue
-        if line == '2. Training Location: Instructor-Led – Onsite.':
-            line = '2. Training Location: Instructor-Led – Online.'
-        match = re.match(r'^(\d+)\. (.*)$', line)
-        if match and int(match.group(1)) >= 5:
-            line = '%s. %s' % (int(match.group(1)) - 1, match.group(2))
-        lines.append(line)
-    return '\n'.join(lines)
+def _clc_terms_html(clauses, expected_clauses):
+    """Use native editor <ol>/<li> numbering, never visible text prefixes.
 
-
-CLC_ONLINE_TERMS = _clc_online_terms()
-
-
-def _clc_terms_html(terms, expected_clauses):
-    """Build editable numbered CLC Terms without hard-coded visible numbers.
-
-    The original CLC Onsite/Online wording stays in the source constants.
-    Rendered numbers come only from HTML <ol>/<li>, including the a/b/c
-    list inside Purchase Order and Payment.
+    Both CLC modes share one editable numbered list with an alphabetic
+    sublist inside Purchase Order and Payment, plus Disclaimer bullets.
     """
-    if expected_clauses not in (13, 14):
-        raise ValueError('Unsupported CLC Terms layout')
+    if len(clauses) != expected_clauses:
+        raise ValueError('CLC Terms clause count differs from the template')
 
     html = [
         '<p><strong>Terms &amp; Conditions:</strong></p>',
         '<ol style="list-style-type:decimal;padding-left:28px;">',
     ]
-    next_number = 1
-    item_open = False
-    sublist_open = False
-    subitem_count = 0
-    disclaimer_open = False
-    disclaimer_count = 0
-    # Onsite has a Catering clause at 4, Online does not.
-    purchase_order_clause = 7 if expected_clauses == 14 else 6
+    payment_sections = 0
 
-    for raw_line in terms.splitlines():
-        line = raw_line.strip()
-        if not line:
-            continue
+    for clause in clauses:
+        html.append('<li>%s' % escape(clause))
+        if clause.startswith('Purchase Order and Payment:'):
+            payment_sections += 1
+            html.append(
+                '<ol type="a" style="list-style-type:lower-alpha;padding-left:28px;">'
+            )
+            for text in CLC_PAYMENT_SUBITEMS:
+                html.append('<li>%s</li>' % escape(text))
+            html.append('</ol>')
+        html.append('</li>')
 
-        if line == 'Disclaimer:':
-            if next_number != expected_clauses + 1 or subitem_count != 3:
-                raise ValueError('Invalid CLC Terms numbering')
-            if sublist_open:
-                html.append('</ol>')
-                sublist_open = False
-            if item_open:
-                html.append('</li>')
-                item_open = False
-            html.extend([
-                '</ol>',
-                '<p><strong>Disclaimer:</strong></p>',
-                '<ul style="list-style-type:disc;padding-left:28px;">',
-            ])
-            disclaimer_open = True
-            continue
+    if payment_sections != 1 or len(CLC_PAYMENT_SUBITEMS) != 3:
+        raise ValueError('The CLC Payment sublist must contain a, b, c')
+    if len(CLC_DISCLAIMER_BULLETS) != 2:
+        raise ValueError('The CLC Disclaimer must contain two bullet items')
 
-        if disclaimer_open:
-            bullet = re.match(r'^-\s*(.+)$', line)
-            if not bullet:
-                raise ValueError('Invalid CLC Disclaimer bullet')
-            html.append('<li>%s</li>' % escape(bullet.group(1)))
-            disclaimer_count += 1
-            continue
-
-        numbered = re.match(r'^(\d+)\.\s+(.+)$', line)
-        if numbered:
-            if int(numbered.group(1)) != next_number:
-                raise ValueError('CLC Terms clauses are not sequential')
-            if sublist_open:
-                html.append('</ol>')
-                sublist_open = False
-            if item_open:
-                html.append('</li>')
-            html.append('<li>%s' % escape(numbered.group(2)))
-            item_open = True
-            next_number += 1
-            continue
-
-        lettered = re.match(r'^([a-c])\.\s+(.+)$', line)
-        if lettered:
-            if (next_number != purchase_order_clause + 1
-                    or lettered.group(1) != chr(ord('a') + subitem_count)):
-                raise ValueError('Invalid CLC Payment subclause numbering')
-            if not sublist_open:
-                html.append(
-                    '<ol type="a" style="list-style-type:lower-alpha;padding-left:28px;">'
-                )
-                sublist_open = True
-            html.append('<li>%s</li>' % escape(lettered.group(2)))
-            subitem_count += 1
-            continue
-
-        raise ValueError('Unexpected content in CLC Terms')
-
-    if not disclaimer_open or disclaimer_count != 2:
-        raise ValueError('CLC Terms must have two disclaimer bullets')
+    html.extend([
+        '</ol>',
+        '<p><strong>Disclaimer:</strong></p>',
+        '<ul style="list-style-type:disc;padding-left:28px;">',
+    ])
+    for text in CLC_DISCLAIMER_BULLETS:
+        html.append('<li>%s</li>' % escape(text))
     html.append('</ul>')
     return ''.join(html)
 
