@@ -177,7 +177,10 @@ def _cash_onsite_terms_html():
                 nested = None
             if in_item:
                 html.append('</li>')
-            html.append('<li>%s' % _cash_heading_html(numbered.group(2)))
+            html.append('<li%s>%s' % (
+                ' style="color:#ff0000;"' if numbered.group(1) == '4' else '',
+                _cash_heading_html(numbered.group(2)),
+            ))
             in_item = True
             continue
 
