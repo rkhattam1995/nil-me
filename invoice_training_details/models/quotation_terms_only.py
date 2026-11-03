@@ -32,33 +32,43 @@ def _clc_online_terms():
 CLC_ONLINE_TERMS = _clc_online_terms()
 
 
-def _clc_online_terms_html():
-    """Editable HTML lists: 13 automatic clauses, a-c sublist, disclaimer bullets."""
+def _clc_terms_html(terms, expected_clauses):
+    """Build editable numbered CLC Terms without hard-coded visible numbers.
+
+    The original CLC Onsite/Online wording stays in the source constants.
+    Rendered numbers come only from HTML <ol>/<li>, including the a/b/c
+    list inside Purchase Order and Payment.
+    """
+    if expected_clauses not in (13, 14):
+        raise ValueError('Unsupported CLC Terms layout')
+
     html = [
         '<p><strong>Terms &amp; Conditions:</strong></p>',
         '<ol style="list-style-type:decimal;padding-left:28px;">',
     ]
     next_number = 1
-    current_item_open = False
+    item_open = False
     sublist_open = False
     subitem_count = 0
     disclaimer_open = False
     disclaimer_count = 0
+    # Onsite has a Catering clause at 4, Online does not.
+    purchase_order_clause = 7 if expected_clauses == 14 else 6
 
-    for line in CLC_ONLINE_TERMS.splitlines():
-        line = line.strip()
+    for raw_line in terms.splitlines():
+        line = raw_line.strip()
         if not line:
             continue
 
         if line == 'Disclaimer:':
-            if next_number != 14 or subitem_count != 3:
-                raise ValueError('Invalid CLC Online Terms numbering')
+            if next_number != expected_clauses + 1 or subitem_count != 3:
+                raise ValueError('Invalid CLC Terms numbering')
             if sublist_open:
                 html.append('</ol>')
                 sublist_open = False
-            if current_item_open:
+            if item_open:
                 html.append('</li>')
-                current_item_open = False
+                item_open = False
             html.extend([
                 '</ol>',
                 '<p><strong>Disclaimer:</strong></p>',
@@ -70,29 +80,30 @@ def _clc_online_terms_html():
         if disclaimer_open:
             bullet = re.match(r'^-\s*(.+)$', line)
             if not bullet:
-                raise ValueError('Invalid CLC Online Disclaimer bullet')
+                raise ValueError('Invalid CLC Disclaimer bullet')
             html.append('<li>%s</li>' % escape(bullet.group(1)))
             disclaimer_count += 1
             continue
 
-        main = re.match(r'^(\d+)\.\s+(.+)$', line)
-        if main:
-            if int(main.group(1)) != next_number:
-                raise ValueError('Invalid CLC Online Terms clause numbering')
+        numbered = re.match(r'^(\d+)\.\s+(.+)$', line)
+        if numbered:
+            if int(numbered.group(1)) != next_number:
+                raise ValueError('CLC Terms clauses are not sequential')
             if sublist_open:
                 html.append('</ol>')
                 sublist_open = False
-            if current_item_open:
+            if item_open:
                 html.append('</li>')
-            html.append('<li>%s' % escape(main.group(2)))
-            current_item_open = True
+            html.append('<li>%s' % escape(numbered.group(2)))
+            item_open = True
             next_number += 1
             continue
 
         lettered = re.match(r'^([a-c])\.\s+(.+)$', line)
         if lettered:
-            if next_number != 7 or lettered.group(1) != chr(ord('a') + subitem_count):
-                raise ValueError('Invalid CLC Online Terms subclause numbering')
+            if (next_number != purchase_order_clause + 1
+                    or lettered.group(1) != chr(ord('a') + subitem_count)):
+                raise ValueError('Invalid CLC Payment subclause numbering')
             if not sublist_open:
                 html.append(
                     '<ol type="a" style="list-style-type:lower-alpha;padding-left:28px;">'
@@ -102,13 +113,20 @@ def _clc_online_terms_html():
             subitem_count += 1
             continue
 
-        raise ValueError('Unexpected CLC Online Terms content')
+        raise ValueError('Unexpected content in CLC Terms')
 
     if not disclaimer_open or disclaimer_count != 2:
-        raise ValueError('CLC Online Terms must have two disclaimer bullets')
+        raise ValueError('CLC Terms must have two disclaimer bullets')
     html.append('</ul>')
     return ''.join(html)
 
+
+def _clc_online_terms_html():
+    return _clc_terms_html(CLC_ONLINE_TERMS, 13)
+
+
+def _clc_onsite_terms_html():
+    return _clc_terms_html(CLC_ONSITE_TERMS, 14)
 
 
 # Native HTML lists are compatible with the existing Terms editor.
@@ -245,9 +263,9 @@ class CrmLead(models.Model):
             if mode == ('clc', 'Online'):
                 sections.append(_clc_online_terms_html())
                 continue
-            # CLC Onsite retains its original wording and rendering.
-            body = escape(terms).replace('\t', '&nbsp;&nbsp;&nbsp;&nbsp;')
-            sections.append('<span>%s</span>' % body.replace('\n', '<br/>'))
+            if mode == ('clc', 'On site'):
+                sections.append(_clc_onsite_terms_html())
+                continue
         return '<br/><br/>'.join(sections)
 
     def action_new_quotation(self):
