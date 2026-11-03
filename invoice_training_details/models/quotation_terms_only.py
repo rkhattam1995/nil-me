@@ -2,7 +2,6 @@
 """Quotation-only terms. Do not use for New WO, POs, invoices or global defaults."""
 
 from html import escape
-import re
 
 from odoo import api, fields, models
 
