@@ -97,3 +97,12 @@ class SaleOrder(models.Model):
         for order in self:
             if not order.nil_new_quotation_terms:
                 super(SaleOrder, order)._onchange_payment_method_terms()
+
+    def _prepare_invoice(self):
+        self.ensure_one()
+        values = super()._prepare_invoice()
+        if self.nil_new_quotation_terms:
+            # The custom sale.order logic normally forwards these terms to
+            # account.move. This content belongs ONLY to the quotation.
+            values.pop('term_and_cond', None)
+        return values
