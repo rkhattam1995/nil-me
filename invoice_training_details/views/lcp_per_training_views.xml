@@ -65,6 +65,7 @@
                                 <field name="lcp_ticket_total"/>
                                 <field name="lcp_hotel_total"/>
                                 <field name="lcp_total_logistics"/>
+                                <field name="lcp_all_onsite_expenses"/>
                                 <field name="lcp_partner_share"/>
                                 <field name="lcp_total_costs"/>
                                 <field name="lcp_nilme_profit"/>

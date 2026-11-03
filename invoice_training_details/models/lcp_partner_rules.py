@@ -2,7 +2,8 @@
 
 from datetime import timedelta
 
-from odoo import api, fields, models
+from odoo import api, fields, models, _
+from odoo.exceptions import UserError, ValidationError
 
 
 class TrainingCourse(models.Model):
@@ -193,6 +194,17 @@ class TicketTicket(models.Model):
         default=lambda self: self.env.ref('base.USD'),
     )
 
+    @api.constrains('ticket_lead_id', 'lcp_training_course_id')
+    def _check_training_logistics_assignment(self):
+        for ticket in self:
+            course = ticket.lcp_training_course_id
+            if not course:
+                continue
+            if course.location != 'On site' or not course.lead_id:
+                raise ValidationError(_('Flight must be linked to a saved On-site Training.'))
+            if ticket.ticket_lead_id != course.lead_id:
+                raise ValidationError(_('Flight and Training must belong to the same Lead.'))
+
     def _single_onsite_training(self, lead):
         onsite = lead.training_course_ids.filtered(
             lambda course: course.location == 'On site'
@@ -215,6 +227,12 @@ class TicketTicket(models.Model):
 
         if training_id:
             training = self.env['training.course'].browse(training_id)
+            if training.location != 'On site':
+                raise UserError(_('Flight expenses must belong to an On-site Training.'))
+            if vals.get('ticket_lead_id') and vals['ticket_lead_id'] != training.lead_id.id:
+                raise UserError(_('The Flight and Training must belong to the same Lead.'))
+            if training.lead_id:
+                vals['ticket_lead_id'] = training.lead_id.id
             if training.training_date_start:
                 vals['date'] = (
                     training.training_date_start - timedelta(days=1)
@@ -236,6 +254,11 @@ class TicketTicket(models.Model):
             training = self.env['training.course'].browse(
                 vals['lcp_training_course_id']
             )
+            if training.location != 'On site':
+                raise UserError(_('Flight expenses must belong to an On-site Training.'))
+            if any(row.ticket_lead_id and row.ticket_lead_id != training.lead_id for row in self):
+                raise UserError(_('The Flight and Training must belong to the same Lead.'))
+            vals['ticket_lead_id'] = training.lead_id.id
             if training.training_date_start:
                 vals['date'] = (
                     training.training_date_start - timedelta(days=1)
@@ -278,6 +301,17 @@ class HotelHotel(models.Model):
         default=lambda self: self.env.ref('base.USD'),
     )
 
+    @api.constrains('hotel_lead_id', 'lcp_training_course_id')
+    def _check_training_logistics_assignment(self):
+        for hotel in self:
+            course = hotel.lcp_training_course_id
+            if not course:
+                continue
+            if course.location != 'On site' or not course.lead_id:
+                raise ValidationError(_('Hotel must be linked to a saved On-site Training.'))
+            if hotel.hotel_lead_id != course.lead_id:
+                raise ValidationError(_('Hotel and Training must belong to the same Lead.'))
+
     def _single_onsite_training(self, lead):
         onsite = lead.training_course_ids.filtered(
             lambda course: course.location == 'On site'
@@ -300,6 +334,12 @@ class HotelHotel(models.Model):
 
         if training_id:
             training = self.env['training.course'].browse(training_id)
+            if training.location != 'On site':
+                raise UserError(_('Hotel expenses must belong to an On-site Training.'))
+            if vals.get('hotel_lead_id') and vals['hotel_lead_id'] != training.lead_id.id:
+                raise UserError(_('The Hotel and Training must belong to the same Lead.'))
+            if training.lead_id:
+                vals['hotel_lead_id'] = training.lead_id.id
             if training.training_date_start:
                 vals['date_from'] = (
                     training.training_date_start - timedelta(days=1)
@@ -323,6 +363,11 @@ class HotelHotel(models.Model):
             training = self.env['training.course'].browse(
                 vals['lcp_training_course_id']
             )
+            if training.location != 'On site':
+                raise UserError(_('Hotel expenses must belong to an On-site Training.'))
+            if any(row.hotel_lead_id and row.hotel_lead_id != training.lead_id for row in self):
+                raise UserError(_('The Hotel and Training must belong to the same Lead.'))
+            vals['hotel_lead_id'] = training.lead_id.id
             if training.training_date_start:
                 vals['date_from'] = (
                     training.training_date_start - timedelta(days=1)
