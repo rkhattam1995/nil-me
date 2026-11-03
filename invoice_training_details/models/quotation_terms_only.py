@@ -7,10 +7,9 @@ import re
 from odoo import api, fields, models
 
 
-# Legal wording is intentionally copied without proofreading or alterations.
-# CLC Online differs only in delivery mode and removal of On-site Catering.
-# Its numbered clauses are renumbered sequentially without rewriting text.
-# Original legal wording. Clause numbering is intentionally NOT stored as text.
+# Preserve original legal wording exactly, but never store CLC clause numbers
+# as part of the editable text. HTML lists generate the numbers in the editor.
+# Online differs only in delivery mode and removal of On-site Catering.
 CLC_ONSITE_TERMS = (
     "All NIL Middle East (NIL ME) terms and conditions apply; by accepting this quotation, you are accepting all terms with no exceptions.",
     "Training Location: Instructor-Led – Onsite.",
