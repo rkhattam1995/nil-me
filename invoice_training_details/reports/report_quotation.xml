@@ -557,8 +557,16 @@
                                 font-family:inherit;
                              ">
 
-                            <!-- Native ordered / nested Terms lists must not be
-                                 placed inside a paragraph or an inline span. -->
+                            <!-- Upgrade compatibility: the previously stored
+                                 report_quotation_terms_finishing inherited view
+                                 still targets span[@t-field='o.term_and_cond']
+                                 while this parent view is reloaded. Keep this
+                                 non-rendering anchor so the old view validates
+                                 before Odoo loads its corrected XPath. -->
+                            <span t-if="False" t-field="o.term_and_cond"/>
+
+                            <!-- Real Terms: block HTML is required for native
+                                 editor ordered, alphabetic and bullet lists. -->
                             <div t-field="o.term_and_cond"
                                  style="text-align:justify; margin:0;
                                         font-size:16px; font-family:inherit;"/>
