@@ -32,6 +32,85 @@ def _clc_online_terms():
 CLC_ONLINE_TERMS = _clc_online_terms()
 
 
+def _clc_online_terms_html():
+    """Editable HTML lists: 13 automatic clauses, a-c sublist, disclaimer bullets."""
+    html = [
+        '<p><strong>Terms &amp; Conditions:</strong></p>',
+        '<ol style="list-style-type:decimal;padding-left:28px;">',
+    ]
+    next_number = 1
+    current_item_open = False
+    sublist_open = False
+    subitem_count = 0
+    disclaimer_open = False
+    disclaimer_count = 0
+
+    for line in CLC_ONLINE_TERMS.splitlines():
+        line = line.strip()
+        if not line:
+            continue
+
+        if line == 'Disclaimer:':
+            if next_number != 14 or subitem_count != 3:
+                raise ValueError('Invalid CLC Online Terms numbering')
+            if sublist_open:
+                html.append('</ol>')
+                sublist_open = False
+            if current_item_open:
+                html.append('</li>')
+                current_item_open = False
+            html.extend([
+                '</ol>',
+                '<p><strong>Disclaimer:</strong></p>',
+                '<ul style="list-style-type:disc;padding-left:28px;">',
+            ])
+            disclaimer_open = True
+            continue
+
+        if disclaimer_open:
+            bullet = re.match(r'^-\s*(.+)$', line)
+            if not bullet:
+                raise ValueError('Invalid CLC Online Disclaimer bullet')
+            html.append('<li>%s</li>' % escape(bullet.group(1)))
+            disclaimer_count += 1
+            continue
+
+        main = re.match(r'^(\d+)\.\s+(.+)$', line)
+        if main:
+            if int(main.group(1)) != next_number:
+                raise ValueError('Invalid CLC Online Terms clause numbering')
+            if sublist_open:
+                html.append('</ol>')
+                sublist_open = False
+            if current_item_open:
+                html.append('</li>')
+            html.append('<li>%s' % escape(main.group(2)))
+            current_item_open = True
+            next_number += 1
+            continue
+
+        lettered = re.match(r'^([a-c])\.\s+(.+)$', line)
+        if lettered:
+            if next_number != 7 or lettered.group(1) != chr(ord('a') + subitem_count):
+                raise ValueError('Invalid CLC Online Terms subclause numbering')
+            if not sublist_open:
+                html.append(
+                    '<ol type="a" style="list-style-type:lower-alpha;padding-left:28px;">'
+                )
+                sublist_open = True
+            html.append('<li>%s</li>' % escape(lettered.group(2)))
+            subitem_count += 1
+            continue
+
+        raise ValueError('Unexpected CLC Online Terms content')
+
+    if not disclaimer_open or disclaimer_count != 2:
+        raise ValueError('CLC Online Terms must have two disclaimer bullets')
+    html.append('</ul>')
+    return ''.join(html)
+
+
+
 # Native HTML lists are compatible with the existing Terms editor.
 _CASH_BOLD_HEADINGS = (
     'Training Location:',
@@ -160,7 +239,10 @@ class CrmLead(models.Model):
             if mode == ('cash', 'On site'):
                 sections.append(_cash_onsite_terms_html())
                 continue
-            # The CLC clauses retain their original wording and rendering.
+            if mode == ('clc', 'Online'):
+                sections.append(_clc_online_terms_html())
+                continue
+            # CLC Onsite retains its original wording and rendering.
             body = escape(terms).replace('\t', '&nbsp;&nbsp;&nbsp;&nbsp;')
             sections.append('<span>%s</span>' % body.replace('\n', '<br/>'))
         return '<br/><br/>'.join(sections)
