@@ -31,6 +31,335 @@ def _clc_online_terms():
 
 CLC_ONLINE_TERMS = _clc_online_terms()
 
+
+# Native <ol> and <ul> are compatible with the existing Odoo Terms editor.
+_CASH_BOLD_HEADINGS = (
+    'Training Location:',
+    'Catering',
+    'Cancellation Policy:',
+    'Schedule Changes:',
+    'Payment:',
+    'Schedule changes',
+    'Exams & Vouchers:',
+    'Training Language:',
+    'Offer Validity:',
+)
+
+
+def _cash_heading_html(text):
+    for heading in _CASH_BOLD_HEADINGS:
+        if text.startswith(heading):
+            return '<strong>%s</strong>%s' % (
+                escape(heading), escape(text[len(heading):]),
+            )
+    return escape(text)
+
+
+def _cash_onsite_terms_html():
+    """Use native numbered, bulleted and alphabetical lists in the editor."""
+    lines = [line.strip() for line in CASH_ONSITE_TERMS.splitlines()]
+    html = [
+        '<p><strong>General Terms &amp; Conditions:</strong></p>',
+        '<ol style="list-style-type:decimal;padding-left:28px;">',
+    ]
+    in_item = False
+    nested = None
+    in_disclaimer = False
+    expected_number = 1
+
+    for line in lines[1:]:
+        if not line:
+            continue
+        if line == 'Disclaimer:':
+            if nested:
+                html.append('</%s>' % nested)
+                nested = None
+            if in_item:
+                html.append('</li>')
+                in_item = False
+            html.append('</ol>')
+            html.append('<p><strong>Disclaimer:</strong></p>')
+            html.append('<ul style="list-style-type:disc;padding-left:28px;">')
+            in_disclaimer = True
+            continue
+        if in_disclaimer:
+            if line.startswith('- '):
+                html.append('<li>%s</li>' % escape(line[2:]))
+            continue
+
+        numbered = re.match(r'^(\d+)\.\s+(.+)
+_QUOTATION_TERMS = {
+    ('clc', 'On site'): ('CLC Onsite', CLC_ONSITE_TERMS),
+    ('clc', 'Online'): ('CLC Online', CLC_ONLINE_TERMS),
+    ('cash', 'On site'): ('Cash Onsite', CASH_ONSITE_TERMS),
+}
+
+
+class CrmLead(models.Model):
+    _inherit = 'crm.lead'
+
+    def _nil_terms_for_new_quotation_only(self):
+        """Build complete terms from training modes, never from lead-level mode."""
+        self.ensure_one()
+        modes = []
+        for course in self.training_course_ids:
+            mode = (course.payment_method, course.location)
+            # Cash Online was not provided. Never silently use the On-site text.
+            if mode not in _QUOTATION_TERMS:
+                return False
+            if mode not in modes:
+                modes.append(mode)
+        if not modes:
+            return False
+        sections = []
+        for mode in modes:
+            _label, terms = _QUOTATION_TERMS[mode]
+            if mode == ('cash', 'On site'):
+                sections.append(_cash_onsite_terms_html())
+                continue
+            # Keep CLC terms and the existing CLC renderer unchanged.
+            body = escape(terms).replace('\t', '&nbsp;&nbsp;&nbsp;&nbsp;')
+            sections.append('<span>%s</span>' % body.replace('\n', '<br/>'))
+        return '<br/><br/>'.join(sections)
+
+    def action_new_quotation(self):
+        """Apply terms only when CRM's standard New Quotation button is used."""
+        self.ensure_one()
+        action = super().action_new_quotation()
+        if action.get('res_model') != 'sale.order':
+            return action
+        html = self._nil_terms_for_new_quotation_only()
+        if html:
+            context = dict(action.get('context') or {})
+            context.update({
+                'default_nil_new_quotation_terms': True,
+                'default_term_and_cond': html,
+            })
+            action['context'] = context
+        return action
+
+
+class SaleOrder(models.Model):
+    _inherit = 'sale.order'
+
+    nil_new_quotation_terms = fields.Boolean(
+        string='Quotation Terms Set From New Quotation',
+        default=False,
+        copy=False,
+    )
+
+    @api.onchange('payment_method')
+    def _onchange_payment_method_terms(self):
+        # The preexisting onchange prepends an Instructor/Customer header.
+        # Suppress it only for the precise New Quotation records, leaving
+        # Work Orders, purchase orders and all other documents untouched.
+        for order in self:
+            if not order.nil_new_quotation_terms:
+                super(SaleOrder, order)._onchange_payment_method_terms()
+
+    def _prepare_invoice(self):
+        self.ensure_one()
+        values = super()._prepare_invoice()
+        if self.nil_new_quotation_terms:
+            # The custom sale.order logic normally forwards these terms to
+            # account.move. This content belongs ONLY to the quotation.
+            values.pop('term_and_cond', None)
+        return values
+, line)
+        if numbered:
+            if int(numbered.group(1)) != expected_number:
+                raise ValueError('Incorrect Cash Onsite clause numbering')
+            expected_number += 1
+            if nested:
+                html.append('</%s>' % nested)
+                nested = None
+            if in_item:
+                html.append('</li>')
+            html.append('<li>%s' % _cash_heading_html(numbered.group(2)))
+            in_item = True
+            continue
+
+        bullet = re.match(r'^•\s+(.+)
+_QUOTATION_TERMS = {
+    ('clc', 'On site'): ('CLC Onsite', CLC_ONSITE_TERMS),
+    ('clc', 'Online'): ('CLC Online', CLC_ONLINE_TERMS),
+    ('cash', 'On site'): ('Cash Onsite', CASH_ONSITE_TERMS),
+}
+
+
+class CrmLead(models.Model):
+    _inherit = 'crm.lead'
+
+    def _nil_terms_for_new_quotation_only(self):
+        """Build complete terms from training modes, never from lead-level mode."""
+        self.ensure_one()
+        modes = []
+        for course in self.training_course_ids:
+            mode = (course.payment_method, course.location)
+            # Cash Online was not provided. Never silently use the On-site text.
+            if mode not in _QUOTATION_TERMS:
+                return False
+            if mode not in modes:
+                modes.append(mode)
+        if not modes:
+            return False
+        sections = []
+        for mode in modes:
+            _label, terms = _QUOTATION_TERMS[mode]
+            # Keep every word, punctuation mark, line break and explicit typo.
+            # Render line breaks as <br/> for both HTML forms and quotation PDFs.
+            body = escape(terms).replace('\t', '&nbsp;&nbsp;&nbsp;&nbsp;')
+            sections.append('<span>%s</span>' % body.replace('\n', '<br/>'))
+        return '<br/><br/>'.join(sections)
+
+    def action_new_quotation(self):
+        """Apply terms only when CRM's standard New Quotation button is used."""
+        self.ensure_one()
+        action = super().action_new_quotation()
+        if action.get('res_model') != 'sale.order':
+            return action
+        html = self._nil_terms_for_new_quotation_only()
+        if html:
+            context = dict(action.get('context') or {})
+            context.update({
+                'default_nil_new_quotation_terms': True,
+                'default_term_and_cond': html,
+            })
+            action['context'] = context
+        return action
+
+
+class SaleOrder(models.Model):
+    _inherit = 'sale.order'
+
+    nil_new_quotation_terms = fields.Boolean(
+        string='Quotation Terms Set From New Quotation',
+        default=False,
+        copy=False,
+    )
+
+    @api.onchange('payment_method')
+    def _onchange_payment_method_terms(self):
+        # The preexisting onchange prepends an Instructor/Customer header.
+        # Suppress it only for the precise New Quotation records, leaving
+        # Work Orders, purchase orders and all other documents untouched.
+        for order in self:
+            if not order.nil_new_quotation_terms:
+                super(SaleOrder, order)._onchange_payment_method_terms()
+
+    def _prepare_invoice(self):
+        self.ensure_one()
+        values = super()._prepare_invoice()
+        if self.nil_new_quotation_terms:
+            # The custom sale.order logic normally forwards these terms to
+            # account.move. This content belongs ONLY to the quotation.
+            values.pop('term_and_cond', None)
+        return values
+, line)
+        lettered = re.match(r'^[a-d]\.\s+(.+)
+_QUOTATION_TERMS = {
+    ('clc', 'On site'): ('CLC Onsite', CLC_ONSITE_TERMS),
+    ('clc', 'Online'): ('CLC Online', CLC_ONLINE_TERMS),
+    ('cash', 'On site'): ('Cash Onsite', CASH_ONSITE_TERMS),
+}
+
+
+class CrmLead(models.Model):
+    _inherit = 'crm.lead'
+
+    def _nil_terms_for_new_quotation_only(self):
+        """Build complete terms from training modes, never from lead-level mode."""
+        self.ensure_one()
+        modes = []
+        for course in self.training_course_ids:
+            mode = (course.payment_method, course.location)
+            # Cash Online was not provided. Never silently use the On-site text.
+            if mode not in _QUOTATION_TERMS:
+                return False
+            if mode not in modes:
+                modes.append(mode)
+        if not modes:
+            return False
+        sections = []
+        for mode in modes:
+            _label, terms = _QUOTATION_TERMS[mode]
+            # Keep every word, punctuation mark, line break and explicit typo.
+            # Render line breaks as <br/> for both HTML forms and quotation PDFs.
+            body = escape(terms).replace('\t', '&nbsp;&nbsp;&nbsp;&nbsp;')
+            sections.append('<span>%s</span>' % body.replace('\n', '<br/>'))
+        return '<br/><br/>'.join(sections)
+
+    def action_new_quotation(self):
+        """Apply terms only when CRM's standard New Quotation button is used."""
+        self.ensure_one()
+        action = super().action_new_quotation()
+        if action.get('res_model') != 'sale.order':
+            return action
+        html = self._nil_terms_for_new_quotation_only()
+        if html:
+            context = dict(action.get('context') or {})
+            context.update({
+                'default_nil_new_quotation_terms': True,
+                'default_term_and_cond': html,
+            })
+            action['context'] = context
+        return action
+
+
+class SaleOrder(models.Model):
+    _inherit = 'sale.order'
+
+    nil_new_quotation_terms = fields.Boolean(
+        string='Quotation Terms Set From New Quotation',
+        default=False,
+        copy=False,
+    )
+
+    @api.onchange('payment_method')
+    def _onchange_payment_method_terms(self):
+        # The preexisting onchange prepends an Instructor/Customer header.
+        # Suppress it only for the precise New Quotation records, leaving
+        # Work Orders, purchase orders and all other documents untouched.
+        for order in self:
+            if not order.nil_new_quotation_terms:
+                super(SaleOrder, order)._onchange_payment_method_terms()
+
+    def _prepare_invoice(self):
+        self.ensure_one()
+        values = super()._prepare_invoice()
+        if self.nil_new_quotation_terms:
+            # The custom sale.order logic normally forwards these terms to
+            # account.move. This content belongs ONLY to the quotation.
+            values.pop('term_and_cond', None)
+        return values
+, line)
+        if bullet or lettered:
+            kind = 'ul' if bullet else 'ol'
+            if nested != kind:
+                if nested:
+                    html.append('</%s>' % nested)
+                html.append(
+                    '<ul style="list-style-type:disc;padding-left:28px;">'
+                    if bullet else
+                    '<ol type="a" style="list-style-type:lower-alpha;padding-left:28px;">'
+                )
+                nested = kind
+            html.append('<li>%s</li>' % escape((bullet or lettered).group(1)))
+            continue
+
+        # The unnumbered paragraph following clause 9 stays in item 9.
+        html.append('<br/>%s' % escape(line))
+
+    if nested:
+        html.append('</%s>' % nested)
+    if in_item:
+        html.append('</li>')
+    html.append('</ul>' if in_disclaimer else '</ol>')
+    if expected_number != 15:
+        raise ValueError('Cash Onsite terms must contain 14 clauses')
+    return ''.join(html)
+
+
 _QUOTATION_TERMS = {
     ('clc', 'On site'): ('CLC Onsite', CLC_ONSITE_TERMS),
     ('clc', 'Online'): ('CLC Online', CLC_ONLINE_TERMS),
