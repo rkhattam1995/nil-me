@@ -48,6 +48,7 @@
                             <field name="bank_details"/>
                             </group>
                     </group>
+                    <field name="nil_new_quotation_terms" invisible="1"/>
                     <field name="term_and_cond" widget="nil_terms_editor" nolabel="1" class="w-100 o_nil_terms_full_width"/>
                         <group>
                         <group string="Report PDF Element Display">
