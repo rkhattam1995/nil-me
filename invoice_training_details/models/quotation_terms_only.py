@@ -56,9 +56,7 @@ class CrmLead(models.Model):
             return False
         sections = []
         for mode in modes:
-            label, terms = _QUOTATION_TERMS[mode]
-            if len(modes) > 1:
-                sections.append('<strong>%s</strong><br/>' % escape(label))
+            _label, terms = _QUOTATION_TERMS[mode]
             # Keep every word, punctuation mark, line break and explicit typo.
             # Render line breaks as <br/> for both HTML forms and quotation PDFs.
             body = escape(terms).replace('\t', '&nbsp;&nbsp;&nbsp;&nbsp;')
