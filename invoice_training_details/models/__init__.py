@@ -36,3 +36,4 @@ from . import am_pricing
 
 from . import po_subject
 from . import sale_subject
+from . import quotation_terms_only
