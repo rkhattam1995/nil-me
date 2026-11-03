@@ -7,7 +7,7 @@
             <span t-if="not is_cisco_u_all_access">Seats</span>
         </xpath>
 
-        <xpath expr="//span[@t-field='o.term_and_cond']" position="before">
+        <xpath expr="//*[@t-field='o.term_and_cond']" position="before">
             <t t-set="enterone_terms_pdf"
                t-value="bool(o.training_course_ids.filtered(lambda t: t.lcp_cost_learning_partner == 'EnterOne'))"/>
 
