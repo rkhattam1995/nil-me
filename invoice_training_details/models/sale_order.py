@@ -1,11 +1,9 @@
 # -*- coding: utf-8 -*-
 
 import re
-import math
 
 from odoo import api, models, fields, _
 from odoo.exceptions import UserError
-from odoo.tools.misc import formatLang
 from .sync_utils import sync_commands
 
 
@@ -257,90 +255,6 @@ class SaleOrder(models.Model):
         for rec in self:
             rec.total_training_price = sum(rec.training_course_ids.mapped('price'))
             
-
-    def _nil_is_clc_pricelist_quote(self):
-        """Apply CLC tax rounding only to quotations created from CRM leads."""
-        self.ensure_one()
-        if not (self.pricelist_id and (self.opportunity_id or self.is_training_so)):
-            return False
-        if not re.search(r'\bCLCS?\b', self.pricelist_id.name or '', re.IGNORECASE):
-            return False
-        # The learning partner (LCP) flow already has its own CLC calculation.
-        return not any(
-            course.lcp_cost_learning_partner for course in self.training_course_ids
-        )
-
-    @api.depends(
-        'order_line.price_subtotal', 'order_line.price_tax',
-        'order_line.price_total', 'pricelist_id', 'opportunity_id',
-        'is_training_so', 'training_course_ids.lcp_cost_learning_partner',
-    )
-    def _compute_amounts(self):
-        super()._compute_amounts()
-        for order in self:
-            if not order._nil_is_clc_pricelist_quote():
-                continue
-            # Respect rounded CLC VAT on each order line, even when global tax
-            # rounding is enabled at company level.
-            lines = order.order_line.filtered(lambda line: not line.display_type)
-            order.amount_untaxed = sum(lines.mapped('price_subtotal'))
-            order.amount_tax = sum(lines.mapped('price_tax'))
-            order.amount_total = order.amount_untaxed + order.amount_tax
-
-    @api.depends(
-        'order_line.tax_id', 'order_line.price_unit', 'order_line.price_tax',
-        'order_line.price_subtotal', 'amount_total', 'amount_untaxed',
-        'currency_id', 'pricelist_id', 'opportunity_id', 'is_training_so',
-        'training_course_ids.lcp_cost_learning_partner',
-    )
-    @api.depends_context('lang')
-    def _compute_tax_totals(self):
-        super()._compute_tax_totals()
-        for order in self:
-            if not order._nil_is_clc_pricelist_quote():
-                continue
-            totals = dict(order.tax_totals or {})
-            if not totals:
-                continue
-            # Odoo recomputes the VAT box from raw tax rates, so align its
-            # displayed amount with the rounded VAT values in Order Lines.
-            groups_by_subtotal = totals.get('groups_by_subtotal') or {}
-            groups = [
-                group for subtotal_groups in groups_by_subtotal.values()
-                for group in subtotal_groups
-            ]
-            raw_tax = sum(group.get('tax_group_amount', 0.0) for group in groups)
-            difference = order.amount_tax - raw_tax
-            if groups and abs(difference) > 0.000001:
-                vat_group = next(
-                    (group for group in groups if group.get('tax_group_amount', 0.0) > 0),
-                    groups[0],
-                )
-                vat_group['tax_group_amount'] += difference
-                vat_group['formatted_tax_group_amount'] = formatLang(
-                    order.env, vat_group['tax_group_amount'],
-                    currency_obj=order.currency_id,
-                )
-            running_total = order.amount_untaxed
-            for subtotal in totals.get('subtotals', []):
-                subtotal['amount'] = running_total
-                subtotal['formatted_amount'] = formatLang(
-                    order.env, running_total, currency_obj=order.currency_id,
-                )
-                running_total += sum(
-                    group.get('tax_group_amount', 0.0)
-                    for group in groups_by_subtotal.get(subtotal['name'], [])
-                )
-            totals['amount_untaxed'] = order.amount_untaxed
-            totals['formatted_amount_untaxed'] = formatLang(
-                order.env, order.amount_untaxed, currency_obj=order.currency_id,
-            )
-            totals['amount_total'] = order.amount_total
-            totals['formatted_amount_total'] = formatLang(
-                order.env, order.amount_total, currency_obj=order.currency_id,
-            )
-            order.tax_totals = totals
-
     def _check_nil_sync_draft(self):
         self.ensure_one()
         if self.state not in ('draft', 'sent'):
@@ -390,26 +304,3 @@ class SaleOrderLine(models.Model):
 
     nil_sync_training_id = fields.Many2one('training.course', copy=False, ondelete='set null', index=True)
     nil_sync_service_id = fields.Many2one('pro.service', copy=False, ondelete='set null', index=True)
-
-    @api.depends(
-        'product_uom_qty', 'discount', 'price_unit', 'tax_id',
-        'order_id.pricelist_id', 'order_id.opportunity_id',
-        'order_id.is_training_so',
-        'order_id.training_course_ids.lcp_cost_learning_partner',
-    )
-    def _compute_amount(self):
-        super()._compute_amount()
-        for line in self:
-            if (
-                line.display_type
-                or not line.tax_id
-                or not line.order_id._nil_is_clc_pricelist_quote()
-                or line.price_tax <= 0
-            ):
-                continue
-            # CLC pricelist only: round the VAT of each order line UP to
-            # the next whole CLC. Keep untaxed prices untouched.
-            rounded_vat = math.ceil(round(line.price_tax, 8))
-            line.price_tax = rounded_vat
-            line.price_total = line.price_subtotal + rounded_vat
-
