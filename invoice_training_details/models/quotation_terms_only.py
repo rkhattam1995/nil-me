@@ -365,7 +365,7 @@ class CrmLead(models.Model):
             ])
             clc_pricelists = pricelists.filtered(
                 lambda pricelist: re.search(
-                    r'\\bCLCS?\\b', pricelist.name or '', re.IGNORECASE
+                    r'\bCLCS?\b', pricelist.name or '', re.IGNORECASE
                 )
             )
             exact = clc_pricelists.filtered(
