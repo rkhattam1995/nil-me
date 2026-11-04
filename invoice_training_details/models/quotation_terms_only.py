@@ -88,6 +88,32 @@ CASH_DISCLAIMER_BULLETS = (
 )
 
 
+# Cash Online: independently preserve the supplied 13 clauses, without Catering.
+CASH_ONLINE_TERMS = (
+    "All NIL Middle East (NIL ME) terms and conditions apply.",
+    "Trainees should use their own laptop for the training.",
+    "Training Location: Onsite at customer office in XXXXXXXX. Customers must secure good internet access for the students and the instructor.",
+    "Cancellation Policy:",
+    "Changes or replacements of participant names or email addresses are permitted only if requested at least 2 weeks before the start date.",
+    "Schedule Changes: NIL Middle East reserves the right to modify program start dates, cohort schedules, or exam dates without prior notice. While every effort will be made to maintain the original schedule, NIL ME will provide alternative options if changes occur. Such changes will not result in any legal or financial liability for NIL Middle East.",
+    "Payment:",
+    "Schedule changes\nNIL Middle East reserves the right to modify program start dates, cohort schedules, or exam dates without prior notice. While every effort will be made to maintain the original schedule, NIL ME will provide alternative options if changes occur. Such changes will not result in any legal or financial liability for NIL Middle East.",
+    "Exams & Vouchers: The price does not include exam costs, NIL Middle East is not an official exam testing center and only provides exam vouchers based on separated request.",
+    "Prices for training do not include students’ cost of tickets, accommodation, visa, …. Etc.",
+    "NIL Middle East selects certified instructors based on quality and availability.",
+    "Training Language: All training is delivered in English.",
+    "Offer Validity: This offer is valid for 15 days from the date of issuance.",
+)
+
+# The four Cash Online Payment items use the customer's exact wording.
+CASH_ONLINE_PAYMENT_BULLETS = (
+    "Full payment (30%) must be made in advance, due on receipt of the invoice, and 2 weeks before the training start date.",
+    "Remaining (70%) should be paid against final invoice after delivery- Net30",
+    "All prices are exclusive of taxes. Any applicable taxes must be paid directly by the buyer to the relevant authorities and must not be deducted from the NIL ME fees.",
+    "The buyer is responsible for all bank transfer fees and charges related to payments made to the NIL Middle East XXXXXXXX (XXXXXXXX) bank account.",
+)
+
+
 def _clc_terms_html(clauses, expected_clauses, payment_numbering='lower-alpha'):
     """Use native editor <ol>/<li> numbering, never visible text prefixes.
 
@@ -221,10 +247,60 @@ def _cash_onsite_terms_html():
     return ''.join(html)
 
 
+def _cash_online_terms_html():
+    """Native editable numbered main list, with nested bullet lists."""
+    if len(CASH_ONLINE_TERMS) != 13:
+        raise ValueError('Cash Online Terms must have exactly 13 clauses')
+    if (len(CASH_CANCELLATION_BULLETS) != 2
+            or len(CASH_ONLINE_PAYMENT_BULLETS) != 4
+            or len(CASH_DISCLAIMER_BULLETS) != 2):
+        raise ValueError('Cash Online Terms have invalid sublists')
+
+    html = [
+        '<p><strong>General Terms &amp; Conditions:</strong></p>',
+        '<ol style="list-style-type:decimal;padding-left:28px;">',
+    ]
+    cancellation_count = 0
+    payment_count = 0
+
+    for clause in CASH_ONLINE_TERMS:
+        html.append('<li>%s' % _cash_heading_html(clause))
+
+        if clause == 'Cancellation Policy:':
+            cancellation_count += 1
+            html.append('<ul style="list-style-type:disc;padding-left:28px;">')
+            for text in CASH_CANCELLATION_BULLETS:
+                html.append('<li>%s</li>' % escape(text))
+            html.append('</ul>')
+
+        if clause == 'Payment:':
+            payment_count += 1
+            html.append('<ul style="list-style-type:disc;padding-left:28px;">')
+            for text in CASH_ONLINE_PAYMENT_BULLETS:
+                html.append('<li>%s</li>' % escape(text))
+            html.append('</ul>')
+
+        html.append('</li>')
+
+    if cancellation_count != 1 or payment_count != 1:
+        raise ValueError('Cash Online special clauses are missing or duplicated')
+
+    html.extend([
+        '</ol>',
+        '<p><strong>Disclaimer:</strong></p>',
+        '<ul style="list-style-type:disc;padding-left:28px;">',
+    ])
+    for text in CASH_DISCLAIMER_BULLETS:
+        html.append('<li>%s</li>' % escape(text))
+    html.append('</ul>')
+    return ''.join(html)
+
+
 _QUOTATION_TERMS = {
     ('clc', 'On site'): ('CLC Onsite', CLC_ONSITE_TERMS),
     ('clc', 'Online'): ('CLC Online', CLC_ONLINE_TERMS),
     ('cash', 'On site'): ('Cash Onsite', CASH_ONSITE_TERMS),
+    ('cash', 'Online'): ('Cash Online', CASH_ONLINE_TERMS),
 }
 
 
@@ -237,7 +313,7 @@ class CrmLead(models.Model):
         modes = []
         for course in self.training_course_ids:
             mode = (course.payment_method, course.location)
-            # Cash Online was not provided. Never silently use the On-site text.
+            # Never substitute terms from a different payment/delivery mode.
             if mode not in _QUOTATION_TERMS:
                 return False
             if mode not in modes:
@@ -249,6 +325,9 @@ class CrmLead(models.Model):
             _label, terms = _QUOTATION_TERMS[mode]
             if mode == ('cash', 'On site'):
                 sections.append(_cash_onsite_terms_html())
+                continue
+            if mode == ('cash', 'Online'):
+                sections.append(_cash_online_terms_html())
                 continue
             if mode == ('clc', 'Online'):
                 sections.append(_clc_online_terms_html())
