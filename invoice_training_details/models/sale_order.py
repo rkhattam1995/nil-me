@@ -412,3 +412,4 @@ class SaleOrderLine(models.Model):
             rounded_vat = math.ceil(round(line.price_tax, 8))
             line.price_tax = rounded_vat
             line.price_total = line.price_subtotal + rounded_vat
+
