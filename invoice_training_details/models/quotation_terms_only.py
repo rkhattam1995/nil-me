@@ -88,11 +88,11 @@ CASH_DISCLAIMER_BULLETS = (
 )
 
 
-def _clc_terms_html(clauses, expected_clauses):
+def _clc_terms_html(clauses, expected_clauses, payment_numbering='lower-alpha'):
     """Use native editor <ol>/<li> numbering, never visible text prefixes.
 
-    Both CLC modes share one editable numbered list with an alphabetic
-    sublist inside Purchase Order and Payment, plus Disclaimer bullets.
+    Both CLC modes share one editable numbered list, with a native nested
+    Payment list (decimal for Online, alphabetic for Onsite) and Disclaimer bullets.
     """
     if len(clauses) != expected_clauses:
         raise ValueError('CLC Terms clause count differs from the template')
@@ -107,16 +107,17 @@ def _clc_terms_html(clauses, expected_clauses):
         html.append('<li>%s' % escape(clause))
         if clause.startswith('Purchase Order and Payment:'):
             payment_sections += 1
-            html.append(
-                '<ol type="a" style="list-style-type:lower-alpha;padding-left:28px;">'
-            )
+            if payment_numbering == 'decimal':
+                html.append('<ol style="list-style-type:decimal;padding-left:28px;">')
+            else:
+                html.append('<ol type="a" style="list-style-type:lower-alpha;padding-left:28px;">')
             for text in CLC_PAYMENT_SUBITEMS:
                 html.append('<li>%s</li>' % escape(text))
             html.append('</ol>')
         html.append('</li>')
 
     if payment_sections != 1 or len(CLC_PAYMENT_SUBITEMS) != 3:
-        raise ValueError('The CLC Payment sublist must contain a, b, c')
+        raise ValueError('The CLC Payment sublist must contain three entries')
     if len(CLC_DISCLAIMER_BULLETS) != 2:
         raise ValueError('The CLC Disclaimer must contain two bullet items')
 
@@ -132,7 +133,7 @@ def _clc_terms_html(clauses, expected_clauses):
 
 
 def _clc_online_terms_html():
-    return _clc_terms_html(CLC_ONLINE_TERMS, 13)
+    return _clc_terms_html(CLC_ONLINE_TERMS, 13, payment_numbering='decimal')
 
 
 def _clc_onsite_terms_html():
