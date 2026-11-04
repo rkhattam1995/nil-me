@@ -2,6 +2,7 @@
 """Quotation-only terms. Do not use for New WO, POs, invoices or global defaults."""
 
 from html import escape
+import re
 
 from odoo import api, fields, models
 
@@ -338,19 +339,44 @@ class CrmLead(models.Model):
         return '<br/><br/>'.join(sections)
 
     def action_new_quotation(self):
-        """Apply terms only when CRM's standard New Quotation button is used."""
+        """Apply quotation terms and default CLC pricelist only to New Quotation."""
         self.ensure_one()
         action = super().action_new_quotation()
         if action.get('res_model') != 'sale.order':
             return action
+
+        context = dict(action.get('context') or {})
         html = self._nil_terms_for_new_quotation_only()
         if html:
-            context = dict(action.get('context') or {})
             context.update({
                 'default_nil_new_quotation_terms': True,
                 'default_term_and_cond': html,
             })
-            action['context'] = context
+
+        # A CLC-only CRM training quotation must open with its CLC pricelist.
+        # Do not override the customer's usual pricelist for Cash/mixed leads.
+        courses = self.training_course_ids
+        if courses and all(course.payment_method == 'clc' for course in courses):
+            company_id = self.company_id.id or self.env.company.id
+            pricelists = self.env['product.pricelist'].search([
+                ('active', '=', True),
+                ('company_id', 'in', [False, company_id]),
+                ('name', 'ilike', 'CLC'),
+            ])
+            clc_pricelists = pricelists.filtered(
+                lambda pricelist: re.search(
+                    r'\\bCLCS?\\b', pricelist.name or '', re.IGNORECASE
+                )
+            )
+            exact = clc_pricelists.filtered(
+                lambda pricelist: (pricelist.name or '').strip().casefold()
+                in ('clc', 'clcs')
+            )
+            clc_pricelist = (exact or clc_pricelists)[:1]
+            if clc_pricelist:
+                context['default_pricelist_id'] = clc_pricelist.id
+
+        action['context'] = context
         return action
 
 
