@@ -4,10 +4,12 @@ from hashlib import sha256
 
 from odoo import Command, api, fields, models, _
 from odoo.exceptions import AccessError
-from odoo.tools import html2plaintext
 
 
 AUDIT_SKIP_LEAD_FIELDS = {
+    'id',
+    'display_name',
+    '__last_update',
     'write_date',
     'write_uid',
     'create_date',
@@ -144,7 +146,7 @@ class CrmLead(models.Model):
         if field.type == 'boolean':
             return 'Yes' if value else 'No'
 
-        if value in (False, None):
+        if value is False or value is None:
             return ''
 
         return str(value)
@@ -333,15 +335,18 @@ def _nil_related_value(record, name):
             for entry in value
         )
     if field.type == 'selection':
-        labels = dict(field._description_selection(record.env))
-        return str(labels.get(value, value) or '')
+        try:
+            labels = dict(field._description_selection(record.env))
+            return str(labels.get(value, value) or '')
+        except Exception:
+            return str(value or '')
     if field.type == 'boolean':
         return 'Yes' if value else 'No'
     if field.type == 'html':
         return str(value or '')
     if field.type == 'binary':
         return ('Attachment SHA256: %s' % sha256(str(value).encode('utf-8')).hexdigest()) if value else ''
-    return str(value) if value not in (False, None) else ''
+    return '' if value is False or value is None else str(value)
 
 
 class _NilRelatedAuditMixin:
