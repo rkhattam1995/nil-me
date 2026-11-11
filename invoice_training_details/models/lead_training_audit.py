@@ -75,6 +75,14 @@ class TrainingCourse(models.Model):
             lead = root.lead_id or rec.lead_id
             if lead:
                 payload['lead_id'] = lead.id
+            # In a Lead with several courses, identify the exact changed row.
+            course_name = (
+                root.training_id.display_name
+                if root.training_id else (root.name or 'Training')
+            )
+            payload['field_label'] = '%s (line #%s) / %s' % (
+                course_name, root.id, payload.get('field_label') or 'Record'
+            )
             super(TrainingCourse, rec)._nil_create_audit(payload)
         return True
 
