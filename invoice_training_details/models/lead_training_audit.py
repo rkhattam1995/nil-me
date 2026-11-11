@@ -1,15 +1,11 @@
 # -*- coding: utf-8 -*-
 
-from hashlib import sha256
-
 from odoo import Command, api, fields, models, _
 from odoo.exceptions import AccessError
+from odoo.tools import html2plaintext
 
 
 AUDIT_SKIP_LEAD_FIELDS = {
-    'id',
-    'display_name',
-    '__last_update',
     'write_date',
     'write_uid',
     'create_date',
@@ -113,7 +109,7 @@ class CrmLead(models.Model):
             if not value:
                 return ''
             name = value.display_name
-            return ('%s [#%s]' % (name, value.id)) if isinstance(name, str) else ('#%s' % value.id)
+            return name if isinstance(name, str) else ''
 
         if field.type in ('many2many', 'one2many'):
             names = []
@@ -126,7 +122,7 @@ class CrmLead(models.Model):
                         record._description or record._name,
                         record.id,
                     )
-                names.append('%s [#%s]' % (name, record.id))
+                names.append(name)
             return ', '.join(names)
 
         if field.type == 'selection':
@@ -137,16 +133,16 @@ class CrmLead(models.Model):
                 return str(value or '')
 
         if field.type == 'html':
-            # Keep markup: changing formatting is itself a real edit.
-            return str(value or '')
+            text = html2plaintext(value or '')
+            return ' '.join(text.split())
 
         if field.type == 'binary':
-            return 'Attachment SHA256: %s' % sha256(str(value).encode('utf-8')).hexdigest() if value else ''
+            return '[File attached]' if value else ''
 
         if field.type == 'boolean':
             return 'Yes' if value else 'No'
 
-        if value is False or value is None:
+        if value in (False, None):
             return ''
 
         return str(value)
@@ -168,7 +164,6 @@ class CrmLead(models.Model):
         field_name,
         old_value,
         new_value,
-        operation='update',
     ):
         self.ensure_one()
         if old_value == new_value:
@@ -179,7 +174,7 @@ class CrmLead(models.Model):
             'lead_id': self.id,
             'document_model': 'crm.lead',
             'document_name': self.display_name,
-            'operation': operation,
+            'operation': 'update',
             'field_name': field_name,
             'field_label': field.string or field_name,
             'old_value': old_value,
@@ -188,57 +183,6 @@ class CrmLead(models.Model):
             'changed_at': fields.Datetime.now(),
         })
         return True
-
-    @api.model_create_multi
-    def create(self, vals_list):
-        leads = super().create(vals_list)
-        if self.env.context.get('nil_skip_lead_audit'):
-            return leads
-        Audit = self.env['training.course.audit'].sudo()
-        for lead, vals in zip(leads, vals_list):
-            Audit.create({
-                'lead_id': lead.id,
-                'document_model': 'crm.lead',
-                'document_name': lead.display_name,
-                'operation': 'create',
-                'field_label': 'Lead Created',
-                'field_name': 'crm.lead',
-                'old_value': '',
-                'new_value': lead.display_name,
-                'changed_by_id': self.env.user.id,
-                'changed_at': fields.Datetime.now(),
-            })
-            for name in lead._nil_lead_audit_field_names(vals):
-                new_value = lead._nil_lead_audit_value(name)
-                if new_value:
-                    lead._nil_create_lead_field_audit(
-                        name, '', new_value, operation='create',
-                    )
-        return leads
-
-    def unlink(self):
-        if not self.env.context.get('nil_skip_lead_audit'):
-            Audit = self.env['training.course.audit'].sudo()
-            for lead in self:
-                for name in lead._nil_lead_audit_field_names(lead._fields):
-                    value = lead._nil_lead_audit_value(name)
-                    if value:
-                        lead._nil_create_lead_field_audit(
-                            name, value, '', operation='delete',
-                        )
-                Audit.create({
-                    'lead_id': lead.id,
-                    'document_model': 'crm.lead',
-                    'document_name': lead.display_name,
-                    'operation': 'delete',
-                    'field_name': 'crm.lead',
-                    'field_label': 'Lead Deleted',
-                    'old_value': lead.display_name,
-                    'new_value': '',
-                    'changed_by_id': self.env.user.id,
-                    'changed_at': fields.Datetime.now(),
-                })
-        return super().unlink()
 
     def write(self, vals):
         """
@@ -313,170 +257,3 @@ class CrmLead(models.Model):
         action['domain'] = self._nil_training_audit_domain()
         action['context'] = {}
         return action
-
-# All manually editable details linked to a Lead must have field-level history,
-# not only changes to the parent One2many list. This also captures changes made
-# from a separate form (without opening the CRM lead).
-_RELATED_AUDIT_SKIP = {
-    'id', 'display_name', 'write_uid', 'write_date',
-    'create_uid', 'create_date', '__last_update',
-    'message_ids', 'message_follower_ids', 'activity_ids',
-}
-
-
-def _nil_related_value(record, name):
-    field = record._fields[name]
-    value = record[name]
-    if field.type == 'many2one':
-        return ('%s [#%s]' % (value.display_name, value.id)) if value else ''
-    if field.type in ('many2many', 'one2many'):
-        return ', '.join(
-            '%s [#%s]' % (entry.display_name or entry._description or entry._name, entry.id)
-            for entry in value
-        )
-    if field.type == 'selection':
-        try:
-            labels = dict(field._description_selection(record.env))
-            return str(labels.get(value, value) or '')
-        except Exception:
-            return str(value or '')
-    if field.type == 'boolean':
-        return 'Yes' if value else 'No'
-    if field.type == 'html':
-        return str(value or '')
-    if field.type == 'binary':
-        return ('Attachment SHA256: %s' % sha256(str(value).encode('utf-8')).hexdigest()) if value else ''
-    return '' if value is False or value is None else str(value)
-
-
-class _NilRelatedAuditMixin:
-    """Track each real create/edit/delete on an attached CRM detail record."""
-
-    _nil_audit_parent_field = None
-
-    def _nil_related_audit_lead(self):
-        self.ensure_one()
-        return self[self._nil_audit_parent_field] if self._nil_audit_parent_field else self.env['crm.lead']
-
-    def _nil_related_audit_names(self, names):
-        result = []
-        for name in names:
-            field = self._fields.get(name)
-            if (not field or name in _RELATED_AUDIT_SKIP
-                    or (field.compute and not field.inverse)):
-                continue
-            result.append(name)
-        return result
-
-    def _nil_related_audit_label(self):
-        self.ensure_one()
-        return '%s [#%s]' % (self._description or self._name, self.id)
-
-    def _nil_related_audit_event(self, lead, operation, name, old, new):
-        if not lead:
-            return
-        self.env['training.course.audit'].sudo().create({
-            'lead_id': lead.id,
-            'document_model': 'crm.lead',
-            'document_name': lead.display_name,
-            'operation': operation,
-            'field_name': '%s.%s' % (self._name, name or 'record'),
-            'field_label': '%s / %s' % (
-                self._nil_related_audit_label(),
-                self._fields[name].string if name else 'Record',
-            ),
-            'old_value': old,
-            'new_value': new,
-            'changed_by_id': self.env.user.id,
-            'changed_at': fields.Datetime.now(),
-        })
-
-    @api.model_create_multi
-    def create(self, vals_list):
-        records = super().create(vals_list)
-        if self.env.context.get('nil_skip_lead_audit'):
-            return records
-        for rec, vals in zip(records, vals_list):
-            lead = rec._nil_related_audit_lead()
-            if not lead:
-                continue
-            rec._nil_related_audit_event(
-                lead, 'create', None, '', rec._nil_related_audit_label(),
-            )
-            for name in rec._nil_related_audit_names(vals):
-                value = _nil_related_value(rec, name)
-                if value:
-                    rec._nil_related_audit_event(lead, 'create', name, '', value)
-        return records
-
-    def write(self, vals):
-        if self.env.context.get('nil_skip_lead_audit'):
-            return super().write(vals)
-        names = self._nil_related_audit_names(vals)
-        before = {}
-        for rec in self:
-            before[rec.id] = (
-                rec._nil_related_audit_lead(),
-                {name: _nil_related_value(rec, name) for name in names},
-            )
-        result = super().write(vals)
-        for rec in self:
-            old_lead, old_values = before[rec.id]
-            new_lead = rec._nil_related_audit_lead()
-            leads = [new_lead] if new_lead else []
-            if old_lead and old_lead not in leads:
-                leads.append(old_lead)
-            for name in names:
-                old, new = old_values[name], _nil_related_value(rec, name)
-                if old != new:
-                    for lead in leads:
-                        rec._nil_related_audit_event(lead, 'update', name, old, new)
-        return result
-
-    def unlink(self):
-        if not self.env.context.get('nil_skip_lead_audit'):
-            for rec in self:
-                lead = rec._nil_related_audit_lead()
-                if not lead:
-                    continue
-                for name in rec._nil_related_audit_names(rec._fields):
-                    old = _nil_related_value(rec, name)
-                    if old:
-                        rec._nil_related_audit_event(lead, 'delete', name, old, '')
-                rec._nil_related_audit_event(
-                    lead, 'delete', None, rec._nil_related_audit_label(), '',
-                )
-        return super().unlink()
-
-
-class NilLeadAuditCostDetails(_NilRelatedAuditMixin, models.Model):
-    _inherit = 'cost.details'
-    _nil_audit_parent_field = 'cos_lead_id'
-
-
-class NilLeadAuditProfessionalServices(_NilRelatedAuditMixin, models.Model):
-    _inherit = 'pro.service'
-    _nil_audit_parent_field = 'pro_lead_id'
-
-
-class NilLeadAuditTickets(_NilRelatedAuditMixin, models.Model):
-    _inherit = 'ticket.ticket'
-    _nil_audit_parent_field = 'ticket_lead_id'
-
-
-class NilLeadAuditHotels(_NilRelatedAuditMixin, models.Model):
-    _inherit = 'hotel.hotel'
-    _nil_audit_parent_field = 'hotel_lead_id'
-
-
-class NilLeadAuditAmPricing(_NilRelatedAuditMixin, models.Model):
-    _inherit = 'am.pricing'
-    _nil_audit_parent_field = 'lead_id'
-
-
-class NilLeadAuditAmPricingLine(_NilRelatedAuditMixin, models.Model):
-    _inherit = 'am.pricing.line'
-
-    def _nil_related_audit_lead(self):
-        self.ensure_one()
-        return self.pricing_id.lead_id
