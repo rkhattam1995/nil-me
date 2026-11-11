@@ -263,40 +263,14 @@ class TrainingCourse(models.Model):
             return 'crm.lead', self.lead_id.display_name
         return 'training.course', self.display_name
 
-    def _nil_auditable_field_names(self):
-        """All saved user-editable training fields, including newly added fields."""
-        ignored = {
-            'id', 'display_name', 'write_uid', 'write_date',
-            'create_uid', 'create_date', '__last_update',
-            'message_ids', 'message_follower_ids', 'activity_ids',
-        }
-        return [
-            name for name, field in self._fields.items()
-            if name not in ignored
-            and field.store
-            and (not field.compute or field.inverse)
-        ]
-
     def _nil_audit_value(self, field_name):
         self.ensure_one()
         field = self._fields[field_name]
         value = self[field_name]
 
         if field.type == 'many2one':
-            return '%s [#%s]' % (value.display_name, value.id) if value else ''
-        if field.type in ('many2many', 'one2many'):
-            return ', '.join(
-                '%s [#%s]' % (entry.display_name or entry._name, entry.id)
-                for entry in value
-            )
-        if field.type == 'selection':
-            try:
-                return str(dict(field._description_selection(self.env)).get(value, value) or '')
-            except Exception:
-                return str(value or '')
-        if field.type == 'boolean':
-            return 'Yes' if value else 'No'
-        if value is False or value is None:
+            return value.display_name if value else ''
+        if value in (False, None):
             return ''
         return str(value)
 
@@ -357,7 +331,7 @@ class TrainingCourse(models.Model):
         records = super().create(vals_list)
 
         if not self.env.context.get('nil_skip_training_audit'):
-            for rec, vals in zip(records, vals_list):
+            for rec in records:
                 rec._nil_create_audit({
                     'operation': 'create',
                     'field_name': False,
@@ -365,24 +339,13 @@ class TrainingCourse(models.Model):
                     'old_value': '',
                     'new_value': rec._nil_audit_summary(),
                 })
-                # Preserve the initial value of EVERY explicitly set field.
-                for name in sorted(set(rec._nil_auditable_field_names()) & set(vals)):
-                    new_value = rec._nil_audit_value(name)
-                    if new_value:
-                        rec._nil_create_audit({
-                            'operation': 'create',
-                            'field_name': name,
-                            'field_label': rec._fields[name].string or name,
-                            'old_value': '',
-                            'new_value': new_value,
-                        })
 
         return records
 
     def write(self, vals):
         self._nil_check_training_unlocked(vals)
 
-        tracked_names = set(self._nil_auditable_field_names())
+        tracked_names = set(self._nil_snapshot_field_names())
         changed_names = sorted(tracked_names.intersection(vals))
 
         before = {}
@@ -417,16 +380,6 @@ class TrainingCourse(models.Model):
 
         if not self.env.context.get('nil_skip_training_audit'):
             for rec in self:
-                for name in rec._nil_auditable_field_names():
-                    old_value = rec._nil_audit_value(name)
-                    if old_value:
-                        rec._nil_create_audit({
-                            'operation': 'delete',
-                            'field_name': name,
-                            'field_label': rec._fields[name].string or name,
-                            'old_value': old_value,
-                            'new_value': '',
-                        })
                 rec._nil_create_audit({
                     'operation': 'delete',
                     'field_name': False,
