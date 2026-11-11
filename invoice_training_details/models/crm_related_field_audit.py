@@ -7,6 +7,7 @@ system bookkeeping are excluded to avoid recursion and audit noise.
 from hashlib import sha256
 
 from odoo import api, fields, models
+from odoo.tools import html2plaintext
 
 _SAFE_TYPES = {
     'char', 'text', 'html', 'boolean', 'integer', 'float', 'monetary',
@@ -51,7 +52,11 @@ def _value(rec, name):
     if field.type == 'boolean':
         return 'Yes' if data else 'No'
     if field.type == 'html':
-        return str(data or '')
+        if not data:
+            return ''
+        plain = ' '.join(html2plaintext(data).split())
+        fingerprint = sha256(str(data).encode('utf-8')).hexdigest()[:12]
+        return '%s [HTML fingerprint: %s]' % (plain, fingerprint)
     if data is False or data is None:
         return ''
     return str(data)
