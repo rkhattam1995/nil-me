@@ -263,14 +263,37 @@ class TrainingCourse(models.Model):
             return 'crm.lead', self.lead_id.display_name
         return 'training.course', self.display_name
 
+    def _nil_trackable_change_fields(self, vals):
+        """Only fields explicitly saved; never mutate snapshots or computed values."""
+        excluded = {
+            'id', 'display_name', 'create_date', 'create_uid',
+            'write_date', 'write_uid', 'source_training_course_id',
+        }
+        return [
+            name for name in sorted(vals)
+            if name in self._fields
+            and name not in excluded
+            and self._fields[name].type in COPYABLE_FIELD_TYPES
+            and self._fields[name].store
+            and not self._fields[name].compute
+            and not self._fields[name].related
+        ]
+
     def _nil_audit_value(self, field_name):
         self.ensure_one()
         field = self._fields[field_name]
         value = self[field_name]
 
         if field.type == 'many2one':
-            return value.display_name if value else ''
-        if value in (False, None):
+            return str(value.display_name or value.id) if value else ''
+        if field.type == 'selection':
+            try:
+                return str(dict(field._description_selection(self.env)).get(value, value) or '')
+            except (TypeError, ValueError, KeyError):
+                return str(value or '')
+        if field.type == 'boolean':
+            return 'Yes' if value else 'No'
+        if value is False or value is None:
             return ''
         return str(value)
 
@@ -331,22 +354,31 @@ class TrainingCourse(models.Model):
         records = super().create(vals_list)
 
         if not self.env.context.get('nil_skip_training_audit'):
-            for rec in records:
+            for rec, values in zip(records, vals_list):
                 rec._nil_create_audit({
                     'operation': 'create',
-                    'field_name': False,
-                    'field_label': 'Training Details',
-                    'old_value': '',
-                    'new_value': rec._nil_audit_summary(),
+                    'field_name': 'record',
+                    'field_label': 'Training line created',
+                    'old_value': '(not created)',
+                    'new_value': 'Training line #%s: %s' % (
+                        rec.id, rec._nil_audit_summary(),
+                    ),
                 })
+                for name in rec._nil_trackable_change_fields(values):
+                    rec._nil_create_audit({
+                        'operation': 'create',
+                        'field_name': name,
+                        'field_label': rec._fields[name].string or name,
+                        'old_value': '(empty)',
+                        'new_value': rec._nil_audit_value(name) or '(empty)',
+                    })
 
         return records
 
     def write(self, vals):
         self._nil_check_training_unlocked(vals)
 
-        tracked_names = set(self._nil_snapshot_field_names())
-        changed_names = sorted(tracked_names.intersection(vals))
+        changed_names = self._nil_trackable_change_fields(vals)
 
         before = {}
         if changed_names and not self.env.context.get('nil_skip_training_audit'):
@@ -369,8 +401,8 @@ class TrainingCourse(models.Model):
                         'operation': 'update',
                         'field_name': name,
                         'field_label': rec._fields[name].string or name,
-                        'old_value': old_value,
-                        'new_value': new_value,
+                        'old_value': old_value or '(empty)',
+                        'new_value': new_value or '(empty)',
                     })
 
         return result
@@ -382,11 +414,25 @@ class TrainingCourse(models.Model):
             for rec in self:
                 rec._nil_create_audit({
                     'operation': 'delete',
-                    'field_name': False,
-                    'field_label': 'Training Details',
-                    'old_value': rec._nil_audit_summary(),
-                    'new_value': '',
+                    'field_name': 'record',
+                    'field_label': 'Training line deleted',
+                    'old_value': 'Training line #%s: %s' % (
+                        rec.id, rec._nil_audit_summary(),
+                    ),
+                    'new_value': '(deleted)',
                 })
+                for name in rec._nil_trackable_change_fields({
+                    name: True for name in self._fields
+                }):
+                    previous = rec._nil_audit_value(name)
+                    if previous and previous not in ('No', '0', '0.0'):
+                        rec._nil_create_audit({
+                            'operation': 'delete',
+                            'field_name': name,
+                            'field_label': rec._fields[name].string or name,
+                            'old_value': previous,
+                            'new_value': '(deleted)',
+                        })
 
         return super().unlink()
 
