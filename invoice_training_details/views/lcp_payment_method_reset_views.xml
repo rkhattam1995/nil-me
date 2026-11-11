@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="crm_training_payment_method_lcp_reset_fields" model="ir.ui.view">
+        <field name="name">crm.training.payment.method.lcp.reset.fields</field>
+        <field name="model">crm.lead</field>
+        <field name="inherit_id" ref="invoice_training_details.crm_reveal_lead_opportunity_form_training"/>
+        <field name="arch" type="xml">
+            <xpath expr="//page[@id='training']//field[@name='training_course_ids']/tree/field[@name='payment_method']" position="attributes">
+                <attribute name="widget">lcp_payment_method_reset</attribute>
+            </xpath>
+
+            <xpath expr="//page[@id='training']//field[@name='training_course_ids']/tree/field[@name='payment_method']" position="after">
+                <field name="lcp_vat_rate" column_invisible="1"/>
+                <field name="lcp_clcs_per_seat" column_invisible="1"/>
+                <field name="lcp_rate_card_per_seat" column_invisible="1"/>
+                <field name="lcp_partner_share_pct" column_invisible="1"/>
+                <field name="lcp_partner_cash_cost" column_invisible="1"/>
+                <field name="lcp_instructor_md_rate" column_invisible="1"/>
+                <field name="lcp_vendor_instructor_day" column_invisible="1"/>
+                <field name="lcp_uber_day_rate" column_invisible="1"/>
+                <field name="lcp_per_diem_rate" column_invisible="1"/>
+                <field name="lcp_per_diem_days" column_invisible="1"/>
+                <field name="lcp_venue_cost" column_invisible="1"/>
+                <field name="lcp_catering_cost" column_invisible="1"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>

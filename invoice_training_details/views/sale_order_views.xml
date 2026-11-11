@@ -1,4 +1,4 @@
-<?xml version="1.0"?>
+<?xml version='1.0' encoding='UTF-8'?>
 <odoo>
 
     <record id="sale_order_form_quote_training" model="ir.ui.view">
@@ -23,7 +23,6 @@
                             <field name="cost_clc"/>
                             <field name="hyperlink"/>
                             <field name="instructor_id"/>
-                            <field name="train_language"/>
                             <field name="location"/>
                             <!--<field name="where_location" invisible="location != 'Customer Choice'"/>-->
                             <field name="where_location2"/>
@@ -46,11 +45,12 @@
                         <!--    <field name="half_payment_after"/>-->
                         <!--</group>-->
                         <group>
-                            <field name= "bank_details"/>
-                            <field name= "term_and_cond"/>
-                        </group>
+                            <field name="bank_details"/>
+                            </group>
                     </group>
-                    <group>
+                    <field name="nil_new_quotation_terms" invisible="1"/>
+                    <field name="term_and_cond" widget="nil_terms_editor" nolabel="1" class="w-100 o_nil_terms_full_width"/>
+                        <group>
                         <group string="Report PDF Element Display">
                             
                             <field name="display_training_table"/>
@@ -80,27 +80,20 @@
                         <field name="service_name"/>
                         <button name="synch_pro_order" string="Synch Order" class="oe_highlight" type="object"/>
                     </group>
-                     <field name="pro_service_ids">
+                     <field name="nil_ps_custom_heading" invisible="1"/>
+                    <field name="nil_ps_custom_heading_2" invisible="1"/>
+                    <div class="alert alert-info" role="alert" style="margin:6px 0 10px 0;">
+                        Click either of the two custom column headings to enter its title. Each column has an independent editable value per service row. Leave columns blank if unused.
+                    </div>
+                    <field name="pro_service_ids" widget="nil_ps_editable_column">
                         <tree editable="bottom">
-                            
-                            <field name="training_id"/>
-                            <field name="descriptions"/>
-                          
-                          <field name="cost_clc"/>
-                            <field name="hyperlink"/>
-                            
-                            <field name="wor_hour_number"/>
-                            <field name="train_language"/>
-                            <!--<field name="location"/>-->
-                            <!--<field name="where_location" invisible="location != 'Customer Choice'"/>-->
-                            <!--<field name="payment_method"/>-->
-                            
-                            <!--<field name="name"/>-->
-                            <!--<field name="no_of_student"/>-->
-                            <field name="duration"/>
-                            <field name="training_date_start"/>
-                            <field name="hourly_rate"/>
-                            <field name="price"/>
+                            <field name="training_id" string="Service Name"/>
+                            <field name="descriptions" string="Description"/>
+                            <field name="wor_hour_number" string="Qty"/>
+                            <field name="hourly_rate" string="Unit Price"/>
+                            <field name="price" string="Total" readonly="1" force_save="1"/>
+                            <field name="nil_custom_value" string="Custom Column" placeholder="Write this row's value..."/>
+                            <field name="nil_custom_value_2" string="Custom Column 2" placeholder="Write the second value..."/>
                         </tree>
                     </field>
                     <group>
@@ -133,13 +126,13 @@
                             
                         </group>
                         <group>
-                            <field name= "bank_details"/>
-                            <field name= "term_and_cond"/>
-                        </group>
+                            <field name="bank_details"/>
+                            </group>
                         
                        
                     </group>
-                </page>
+                <field name="term_and_cond" widget="nil_terms_editor" nolabel="1" class="w-100 o_nil_terms_full_width"/>
+                        </page>
 
                 <page id="extra_information" string="Extra Information">
                     <group>
@@ -155,7 +148,6 @@
                     <group>
                         <group>
                             <field name="instructor_logistics"/>
-                            <field name="catering"/>
                         </group>
                     
                         <!--<group string="Flights">-->

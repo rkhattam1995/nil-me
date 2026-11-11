@@ -1,40 +1,88 @@
-# -*- coding: utf-8 -*
+# -*- coding: utf-8 -*-
 {
     "name": "Invoice Training Details",
-    "version": "17.0",
-    "summary": "Invoice Training Details",
-    "description": """
-       Invoice Training Details.
-    """,
-    "category": 'Customization',
-
-    # Author
-    "author": "",
+    "version": "17.0.1.94",
+    "summary": "Enhancements for Invoice Training Details",
+    "description": "Customizations for invoicing related to training services, including improved reporting and CRM integration.",
+    "category": "Customization",
+    "author": "SoftGuide Tech",
     "website": "https://www.softguidetech.com",
     "license": "LGPL-3",
 
-    # Dependency
-    "depends": ['account', 'crm', 'sale_management','hr','product'],
+    "depends": [
+        "account",
+        "crm",
+        "sale_management",
+        "purchase",
+        "hr",
+        "product",
+        "mail",
+    ],
 
     "data": [
         "data/report_paperformat.xml",
+        "data/mail_template_invoice.xml",
+        "security/training_audit_security.xml",
+        "security/am_pricing_security.xml",
         "security/ir.model.access.csv",
+        "data/training_audit_setup.xml",
         "views/account_move_views.xml",
+        "views/lcp_details_views.xml",
         "views/crm_lead_views.xml",
+        "views/crm_manual_order_views.xml",
+        "views/lead_training_audit_views.xml",
+        "views/lcp_students_details_views.xml",
+        "views/lcp_partner_po_value_views.xml",
+        "views/lcp_per_training_views.xml",
+        "views/lcp_training_logistics_views.xml",
+        "views/lcp_payment_method_reset_views.xml",
+        "views/lcp_commercial_automation_views.xml",
+        "views/am_pricing_views.xml",
         "views/sale_order_views.xml",
         "views/res_company_views.xml",
-        # Report
+        "views/training_audit_views.xml",
+        "views/training_change_reason_views.xml",
+        "views/po_subject_views.xml",
+        "views/sale_subject_views.xml",
+        "views/purchase_training_report.xml",
         "reports/custom_invoice_layout.xml",
         "reports/report_invoice.xml",
         "reports/report_quotation.xml",
-        
+        "reports/report_quotation_lcp_patch.xml",
+        "reports/report_so_terms_finishing.xml",
         "reports/report_pro_invoice.xml",
-        "reports/report_pro_quotation.xml",
-        
+        "reports/report_po_document.xml",
+        "reports/report_po_partner_invoice_patch.xml",
+        "reports/report_po_layout_finishing.xml",
+        "reports/report_signature_compact.xml",
         "reports/report_action.xml",
+        "reports/report_invoice_KSA.xml",
+        "reports/report_downpayment_so_reference.xml",
+        "reports/report_ps_quotation.xml",
+        "reports/report_sale_subject.xml",
     ],
+
+    "assets": {
+        "web.assets_backend": [
+            "invoice_training_details/static/src/js/logistics_two_rows.js",
+            "invoice_training_details/static/src/css/lcp_details.css",
+            "invoice_training_details/static/src/css/lcp_width_force.css",
+            "invoice_training_details/static/src/css/nil_terms_editor.css",
+            "invoice_training_details/static/src/css/nil_layout_fix.css",
+            "invoice_training_details/static/src/js/nil_terms_editor.js",
+            "invoice_training_details/static/src/js/force_bottom_chatter.js",
+            "invoice_training_details/static/src/js/lcp_per_training_field.js",
+            "invoice_training_details/static/src/js/ps_editable_column.js",
+            "invoice_training_details/static/src/js/lcp_payment_method_reset_field.js",
+            "invoice_training_details/static/src/xml/nil_terms_editor.xml",
+            "invoice_training_details/static/src/xml/lcp_per_training_field.xml",
+            "invoice_training_details/static/src/xml/ps_editable_column.xml",
+            "invoice_training_details/static/src/xml/lcp_instructor_direct_domain_patch.xml",
+            "invoice_training_details/static/src/xml/lcp_commercial_automation_patch.xml",
+        ],
+    },
 
     "installable": True,
     "application": False,
-    "auto_install": False
+    "auto_install": False,
 }

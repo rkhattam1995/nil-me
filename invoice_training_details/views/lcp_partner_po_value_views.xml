@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="purchase_order_form_partner_invoice_value" model="ir.ui.view">
+        <field name="name">purchase.order.form.partner.invoice.value</field>
+        <field name="model">purchase.order</field>
+        <field name="inherit_id" ref="invoice_training_details.purchase_order_form_crm_opportunity_link"/>
+        <field name="arch" type="xml">
+            <xpath expr="//page[@name='training']//field[@name='training_course_ids']/tree/field[@name='price']" position="replace">
+                <field name="lcp_partner_share" string="Partner Invoice" readonly="1"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>

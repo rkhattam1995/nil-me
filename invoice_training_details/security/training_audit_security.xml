@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="group_training_audit_ruba" model="res.groups">
+        <field name="name">Training Audit (Ruba Only)</field>
+        <field name="category_id" ref="base.module_category_hidden"/>
+        <field name="users" eval="[(6, 0, [ref('base.user_admin')])]"/>
+    </record>
+</odoo>

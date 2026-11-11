@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="invoice_training_details.LcpCommercialAutomationPatch"
+       t-inherit="invoice_training_details.LcpPerTrainingField"
+       t-inherit-mode="extension">
+
+        <!-- Cash uses USD / Seat only. Remove the legacy Partner Cost input. -->
+        <xpath expr="//MonetaryField[@name=&quot;'lcp_partner_cash_cost'&quot;]/.." position="replace"/>
+
+        <!-- Country-driven VAT stays locked; manual VAT remains editable when country is missing. -->
+        <xpath expr="//FloatField[@name=&quot;'lcp_vat_rate'&quot;]" position="attributes">
+            <attribute name="readonly">props.readonly || line.data.lcp_vat_locked</attribute>
+        </xpath>
+
+        <!-- CLC Training Price is system-controlled from Total Rate Card. Cash stays editable. -->
+        <xpath expr="//MonetaryField[@name=&quot;'price'&quot;]" position="attributes">
+            <attribute name="readonly">props.readonly || line.data.payment_method === 'clc'</attribute>
+        </xpath>
+
+        <!-- Online training has no Per Diem, so hide the Total Per Diem row completely. -->
+        <xpath expr="//MonetaryField[@name=&quot;'lcp_total_per_diem'&quot;]/ancestor::tr[1]" position="attributes">
+            <attribute name="t-if">line.data.lcp_instructor_source === 'nil_me' &amp;&amp; !line.data.lcp_is_online</attribute>
+        </xpath>
+    </t>
+</templates>

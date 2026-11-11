@@ -1,0 +1,390 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<odoo>
+
+    <!-- Keep old child-form XML IDs safe for database upgrades. -->
+    <record id="view_training_course_lcp_form" model="ir.ui.view">
+        <field name="name">training.course.lcp.form</field>
+        <field name="model">training.course</field>
+        <field name="arch" type="xml">
+            <form string="Training Reference" create="false" delete="false">
+                <sheet>
+                    <group>
+                        <field name="training_id" readonly="1"/>
+                        <field name="no_of_student" readonly="1"/>
+                        <field name="duration" readonly="1"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_training_course_lcp_input_form" model="ir.ui.view">
+        <field name="name">
+            training.course.lcp.input.form
+        </field>
+        <field name="model">training.course</field>
+        <field name="arch" type="xml">
+            <form string="Training Reference" create="false" delete="false">
+                <sheet>
+                    <group>
+                        <field name="training_id" readonly="1"/>
+                        <field name="no_of_student" readonly="1"/>
+                        <field name="duration" readonly="1"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+
+    <record id="crm_lead_view_form_lcp_details" model="ir.ui.view">
+
+        <field name="name">
+            crm.lead.form.lcp.details
+        </field>
+
+        <field name="model">crm.lead</field>
+
+        <field name="inherit_id" ref="crm.crm_lead_view_form"/>
+
+        <field name="arch" type="xml">
+
+            <xpath expr="//page[@name='internal_notes']" position="before">
+
+                <page name="lcp_details" string="LCP Details" class="px-2 py-2">
+
+                    <!-- Uses ONLY Odoo/Bootstrap classes already loaded by the backend.
+         No custom CSS and no inline styles. -->
+
+    <div class="card bg-dark text-white border-0 shadow-sm mb-4">
+        <div class="card-body py-3 px-4">
+            <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+                <div class="d-flex align-items-center gap-3">
+                    <div class="fs-3">
+                        <i class="fa fa-line-chart"/>
+                    </div>
+                    <div>
+                        <div class="fs-4 fw-bold">LCP Financial Overview</div>
+                        <div class="small text-white-50">
+                            Pricing, delivery costs and profitability
+                        </div>
+                    </div>
+                </div>
+                <span class="badge bg-primary rounded-pill px-3 py-2">
+                    Live Costing
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <div class="d-flex align-items-center gap-2 mb-3">
+        <span class="badge bg-primary">01</span>
+        <div class="fs-5 fw-bold">Pricing &amp; Delivery Inputs</div>
+    </div>
+
+    <div class="row g-3 mb-4">
+
+        <!-- Commercial -->
+        <div class="col-12 col-md-6 col-xl-3">
+            <div class="card h-100 shadow-sm border-top border-3 border-primary">
+                <div class="card-header bg-light fw-bold py-2">
+                    <i class="fa fa-briefcase text-primary me-2"/>
+                    Commercial
+                </div>
+                <div class="card-body">
+                    <div class="small text-muted fw-bold mb-1">Learning Partner</div>
+                    <field name="lcp_cost_learning_partner" nolabel="1" class="w-100 mb-3"/>
+
+                    <div invisible="lcp_payment_method != 'clc'">
+                        <div class="small text-muted fw-bold mb-1">SO#</div>
+                        <field name="so_no" nolabel="1" class="w-100 mb-3"/>
+                    </div>
+
+                    <div class="small text-muted fw-bold mb-1">Payment Method</div>
+                    <div class="bg-light rounded p-2">
+                        <field name="lcp_payment_method" readonly="1" nolabel="1" class="oe_inline fw-bold"/>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Training Pricing -->
+        <div class="col-12 col-md-6 col-xl-3">
+            <div class="card h-100 shadow-sm border-top border-3 border-info">
+                <div class="card-header bg-light fw-bold py-2">
+                    <i class="fa fa-usd text-info me-2"/>
+                    Training Pricing
+                </div>
+                <div class="card-body">
+                    <field name="currency_id" invisible="1"/>
+
+                    <div class="alert alert-info py-2 px-3 mb-3">
+                        <div class="small fw-bold mb-1">Training Value</div>
+                        <div class="fs-5 fw-bold">
+                            <field name="total_training_price" widget="monetary" options="{'currency_field': 'currency_id'}" readonly="1" nolabel="1" class="oe_inline"/>
+                        </div>
+                    </div>
+
+                    <div class="small text-muted fw-bold mb-1">VAT %</div>
+                    <field name="lcp_vat_rate" nolabel="1" class="w-100 mb-3"/>
+
+                    <div invisible="lcp_payment_method != 'clc'">
+                        <div class="small text-muted fw-bold mb-1">CLCs / Seat</div>
+                        <field name="lcp_clcs_per_seat" nolabel="1" class="w-100 mb-3"/>
+                    </div>
+
+                    <div invisible="lcp_payment_method != 'cash'">
+                        <div class="small text-muted fw-bold mb-1">USD / Seat</div>
+                        <field name="lcp_clcs_per_seat" nolabel="1" class="w-100 mb-3"/>
+                    </div>
+
+                    <div invisible="lcp_payment_method != 'clc'">
+                        <div class="small text-muted fw-bold mb-1">Rate Card / Seat</div>
+                        <field name="lcp_rate_card_per_seat" nolabel="1" class="w-100"/>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Instructor -->
+        <div class="col-12 col-md-6 col-xl-3">
+            <div class="card h-100 shadow-sm border-top border-3 border-success">
+                <div class="card-header bg-light fw-bold py-2">
+                    <i class="fa fa-user text-success me-2"/>
+                    Instructor
+                </div>
+                <div class="card-body">
+                    <div class="small text-muted fw-bold mb-1">Instructor From</div>
+                    <field name="lcp_instructor_source" nolabel="1" class="w-100 mb-3"/>
+
+                    <div class="small text-muted fw-bold mb-1">Instructor</div>
+                    <field name="instructor_id" nolabel="1" class="w-100 mb-3"/>
+
+                    <div invisible="lcp_instructor_source != 'nil_me'">
+                        <div class="small text-muted fw-bold mb-1">Instructor Rate</div>
+                        <field name="lcp_instructor_md_rate" nolabel="1" class="w-100"/>
+                    </div>
+
+                    <div invisible="lcp_instructor_source != 'vendor'">
+                        <div class="small text-muted fw-bold mb-1">Vendor Instructor / Day</div>
+                        <field name="lcp_vendor_instructor_day" nolabel="1" class="w-100"/>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- On-site -->
+        <div class="col-12 col-md-6 col-xl-3" invisible="lcp_is_online">
+            <div class="card h-100 shadow-sm border-top border-3 border-warning">
+                <div class="card-header bg-light fw-bold py-2">
+                    <i class="fa fa-map-marker text-warning me-2"/>
+                    On-site Costs
+                </div>
+                <div class="card-body">
+                    <div invisible="lcp_is_online">
+                        <div class="small text-muted fw-bold mb-1">Uber / Day</div>
+                        <field name="lcp_uber_day_rate" nolabel="1" class="w-100 mb-3"/>
+                    </div>
+
+                    <div invisible="lcp_instructor_source != 'nil_me'">
+                        <div class="small text-muted fw-bold mb-1">Per Diem / Day</div>
+                        <field name="lcp_per_diem_rate" nolabel="1" class="w-100 mb-3"/>
+
+                        <div class="small text-muted fw-bold mb-1">Per Diem Days</div>
+                        <field name="lcp_per_diem_days" nolabel="1" class="w-100 mb-3"/>
+                    </div>
+
+                    <div invisible="not lcp_is_online" class="alert alert-success py-2 px-3 mb-0">
+                        <i class="fa fa-globe me-2"/>
+                        Online training
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="d-flex align-items-center gap-2 mb-3">
+        <span class="badge bg-success">02</span>
+        <div class="fs-5 fw-bold">LCP Summary</div>
+    </div>
+
+    <div class="row g-3 mb-3">
+
+        <!-- Training Totals -->
+        <div class="col-12 col-lg-4">
+            <div class="card h-100 shadow-sm border-primary">
+                <div class="card-header bg-primary text-white fw-bold">
+                    <i class="fa fa-graduation-cap me-2"/>
+                    Training Totals
+                </div>
+                <div class="card-body p-3">
+                    <table class="table table-sm table-borderless align-middle mb-0">
+                        <tbody>
+                            <tr>
+                                <td class="text-muted">Total Training Days</td>
+                                <td class="text-end fw-bold">
+                                    <field name="lcp_total_days" nolabel="1" readonly="1" class="oe_inline"/>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="text-muted">Total Seats</td>
+                                <td class="text-end fw-bold">
+                                    <field name="lcp_total_seats" nolabel="1" readonly="1" class="oe_inline"/>
+                                </td>
+                            </tr>
+                            <tr invisible="lcp_payment_method != 'clc'" class="table-primary">
+                                <td class="fw-bold">Total CLCs + VAT</td>
+                                <td class="text-end fw-bold">
+                                    <field name="lcp_total_clcs_with_vat" nolabel="1" readonly="1" class="oe_inline"/>
+                                </td>
+                            </tr>
+                            <tr invisible="lcp_payment_method != 'clc'">
+                                <td class="text-muted">Total Rate Card</td>
+                                <td class="text-end fw-bold">
+                                    <field name="lcp_total_rate_card" nolabel="1" readonly="1" class="oe_inline"/>
+                                </td>
+                            </tr>
+                            <tr invisible="lcp_instructor_source != 'nil_me'">
+                                <td class="text-muted">Total Instructor Cost</td>
+                                <td class="text-end fw-bold">
+                                    <field name="lcp_total_instructor_md" nolabel="1" readonly="1" class="oe_inline"/>
+                                </td>
+                            </tr>
+                            <tr invisible="lcp_instructor_source != 'nil_me'">
+                                <td class="text-muted">Total Per Diem</td>
+                                <td class="text-end fw-bold">
+                                    <field name="lcp_total_per_diem" nolabel="1" readonly="1" class="oe_inline"/>
+                                </td>
+                            </tr>
+                            <tr invisible="lcp_instructor_source != 'vendor'">
+                                <td class="text-muted">Total Vendor Instructor</td>
+                                <td class="text-end fw-bold">
+                                    <field name="lcp_total_vendor_instructor" nolabel="1" readonly="1" class="oe_inline"/>
+                                </td>
+                            </tr>
+                            <tr invisible="lcp_is_online">
+                                <td class="text-muted">Total Logistics</td>
+                                <td class="text-end fw-bold">
+                                    <field name="lcp_total_logistics" nolabel="1" readonly="1" class="oe_inline"/>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Logistics -->
+        <div class="col-12 col-lg-4" invisible="lcp_is_online">
+            <div class="card h-100 shadow-sm border-info">
+                <div class="card-header bg-info text-white fw-bold">
+                    <i class="fa fa-plane me-2"/>
+                    Logistics
+                </div>
+                <div class="card-body p-3">
+                    <table class="table table-sm table-borderless align-middle mb-0">
+                        <tbody>
+                            <tr>
+                                <td class="text-muted">Tickets</td>
+                                <td class="text-end fw-bold">
+                                    <field name="lcp_ticket_total" nolabel="1" readonly="1" class="oe_inline"/>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="text-muted">Hotels</td>
+                                <td class="text-end fw-bold">
+                                    <field name="lcp_hotel_total" nolabel="1" readonly="1" class="oe_inline"/>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="text-muted">Venue</td>
+                                <td class="text-end fw-bold">
+                                    <field name="venue" nolabel="1" class="oe_inline"/>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="text-muted">Catering</td>
+                                <td class="text-end fw-bold">
+                                    <field name="ctrng" nolabel="1" class="oe_inline"/>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="text-muted">Uber</td>
+                                <td class="text-end fw-bold">
+                                    <field name="uber" nolabel="1" readonly="1" class="oe_inline"/>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Profitability -->
+        <div class="col-12 col-lg-4">
+            <div class="card h-100 shadow-sm border-success">
+                <div class="card-header bg-success text-white fw-bold">
+                    <i class="fa fa-line-chart me-2"/>
+                    Profitability
+                </div>
+                <div class="card-body p-3">
+                    <table class="table table-sm table-borderless align-middle mb-2">
+                        <tbody>
+                            <tr>
+                                <td class="text-muted">Learning Partner</td>
+                                <td class="text-end fw-bold">
+                                    <field name="lcp_cost_learning_partner" nolabel="1" readonly="1" class="oe_inline"/>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="text-muted">Partner Share</td>
+                                <td class="text-end fw-bold">
+                                    <field name="lcp_partner_share" nolabel="1" readonly="1" class="oe_inline"/>
+                                </td>
+                            </tr>
+                            <tr class="table-warning">
+                                <td class="fw-bold">Total Costs</td>
+                                <td class="text-end fw-bold">
+                                    <field name="lcp_total_costs" nolabel="1" readonly="1" class="oe_inline"/>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <div class="alert alert-success mb-2 py-2 px-3">
+                        <div class="d-flex justify-content-between align-items-center gap-2">
+                            <span class="fw-bold">NIL ME Profit</span>
+                            <span class="fs-5 fw-bold">
+                                <field name="lcp_nilme_profit" nolabel="1" readonly="1" class="oe_inline"/>
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="bg-light rounded p-2">
+                        <div class="d-flex justify-content-between align-items-center gap-2">
+                            <span class="fw-bold">Profit Margin</span>
+                            <span class="fs-5 fw-bold text-success">
+                                <field name="lcp_profit_margin" nolabel="1" readonly="1" widget="percentage" class="oe_inline"/>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+<field name="lcp_cost_detail_count" invisible="1"/>
+
+                    <field name="lcp_is_online" invisible="1"/>
+
+                    <field name="lcp_has_onsite" invisible="1"/>
+
+                </page>
+
+            </xpath>
+
+        </field>
+
+    </record>
+
+</odoo>

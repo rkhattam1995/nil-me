@@ -11,8 +11,11 @@ class PurchaseOrder(models.Model):
                                                string="Use Approval Route", readonly=True)
 
     team_id = fields.Many2one(
-        comodel_name="purchase.team", string="Purchase Team", domain="[('company_id', '=', company_id)]",
-        readonly=True, states={'draft': [('readonly', False)], 'sent': [('readonly', False)]}, ondelete="restrict"
+        comodel_name="purchase.team",
+        string="Purchase Team",
+        domain="[('company_id', '=', company_id)]",
+        readonly=True,
+        ondelete="restrict",
     )
 
     approver_ids = fields.One2many(
@@ -57,19 +60,28 @@ class PurchaseOrder(models.Model):
                         # Send request to approve is there is next approver
                         order.send_to_approve()
                     else:
-                        # If there is not next approval, than assume that approval is finished and send notification
                         partner = order.user_id.partner_id if order.user_id else order.create_uid.partner_id
-                        order.message_post_with_view(
-                            'po_so_approval_route.order_approval',
-                            subject=_('PO Approved: %s') % (order.name,),
-                            composition_mode='mass_mail',
-                            partner_ids=[(4, partner.id)],
-                            auto_delete=True,
-                            auto_delete_message=True,
-                            parent_id=False,
-                            subtype_id=self.env.ref('mail.mt_note').id)
-                        # Do default behaviour to set state as "purchase" and update date_approve
+                        order.message_post(
+                            body=_('Purchase Order "%s" was approved.') % order.name,
+                            partner_ids=[partner.id],
+                            subtype_id=self.env.ref('mail.mt_note').id
+                        )
                         return super(PurchaseOrder, order).button_approve(force)
+
+                # else:
+                    #     # If there is not next approval, than assume that approval is finished and send notification
+                    #     partner = order.user_id.partner_id if order.user_id else order.create_uid.partner_id
+                    #     order.message_post_with_view(
+                    #         'po_so_approval_route.order_approval',
+                    #         subject=_('PO Approved: %s') % (order.name,),
+                    #         composition_mode='mass_mail',
+                    #         partner_ids=[(4, partner.id)],
+                    #         auto_delete=True,
+                    #         auto_delete_message=True,
+                    #         parent_id=False,
+                    #         subtype_id=self.env.ref('mail.mt_note').id)
+                    #     # Do default behaviour to set state as "purchase" and update date_approve
+                    #     return super(PurchaseOrder, order).button_approve(force)
 
     def button_confirm(self):
         for order in self:
@@ -180,29 +192,47 @@ class PurchaseOrder(models.Model):
             if order.state != 'to approve' and not order.team_id:
                 continue
 
-            main_error_msg = _("Unable to send approval request to next approver.")
-            if order.current_approver:
-                reason_msg = _("The order must be approved by %s") % order.current_approver.user_id.name
-                raise UserError("%s %s" % (main_error_msg, reason_msg))
-
             if not order.next_approver:
-                reason_msg = _("There are no approvers in the selected PO team.")
-                raise UserError("%s %s" % (main_error_msg, reason_msg))
-            # use sudo as purchase user cannot update purchase.order.approver
+                raise UserError(_("There are no approvers in the selected PO team."))
+
             order.sudo().next_approver.state = 'pending'
-            # Now next approver became as current
             current_approver_partner = order.current_approver.user_id.partner_id
             if current_approver_partner not in order.message_partner_ids:
                 order.message_subscribe([current_approver_partner.id])
-            order.with_user(order.user_id).message_post_with_view(
-                'po_so_approval_route.request_to_approve',
-                subject=_('PO Approval: %s') % (order.name,),
-                composition_mode='mass_mail',
-                partner_ids=[(4, current_approver_partner.id)],
-                auto_delete=True,
-                auto_delete_message=True,
-                parent_id=False,
-                subtype_id=self.env.ref('mail.mt_note').id)
+            order.message_post(
+                body=_("You have been requested to approve the purchase order %s.") % order.name,
+                partner_ids=[current_approver_partner.id],  # Pass only the partner ID as a plain list
+                subtype_id=self.env.ref('mail.mt_note').id
+            )
+
+    # def send_to_approve(self):
+    #     for order in self:
+    #         if order.state != 'to approve' and not order.team_id:
+    #             continue
+    #
+    #         main_error_msg = _("Unable to send approval request to next approver.")
+    #         if order.current_approver:
+    #             reason_msg = _("The order must be approved by %s") % order.current_approver.user_id.name
+    #             raise UserError("%s %s" % (main_error_msg, reason_msg))
+    #
+    #         if not order.next_approver:
+    #             reason_msg = _("There are no approvers in the selected PO team.")
+    #             raise UserError("%s %s" % (main_error_msg, reason_msg))
+    #         # use sudo as purchase user cannot update purchase.order.approver
+    #         order.sudo().next_approver.state = 'pending'
+    #         # Now next approver became as current
+    #         current_approver_partner = order.current_approver.user_id.partner_id
+    #         if current_approver_partner not in order.message_partner_ids:
+    #             order.message_subscribe([current_approver_partner.id])
+    #         order.with_user(order.user_id).message_post_with_view(
+    #             'po_so_approval_route.request_to_approve',
+    #             subject=_('PO Approval: %s') % (order.name,),
+    #             composition_mode='mass_mail',
+    #             partner_ids=[(4, current_approver_partner.id)],
+    #             auto_delete=True,
+    #             auto_delete_message=True,
+    #             parent_id=False,
+    #             subtype_id=self.env.ref('mail.mt_note').id)
 
     def _check_lock_amount_total(self):
         msg = _('Sorry, you are not allowed to change Amount Total of PO. ')

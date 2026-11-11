@@ -5,14 +5,20 @@ from odoo import api, fields, models
 class SaleOrder(models.Model):
     _inherit = "sale.order"
 
-    # Legacy fields kept only so old records/views from previous versions can
-    # load safely. The SO approval workflow itself is disabled.
+    # Legacy compatibility only. Old database views still reference this
+    # field, but SO approval must always behave as disabled.
     so_order_approval_route = fields.Selection(
-        related='company_id.so_order_approval_route',
+        selection=[
+            ('no', 'No'),
+            ('optional', 'Optional'),
+            ('required', 'Required')
+        ],
         string="Use Approval Route",
+        compute="_compute_legacy_so_approval_route",
         readonly=True,
     )
 
+    # Keep the old state value available so historical records can still load.
     state = fields.Selection(
         selection_add=[('to approve', 'Under Approval')],
         ondelete={'to approve': 'set default'},
@@ -57,6 +63,44 @@ class SaleOrder(models.Model):
         string="Lock Amount Total",
         compute="_compute_lock_amount_total",
     )
+
+    def _compute_legacy_so_approval_route(self):
+        for order in self:
+            order.so_order_approval_route = 'no'
+
+    def _get_usd_pricelist(self):
+        self.ensure_one()
+        usd_currency = self.env.ref('base.USD')
+        company_id = self.company_id.id or self.env.company.id
+
+        base_domain = [
+            ('currency_id', '=', usd_currency.id),
+            ('active', '=', True),
+            ('company_id', 'in', [False, company_id]),
+        ]
+
+        pricelist = self.env['product.pricelist'].search(
+            [('name', '=ilike', 'USD')] + base_domain,
+            order='company_id desc, id asc',
+            limit=1,
+        )
+        if not pricelist:
+            pricelist = self.env['product.pricelist'].search(
+                base_domain,
+                order='company_id desc, id asc',
+                limit=1,
+            )
+        return pricelist
+
+    @api.depends('partner_id', 'company_id')
+    def _compute_pricelist_id(self):
+        super()._compute_pricelist_id()
+        for order in self:
+            if order.state != 'draft':
+                continue
+            usd_pricelist = order._get_usd_pricelist()
+            if usd_pricelist:
+                order.pricelist_id = usd_pricelist
 
     @api.depends('approver_ids.state')
     def _compute_approver(self):

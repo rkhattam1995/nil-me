@@ -1,0 +1,112 @@
+/* Final LCP full-width override.
+   Keep this asset after lcp_details.css so Odoo's generic field rules cannot
+   shrink the repeated LCP widget back to an inline/intrinsic width. */
+
+/* Odoo fields are inline-block by default. Force the exact custom field host
+   to be a block that occupies the full notebook page. */
+.o_lcp_force_full_width,
+.o_lcp_force_field,
+.o_field_widget.o_lcp_force_field,
+.o_field_lcp_per_training,
+.o_field_widget.o_field_lcp_per_training,
+.o_lcp_force_field > .o_lcp_per_training,
+.o_field_lcp_per_training > .o_lcp_per_training {
+    --fieldWidget-display: block;
+    display: block !important;
+    width: 100% !important;
+    max-width: none !important;
+    min-width: 0 !important;
+    box-sizing: border-box !important;
+}
+
+/* If Odoo compiled the field into a form-grid cell/wrapper, make that cell
+   span the complete grid instead of the default partial form width. */
+.o_cell:has(.o_lcp_force_field),
+.o_cell:has(.o_field_lcp_per_training),
+.o_wrap_field:has(.o_lcp_force_field),
+.o_wrap_field:has(.o_field_lcp_per_training),
+.o_field_cell:has(.o_lcp_force_field),
+.o_field_cell:has(.o_field_lcp_per_training),
+.o_inner_group:has(.o_lcp_force_field),
+.o_inner_group:has(.o_field_lcp_per_training),
+.o_group:has(.o_lcp_force_field),
+.o_group:has(.o_field_lcp_per_training) {
+    width: 100% !important;
+    max-width: none !important;
+    min-width: 0 !important;
+    grid-column: 1 / -1 !important;
+    flex: 1 1 100% !important;
+    box-sizing: border-box !important;
+}
+
+.o_inner_group:has(.o_lcp_force_field),
+.o_inner_group:has(.o_field_lcp_per_training) {
+    grid-template-columns: minmax(0, 1fr) !important;
+}
+
+/* Keep the complete notebook chain open to the full sheet width. */
+.o_notebook:has(.o_lcp_force_field),
+.o_notebook:has(.o_field_lcp_per_training),
+.o_notebook:has(.o_lcp_per_training),
+.o_notebook:has(.o_lcp_per_training) > .tab-content,
+.o_notebook:has(.o_lcp_per_training) > .tab-content > .tab-pane,
+.tab-pane:has(.o_lcp_force_field),
+.tab-pane:has(.o_field_lcp_per_training),
+.tab-pane:has(.o_lcp_per_training),
+.o_lcp_full_width_page {
+    width: 100% !important;
+    max-width: none !important;
+    min-width: 0 !important;
+    box-sizing: border-box !important;
+}
+
+/* The repeated card wrapper and both card rows must consume the host width. */
+.o_lcp_per_training,
+.o_lcp_per_training > .border.rounded.shadow-sm.p-3.mb-4.bg-white,
+.o_lcp_per_training .card.bg-dark,
+.o_lcp_per_training .row.g-3.mb-4,
+.o_lcp_per_training .row.g-3.mb-3 {
+    width: 100% !important;
+    max-width: none !important;
+    min-width: 0 !important;
+    box-sizing: border-box !important;
+}
+
+@media (min-width: 1200px) {
+    .o_lcp_per_training .row.g-3.mb-4 {
+        display: grid !important;
+        grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+        gap: 1rem !important;
+    }
+
+    .o_lcp_per_training .row.g-3.mb-4 > .col-12 {
+        width: 100% !important;
+        max-width: none !important;
+        min-width: 0 !important;
+        padding-left: 0 !important;
+        padding-right: 0 !important;
+    }
+
+    .o_lcp_per_training .row.g-3.mb-3 {
+        display: grid !important;
+        grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+        gap: 1rem !important;
+    }
+
+    .o_lcp_per_training .row.g-3.mb-3 > .col-12 {
+        width: 100% !important;
+        max-width: none !important;
+        min-width: 0 !important;
+        padding-left: 0 !important;
+        padding-right: 0 !important;
+    }
+
+    /* Online: hidden on-site helper must not reserve a fourth column. */
+    .o_lcp_per_training .row.g-3.mb-4:has(.alert.alert-success.h-100.d-flex.align-items-center.mb-0) {
+        grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    }
+
+    .o_lcp_per_training .row.g-3.mb-4 > .col-12:has(.alert.alert-success.h-100.d-flex.align-items-center.mb-0) {
+        display: none !important;
+    }
+}

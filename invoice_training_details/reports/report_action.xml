@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <!-- QWeb Reports -->
     <record id="account_invoices_training_report" model="ir.actions.report">
-        <field name="name">Training Invoices</field>
+        <field name="name">Training Invoices - UAE</field>
         <field name="model">account.move</field>
         <field name="report_type">qweb-pdf</field>
         <field name="report_name">invoice_training_details.report_invoice_document_training</field>
@@ -13,21 +12,20 @@
         <field name="paperformat_id" ref="invoice_training_details.paperformat_euro_training_report"/>
         <field name="binding_type">report</field>
     </record>
-    
+
     <record id="quotation_training_report" model="ir.actions.report">
         <field name="name">Training Quotation</field>
         <field name="model">sale.order</field>
         <field name="report_type">qweb-pdf</field>
         <field name="report_name">invoice_training_details.report_quotation_document_training</field>
         <field name="report_file">invoice_training_details.report_quotation_document_training</field>
-        <field name="print_report_name">(object._get_report_base_filename())</field>
+        <field name="print_report_name">'Quotation - %s' % object.name</field>
         <field name="attachment"/>
         <field name="binding_model_id" ref="sale.model_sale_order"/>
         <field name="paperformat_id" ref="invoice_training_details.paperformat_euro_training_report"/>
         <field name="binding_type">report</field>
     </record>
-    
-    
+
     <record id="account_invoices_pro_training_report" model="ir.actions.report">
         <field name="name">Professional Services Invoices</field>
         <field name="model">account.move</field>
@@ -40,19 +38,17 @@
         <field name="paperformat_id" ref="invoice_training_details.paperformat_euro_training_report"/>
         <field name="binding_type">report</field>
     </record>
-    
-    <record id="quotation_pro_training_report" model="ir.actions.report">
-        <field name="name">Professional Services Quotation</field>
+
+    <record id="quotation_po_training_report" model="ir.actions.report">
+        <field name="name">Training PO</field>
         <field name="model">sale.order</field>
         <field name="report_type">qweb-pdf</field>
-        <field name="report_name">invoice_training_details.report_quotation_pro_document_training</field>
-        <field name="report_file">invoice_training_details.report_quotation_pro_document_training</field>
-        <field name="print_report_name">(object._get_report_base_filename())</field>
+        <field name="report_name">invoice_training_details.report_po_document_training</field>
+        <field name="report_file">invoice_training_details.report_po_document_training</field>
+        <field name="print_report_name">'PO#' + (object.name or '')</field>
         <field name="attachment"/>
         <field name="binding_model_id" ref="sale.model_sale_order"/>
         <field name="paperformat_id" ref="invoice_training_details.paperformat_euro_training_report"/>
         <field name="binding_type">report</field>
     </record>
-
-
 </odoo>

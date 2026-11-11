@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_training_course_audit_tree" model="ir.ui.view">
+        <field name="name">training.course.audit.tree</field>
+        <field name="model">training.course.audit</field>
+        <field name="arch" type="xml">
+            <tree create="false" edit="false" delete="false">
+                <field name="changed_at" string="Date/Time"/>
+                <field name="changed_by_id" string="User"/>
+                <field name="document_name" string="Document"/>
+                <field name="operation" string="Action"/>
+                <field name="field_label" string="Field"/>
+                <field name="old_value" string="Old Value"/>
+                <field name="new_value" string="New Value"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_training_course_audit_form" model="ir.ui.view">
+        <field name="name">training.course.audit.form</field>
+        <field name="model">training.course.audit</field>
+        <field name="arch" type="xml">
+            <form create="false" edit="false" delete="false">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="changed_at" string="Date/Time"/>
+                            <field name="changed_by_id" string="User"/>
+                            <field name="operation" string="Action"/>
+                            <field name="document_name" string="Document"/>
+                        </group>
+                        <group>
+                            <field name="field_label" string="Field"/>
+                            <field name="field_name" string="Technical Field"/>
+                            <field name="training_course_id"/>
+                            <field name="source_training_course_id"/>
+                        </group>
+                    </group>
+                    <group>
+                        <field name="old_value" string="Old Value"/>
+                        <field name="new_value" string="New Value"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_training_course_audit" model="ir.actions.act_window">
+        <field name="name">Change Log</field>
+        <field name="res_model">training.course.audit</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <menuitem id="menu_training_course_audit"
+              name="Change Log"
+              parent="crm.crm_menu_root"
+              action="action_training_course_audit"
+              sequence="95"
+              groups="invoice_training_details.group_training_audit_ruba"/>
+</odoo>

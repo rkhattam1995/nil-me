@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_form_inherit_purchase_order" model="ir.ui.view">
+        <field name="name">purchase.order.form.inherit</field>
+        <field name="model">purchase.order</field>
+        <field name="inherit_id" ref="purchase.purchase_order_form"/>
+        <field name="arch" type="xml">
+            <!-- Add Training Details section after Other Information -->
+            <xpath expr="//page[@name='other_information']" position="after">
+                <page string="Training Details" attrs="{'invisible': [('has_training', '=', False)]}">
+                    <group>
+                        <field name="total_training_cost"/>
+                    </group>
+                    <field name="training_details_ids">
+                        <tree editable="bottom">
+                            <field name="name"/>
+                            <field name="training_id"/>
+                            <field name="instructor_id"/>
+                            <field name="start_date"/>
+                            <field name="end_date"/>
+                            <field name="location"/>
+                            <field name="number_of_participants"/>
+                            <field name="training_cost"/>
+                            <field name="state"/>
+                        </tree>
+                    </field>
+                </page>
+            </xpath>
+        </field>
+    </record>
+</odoo> 

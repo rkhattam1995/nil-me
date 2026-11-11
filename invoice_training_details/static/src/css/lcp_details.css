@@ -1,0 +1,294 @@
+/* LCP Details - Pricing Setup + Summary */
+
+.o_lcp_summary_card {
+    height: 100%;
+    border: 1px solid var(--border-color, #dee2e6);
+    border-radius: 6px;
+    padding: 18px;
+    background: var(--o-view-background-color, #fff);
+}
+
+.o_lcp_summary_title {
+    font-size: 16px;
+    font-weight: 700;
+    margin-bottom: 16px;
+}
+
+.o_lcp_summary_note {
+    font-size: 12px;
+    color: var(--o-gray-600, #6c757d);
+    margin-bottom: 14px;
+}
+
+.o_lcp_summary_line {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 14px;
+    padding: 6px 0;
+}
+
+.o_lcp_summary_line > strong {
+    white-space: nowrap;
+    text-align: right;
+}
+
+.o_lcp_summary_divider {
+    border-top: 1px solid var(--border-color, #dee2e6);
+    margin: 8px 0;
+}
+
+.o_lcp_summary_total {
+    font-weight: 700;
+}
+
+/* =========================================================
+   REPEATED LCP: REAL FULL-WIDTH LAYOUT
+   ========================================================= */
+
+/* Do not rely only on the compiler helper class. Target the actual form
+   that contains the LCP widget as well, so Odoo's centered sheet max-width
+   cannot squeeze the cards into the left side of the screen. */
+.o_form_renderer.o_nil_lcp_full_width,
+.o_form_renderer:has(.o_lcp_per_training),
+.o_form_renderer.o_nil_lcp_full_width > .o_form_sheet_bg,
+.o_form_renderer:has(.o_lcp_per_training) > .o_form_sheet_bg,
+.o_form_renderer.o_nil_lcp_full_width > .o_form_sheet_bg > .o_form_sheet,
+.o_form_renderer:has(.o_lcp_per_training) > .o_form_sheet_bg > .o_form_sheet,
+.o_form_sheet_bg:has(.o_lcp_per_training),
+.o_form_sheet_bg:has(.o_lcp_per_training) > .o_form_sheet,
+.o_form_sheet:has(.o_lcp_per_training) {
+    width: 100% !important;
+    max-width: none !important;
+    min-width: 0 !important;
+}
+
+.o_form_renderer.o_nil_lcp_full_width > .o_form_sheet_bg > .o_form_sheet,
+.o_form_renderer:has(.o_lcp_per_training) > .o_form_sheet_bg > .o_form_sheet,
+.o_form_sheet_bg:has(.o_lcp_per_training) > .o_form_sheet {
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+}
+
+/* Every notebook / tab / field wrapper between the sheet and the custom
+   widget must also be allowed to grow. This is the layer that was still
+   keeping the visible LCP around 900px wide. */
+.o_form_renderer:has(.o_lcp_per_training) .o_notebook,
+.o_form_renderer:has(.o_lcp_per_training) .o_notebook_content,
+.o_form_renderer:has(.o_lcp_per_training) .tab-content,
+.o_form_renderer:has(.o_lcp_per_training) .tab-pane,
+.o_form_renderer:has(.o_lcp_per_training) .o_lcp_full_width_page,
+.o_form_renderer:has(.o_lcp_per_training) .o_lcp_full_width_page > .o_field_widget,
+.o_form_renderer:has(.o_lcp_per_training) .o_lcp_full_width_page .o_field_x2many,
+.o_form_renderer:has(.o_lcp_per_training) .o_lcp_per_training,
+.o_form_renderer:has(.o_lcp_per_training) .o_lcp_per_training > .border.rounded.shadow-sm.p-3.mb-4.bg-white {
+    display: block !important;
+    width: 100% !important;
+    max-width: none !important;
+    min-width: 0 !important;
+    box-sizing: border-box !important;
+}
+
+.o_lcp_full_width_page {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+}
+
+/* Do not add a second narrow frame around each repeated LCP. */
+.o_lcp_per_training > .border.rounded.shadow-sm.p-3.mb-4.bg-white {
+    border: 0 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+}
+
+/* Header must span the same full width as the cards. */
+.o_lcp_per_training .card.bg-dark {
+    width: 100% !important;
+    max-width: none !important;
+}
+
+/* =========================================================
+   FORCE THE CARDS TO USE THE ENTIRE ROW
+   ========================================================= */
+
+/* Input cards: four equal cards across the available width. */
+@media (min-width: 1200px) {
+    .o_lcp_per_training .row.g-3.mb-4 {
+        display: grid !important;
+        grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+        gap: 1rem !important;
+        width: 100% !important;
+        max-width: none !important;
+        margin-left: 0 !important;
+        margin-right: 0 !important;
+    }
+
+    .o_lcp_per_training .row.g-3.mb-4 > .col-12 {
+        width: auto !important;
+        max-width: none !important;
+        padding-left: 0 !important;
+        padding-right: 0 !important;
+    }
+
+    /* Online has no On-site Costs card, so the three remaining cards fill
+       the row instead of leaving an empty fourth column. */
+    .o_lcp_per_training .row.g-3.mb-4:has(.alert.alert-success.h-100.d-flex.align-items-center.mb-0) {
+        grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    }
+
+    .o_lcp_per_training .row.g-3.mb-4
+        > .col-12:has(.alert.alert-success.h-100.d-flex.align-items-center.mb-0) {
+        display: none !important;
+    }
+
+    /* Summary: three equal cards across the full row. */
+    .o_lcp_per_training .row.g-3.mb-3 {
+        display: grid !important;
+        grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+        gap: 1rem !important;
+        width: 100% !important;
+        max-width: none !important;
+        margin-left: 0 !important;
+        margin-right: 0 !important;
+    }
+
+    .o_lcp_per_training .row.g-3.mb-3 > .col-12 {
+        width: auto !important;
+        max-width: none !important;
+        padding-left: 0 !important;
+        padding-right: 0 !important;
+    }
+
+    /* Online hides Logistics, so the two remaining summary cards share the
+       complete row equally. */
+    .o_lcp_per_training .row.g-3.mb-3:not(:has(> .col-12:nth-child(2))) {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    }
+}
+
+@media (min-width: 768px) and (max-width: 1199.98px) {
+    .o_lcp_per_training .row.g-3.mb-4,
+    .o_lcp_per_training .row.g-3.mb-3 {
+        display: grid !important;
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        gap: 1rem !important;
+        width: 100% !important;
+        margin-left: 0 !important;
+        margin-right: 0 !important;
+    }
+
+    .o_lcp_per_training .row.g-3.mb-4 > .col-12,
+    .o_lcp_per_training .row.g-3.mb-3 > .col-12 {
+        width: auto !important;
+        max-width: none !important;
+        padding-left: 0 !important;
+        padding-right: 0 !important;
+    }
+}
+
+@media (max-width: 767.98px) {
+    .o_lcp_per_training .row.g-3.mb-4,
+    .o_lcp_per_training .row.g-3.mb-3 {
+        display: grid !important;
+        grid-template-columns: minmax(0, 1fr) !important;
+        gap: 1rem !important;
+        width: 100% !important;
+        margin-left: 0 !important;
+        margin-right: 0 !important;
+    }
+}
+
+/* =========================================================
+   REMOVE ONLY THE EXTRA NOTES
+   Keep training name + Cash/CLC + Online/On-site badges.
+   ========================================================= */
+
+.o_lcp_per_training > .alert,
+.o_lcp_per_training > .border.rounded.shadow-sm.p-3.mb-4.bg-white > .alert.alert-warning,
+.o_lcp_per_training .alert.alert-success.h-100.d-flex.align-items-center.mb-0,
+.o_lcp_per_training .card.bg-dark .small.text-white-50 {
+    display: none !important;
+}
+
+/* =========================================================
+   APPROVED LCP COLOR PALETTE
+   ========================================================= */
+
+.o_lcp_per_training .row.g-3.mb-4 > .col-12:nth-child(1) .card {
+    border-color: #714b67 !important;
+}
+.o_lcp_per_training .row.g-3.mb-4 > .col-12:nth-child(1) .fa {
+    color: #714b67 !important;
+}
+
+.o_lcp_per_training .row.g-3.mb-4 > .col-12:nth-child(2) .card {
+    border-color: #17a2b8 !important;
+}
+.o_lcp_per_training .row.g-3.mb-4 > .col-12:nth-child(2) .fa {
+    color: #17a2b8 !important;
+}
+
+.o_lcp_per_training .row.g-3.mb-4 > .col-12:nth-child(3) .card {
+    border-color: #28a745 !important;
+}
+.o_lcp_per_training .row.g-3.mb-4 > .col-12:nth-child(3) .fa {
+    color: #28a745 !important;
+}
+
+.o_lcp_per_training .row.g-3.mb-4 > .col-12:nth-child(4) .card {
+    border-color: #e99d00 !important;
+}
+.o_lcp_per_training .row.g-3.mb-4 > .col-12:nth-child(4) .fa {
+    color: #e99d00 !important;
+}
+
+.o_lcp_per_training .alert-info {
+    background-color: #d1ecf1 !important;
+    border-color: #bee5eb !important;
+    color: #0c5460 !important;
+}
+
+.o_lcp_per_training .row.g-3.mb-3 > .col-12:nth-child(1) .card {
+    border-color: #714b67 !important;
+}
+.o_lcp_per_training .row.g-3.mb-3 > .col-12:nth-child(1) .card-header {
+    background-color: #714b67 !important;
+    color: #fff !important;
+}
+
+.o_lcp_per_training .row.g-3.mb-3 > .col-12:nth-child(2) .card {
+    border-color: #17a2b8 !important;
+}
+.o_lcp_per_training .row.g-3.mb-3 > .col-12:nth-child(2) .card-header {
+    background-color: #17a2b8 !important;
+    color: #fff !important;
+}
+
+.o_lcp_per_training .row.g-3.mb-3 > .col-12:nth-child(3) .card {
+    border-color: #28a745 !important;
+}
+.o_lcp_per_training .row.g-3.mb-3 > .col-12:nth-child(3) .card-header {
+    background-color: #28a745 !important;
+    color: #fff !important;
+}
+
+.o_lcp_per_training .table-warning {
+    background-color: #fbebcc !important;
+}
+
+.o_lcp_per_training .alert-success:not(.h-100) {
+    background-color: #d4edda !important;
+    border-color: #c3e6cb !important;
+    color: #155724 !important;
+}
+
+.o_lcp_per_training .badge.bg-primary {
+    background-color: #28527a !important;
+    color: #fff !important;
+}
+
+.o_lcp_per_training .badge.bg-success {
+    background-color: #28a745 !important;
+    color: #fff !important;
+}

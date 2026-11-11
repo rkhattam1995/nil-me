@@ -1,8 +1,12 @@
 # -*- coding: utf-8 -*-
 
 import re
+import math
 
-from odoo import api, models, fields
+from odoo import api, models, fields, _
+from odoo.exceptions import UserError
+from odoo.tools.misc import formatLang
+from .sync_utils import sync_commands
 
 
 class SaleOrder(models.Model):
@@ -15,7 +19,7 @@ class SaleOrder(models.Model):
     half_advance_payment_before = fields.Monetary(string='Advance payment amount 50% (paid)')
     half_payment_after = fields.Monetary(string='50% Amount after Training Delivery (Not Yet Paid)')
     training_course_ids = fields.One2many('training.course', 'sale_id', string='Training Courses')
-    pro_service_ids = fields.One2many('pro.service','pro_sale_id',srting='Professional Services')
+    pro_service_ids = fields.One2many('pro.service','pro_sale_id',string='Professional Services')
     
     #Add extera
     instructor_id = fields.Many2one('hr.employee',string="Instructor")
@@ -56,61 +60,6 @@ class SaleOrder(models.Model):
     
     training_vendor = fields.Char(string="Training Vendor")
     training_type = fields.Char(string="Training Type")
-
-    # Keep quotation / SO pricing in USD.
-    def _nil_get_usd_pricelist(self, company=None):
-        company = company or self.company_id or self.env.company
-        usd_currency = self.env.ref('base.USD')
-
-        domain = [
-            ('currency_id', '=', usd_currency.id),
-            ('active', '=', True),
-            ('company_id', 'in', [False, company.id]),
-        ]
-
-        pricelist = self.env['product.pricelist'].search(
-            [('name', '=ilike', 'USD')] + domain,
-            order='company_id desc, id asc',
-            limit=1,
-        )
-        if not pricelist:
-            pricelist = self.env['product.pricelist'].search(
-                domain,
-                order='company_id desc, id asc',
-                limit=1,
-            )
-        return pricelist
-
-    @api.depends('partner_id', 'company_id')
-    def _compute_pricelist_id(self):
-        super()._compute_pricelist_id()
-        for order in self:
-            if order.state not in ('draft', 'sent'):
-                continue
-            usd_pricelist = order._nil_get_usd_pricelist()
-            if usd_pricelist:
-                order.pricelist_id = usd_pricelist
-
-    def write(self, vals):
-        # Do not allow a draft quotation to drift away from the USD pricelist,
-        # even if the customer or pricelist is changed manually.
-        sensitive_fields = {'partner_id', 'company_id', 'pricelist_id'}
-        if sensitive_fields.intersection(vals):
-            for order in self:
-                order_vals = dict(vals)
-                target_state = order_vals.get('state', order.state)
-                if target_state in ('draft', 'sent'):
-                    company = (
-                        self.env['res.company'].browse(order_vals['company_id'])
-                        if order_vals.get('company_id')
-                        else order.company_id
-                    )
-                    usd_pricelist = order._nil_get_usd_pricelist(company=company)
-                    if usd_pricelist:
-                        order_vals['pricelist_id'] = usd_pricelist.id
-                super(SaleOrder, order).write(order_vals)
-            return True
-        return super().write(vals)
     
     
     @api.depends('amount_total', 'currency_id')
@@ -308,50 +257,159 @@ class SaleOrder(models.Model):
         for rec in self:
             rec.total_training_price = sum(rec.training_course_ids.mapped('price'))
             
+
+    def _nil_is_clc_pricelist_quote(self):
+        """Apply CLC tax rounding only to quotations created from CRM leads."""
+        self.ensure_one()
+        if not (self.pricelist_id and (self.opportunity_id or self.is_training_so)):
+            return False
+        if not re.search(r'\bCLCS?\b', self.pricelist_id.name or '', re.IGNORECASE):
+            return False
+        # The learning partner (LCP) flow already has its own CLC calculation.
+        return not any(
+            course.lcp_cost_learning_partner for course in self.training_course_ids
+        )
+
+    @api.depends(
+        'order_line.price_subtotal', 'order_line.price_tax',
+        'order_line.price_total', 'pricelist_id', 'opportunity_id',
+        'is_training_so', 'training_course_ids.lcp_cost_learning_partner',
+    )
+    def _compute_amounts(self):
+        super()._compute_amounts()
+        for order in self:
+            if not order._nil_is_clc_pricelist_quote():
+                continue
+            # Respect rounded CLC VAT on each order line, even when global tax
+            # rounding is enabled at company level.
+            lines = order.order_line.filtered(lambda line: not line.display_type)
+            order.amount_untaxed = sum(lines.mapped('price_subtotal'))
+            order.amount_tax = sum(lines.mapped('price_tax'))
+            order.amount_total = order.amount_untaxed + order.amount_tax
+
+    @api.depends(
+        'order_line.tax_id', 'order_line.price_unit', 'order_line.price_tax',
+        'order_line.price_subtotal', 'amount_total', 'amount_untaxed',
+        'currency_id', 'pricelist_id', 'opportunity_id', 'is_training_so',
+        'training_course_ids.lcp_cost_learning_partner',
+    )
+    @api.depends_context('lang')
+    def _compute_tax_totals(self):
+        super()._compute_tax_totals()
+        for order in self:
+            if not order._nil_is_clc_pricelist_quote():
+                continue
+            totals = dict(order.tax_totals or {})
+            if not totals:
+                continue
+            # Odoo recomputes the VAT box from raw tax rates, so align its
+            # displayed amount with the rounded VAT values in Order Lines.
+            groups_by_subtotal = totals.get('groups_by_subtotal') or {}
+            groups = [
+                group for subtotal_groups in groups_by_subtotal.values()
+                for group in subtotal_groups
+            ]
+            raw_tax = sum(group.get('tax_group_amount', 0.0) for group in groups)
+            difference = order.amount_tax - raw_tax
+            if groups and abs(difference) > 0.000001:
+                vat_group = next(
+                    (group for group in groups if group.get('tax_group_amount', 0.0) > 0),
+                    groups[0],
+                )
+                vat_group['tax_group_amount'] += difference
+                vat_group['formatted_tax_group_amount'] = formatLang(
+                    order.env, vat_group['tax_group_amount'],
+                    currency_obj=order.currency_id,
+                )
+            running_total = order.amount_untaxed
+            for subtotal in totals.get('subtotals', []):
+                subtotal['amount'] = running_total
+                subtotal['formatted_amount'] = formatLang(
+                    order.env, running_total, currency_obj=order.currency_id,
+                )
+                running_total += sum(
+                    group.get('tax_group_amount', 0.0)
+                    for group in groups_by_subtotal.get(subtotal['name'], [])
+                )
+            totals['amount_untaxed'] = order.amount_untaxed
+            totals['formatted_amount_untaxed'] = formatLang(
+                order.env, order.amount_untaxed, currency_obj=order.currency_id,
+            )
+            totals['amount_total'] = order.amount_total
+            totals['formatted_amount_total'] = formatLang(
+                order.env, order.amount_total, currency_obj=order.currency_id,
+            )
+            order.tax_totals = totals
+
+    def _check_nil_sync_draft(self):
+        self.ensure_one()
+        if self.state not in ('draft', 'sent'):
+            raise UserError(_('Synchronize only a draft quotation.'))
+
     def synch_order(self):
-        usd_pricelist = self._nil_get_usd_pricelist()
-        if usd_pricelist and self.pricelist_id != usd_pricelist:
-            self.write({'pricelist_id': usd_pricelist.id})
+        self._check_nil_sync_draft()
+        items = []
+        for course in self.training_course_ids:
+            if not course.training_id:
+                raise UserError(_('Select a product for every training before synchronizing.'))
+            if course.lead_id and course.lcp_cost_learning_partner:
+                # Reuse the same pricing/tax rules as New SO, including EnterOne CLC.
+                vals = course.lead_id._lcp_sale_lines(course, self.company_id)[0][2]
+            else:
+                vals = {
+                    'product_id': course.training_id.id,
+                    'name': course.training_id.display_name,
+                    'product_uom_qty': 1,
+                    'price_unit': course.price,
+                }
+            items.append((course, vals))
+        self.write({'order_line': sync_commands(self.order_line, items, 'nil_sync_training_id')})
+        return True
 
-        l = []
-       
-        for rec in self.training_course_ids:
-            val = {
-
-                'product_id': rec.training_id.id,
-                # 'product_id': rec.training_id.id,
-                'name': rec.training_id.name,
-                'product_uom_qty': 1,
-                'price_unit': rec.price,
-                # 'order_id': self.id,
-                
-            }
-            l.append((0, 0, val))
-            
-        
-        self.write({'order_line': []})
-        self.write({'order_line': l})
-            
     def synch_pro_order(self):
-        usd_pricelist = self._nil_get_usd_pricelist()
-        if usd_pricelist and self.pricelist_id != usd_pricelist:
-            self.write({'pricelist_id': usd_pricelist.id})
+        self._check_nil_sync_draft()
+        items = []
+        for service in self.pro_service_ids:
+            if not service.training_id:
+                raise UserError(_('Select a product for every service before synchronizing.'))
+            # New PS lines use Qty × Unit Price. Retain legacy totals for
+            # previously saved lines that did not have a quantity/rate.
+            uses_units = bool(service.wor_hour_number or service.hourly_rate)
+            items.append((service, {
+                'product_id': service.training_id.id,
+                'name': service.training_id.display_name,
+                'product_uom_qty': service.wor_hour_number if uses_units else 1,
+                'price_unit': service.hourly_rate if uses_units else service.price,
+            }))
+        self.write({'order_line': sync_commands(self.order_line, items, 'nil_sync_service_id')})
+        return True
 
-        l = []
-       
-        for rec in self.pro_service_ids:
-            val = {
 
-                'product_id': rec.training_id.id,
-                # 'product_id': rec.training_id.id,
-                'name': rec.training_id.name,
-                'product_uom_qty': 1,
-                'price_unit': rec.price,
-                # 'order_id': self.id,
-                
-            }
-            l.append((0, 0, val))
-            
-        
-        self.write({'order_line': []})
-        self.write({'order_line': l})
+class SaleOrderLine(models.Model):
+    _inherit = 'sale.order.line'
+
+    nil_sync_training_id = fields.Many2one('training.course', copy=False, ondelete='set null', index=True)
+    nil_sync_service_id = fields.Many2one('pro.service', copy=False, ondelete='set null', index=True)
+
+    @api.depends(
+        'product_uom_qty', 'discount', 'price_unit', 'tax_id',
+        'order_id.pricelist_id', 'order_id.opportunity_id',
+        'order_id.is_training_so',
+        'order_id.training_course_ids.lcp_cost_learning_partner',
+    )
+    def _compute_amount(self):
+        super()._compute_amount()
+        for line in self:
+            if (
+                line.display_type
+                or not line.tax_id
+                or not line.order_id._nil_is_clc_pricelist_quote()
+                or line.price_tax <= 0
+            ):
+                continue
+            # CLC pricelist only: round the VAT of each order line UP to
+            # the next whole CLC. Keep untaxed prices untouched.
+            rounded_vat = math.ceil(round(line.price_tax, 8))
+            line.price_tax = rounded_vat
+            line.price_total = line.price_subtotal + rounded_vat
+

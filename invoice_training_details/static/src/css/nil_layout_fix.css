@@ -1,0 +1,104 @@
+/* =========================================================
+   TERMS EDITOR: FULL WIDTH
+   ========================================================= */
+
+.o_nil_terms_full_width,
+.o_nil_terms_full_width.o_field_widget,
+.o_nil_terms_full_width .nil_terms_editor_pro,
+.nil_terms_editor_pro {
+    width: 100% !important;
+    max-width: none !important;
+    min-width: 0 !important;
+}
+
+.o_nil_terms_full_width {
+    display: block !important;
+}
+
+.nil_terms_toolbar,
+.nil_terms_editor_surface {
+    width: 100% !important;
+    max-width: none !important;
+    min-width: 0 !important;
+    box-sizing: border-box !important;
+}
+
+.nil_terms_editor_surface {
+    min-height: 330px !important;
+}
+
+
+/* =========================================================
+   CHATTER: ALWAYS BELOW FORM
+   Applied only to forms marked by force_bottom_chatter.js.
+   ========================================================= */
+
+.o_form_renderer.o_nil_force_bottom_chatter {
+    flex-direction: column !important;
+    flex-wrap: nowrap !important;
+
+    height: auto !important;
+    min-height: 100% !important;
+
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+
+    overflow-x: hidden !important;
+    overflow-y: visible !important;
+}
+
+.o_form_renderer.o_nil_force_bottom_chatter > .o_form_sheet_bg {
+    flex: 0 0 auto !important;
+
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+
+    overflow: visible !important;
+}
+
+/* =========================================================
+   FORM SHEET: TRUE FULL WIDTH
+   ========================================================= */
+
+.o_form_renderer.o_nil_force_bottom_chatter
+    > .o_form_sheet_bg
+    > .o_form_sheet {
+    width: 100% !important;
+    max-width: none !important;
+    min-width: 0 !important;
+
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+
+    box-sizing: border-box !important;
+}
+
+.o_form_renderer.o_nil_force_bottom_chatter
+    > .o-mail-Form-chatter.o_nil_bottom_chatter {
+    position: static !important;
+
+    flex: 0 0 auto !important;
+    flex-grow: 0 !important;
+    flex-shrink: 0 !important;
+
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+
+    border-left: 0 !important;
+    border-right: 0 !important;
+    border-top: 1px solid #dee2e6 !important;
+}
+
+.o_form_renderer.o_nil_force_bottom_chatter
+    > .o-mail-Form-chatter.o_nil_bottom_chatter
+    > .o-mail-Chatter {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+}

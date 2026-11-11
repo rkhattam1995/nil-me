@@ -1,41 +1,335 @@
-<?xml version="1.0" encoding="utf-8"?>
+<?xml version='1.0' encoding='UTF-8'?>
 <odoo>
 
     <record id="crm_reveal_lead_opportunity_form_training" model="ir.ui.view">
+
         <field name="name">crm.lead.inherited.crm.training</field>
         <field name="model">crm.lead</field>
-        <field name="inherit_id" ref="crm.crm_lead_view_form"/>
+        <field name="inherit_id" ref="invoice_training_details.crm_lead_view_form_lcp_details"/>
+
         <field name="arch" type="xml">
+
+            <xpath expr="//header" position="inside">
+                <button name="action_new_purchase_order" type="object" string="New PO" class="oe_highlight" groups="purchase.group_purchase_user" invisible="not has_cash_training"/>
+                <button name="action_new_instructor_purchase_order" type="object" string="New Instructor PO" class="btn-secondary" groups="purchase.group_purchase_user" invisible="not has_training"/>
+                <button name="action_new_training_so" type="object" string="New WO" class="oe_highlight"/>
+            </xpath>
+
+            <xpath expr="//div[@name='button_box']" position="inside">
+                <button name="action_view_purchase_orders" type="object" class="oe_stat_button" icon="fa-shopping-cart" groups="purchase.group_purchase_user" invisible="purchase_order_count == 0">
+                    <field name="purchase_order_count" widget="statinfo" string="Purchase Orders"/>
+                </button>
+            </xpath>
+
             <xpath expr="//field[@name='tag_ids']" position="after">
                 <field name="instructor_id"/>
-                </xpath>
-                <xpath expr="//field[@name='partner_id']" position="after">
+                <field name="has_cash_training" invisible="1"/>
+                <field name="has_training" invisible="1"/>
+            </xpath>
+
+            <xpath expr="//field[@name='partner_id']" position="after">
                 <field name="ordering_partner_id"/>
-                </xpath>
-                
-            <xpath expr="//page[@name='internal_notes']" position="before">
-                <page id="training" name="Training">
+            </xpath>
+
+            <xpath expr="//page[@name='lcp_details']" position="before"><!-- TRAINING - first custom tab --><page id="training" name="Training">
+
                     <group>
                         <field name="training_name"/>
-                        
-                        <field name="training_vendor"/>
-                        <field name="training_type"/>
-                        
                     </group>
+
+                    <field name="training_course_ids">
+
+                        <tree editable="bottom">
+
+                            <field name="training_id" width="15"/>
+
+                            <field name="cost_clc" width="15"/>
+
+                            <field name="location" width="15"/>
+
+                            <field name="where_location2" width="15"/>
+
+                            <field name="payment_method" width="10"/>
+
+                            <field name="no_of_student" width="5"/>
+
+                            <field name="duration" width="5"/>
+
+                            <field name="training_date_start" width="10"/>
+
+                            <field name="training_date_end" width="10"/>
+
+                            <button name="action_open_lcp_logistics"
+                                    type="object" string="Logistics" icon="fa-plane"
+                                    invisible="location != 'On site'"/>
+
+                            <field name="lcp_currency_id" column_invisible="1"/>
+                            <field name="price" widget="monetary" options="{'currency_field': 'lcp_currency_id'}"/>
+
+                        </tree>
+
+                    </field>
+
+                    <group>
+
+                        <group>
+                            <field name="total_training_price"/>
+                        </group>
+
+                    </group>
+
+                </page>
+
+
+                </xpath><xpath expr="//page[@name='lcp_details']" position="after"><!-- LOGISTICS - immediately after LCP --><page id="logistics" string="Logistics">
+
+                    <group>
+
+                        <field name="ctrng"/>
+
+                        <field name="venue"/>
+
+                        <field name="uber"/>
+
+                    </group>
+
+
+                    <field name="ticket_ids">
+
+                        <tree editable="bottom">
+
+                            <field name="airline_id"/>
+
+                            <field name="origin_id"/>
+
+                            <field name="destination_id"/>
+
+                            <field name="date"/>
+
+                            <field name="stop"/>
+
+                            <field name="currency_id"/>
+
+                            <field name="price"/>
+
+                        </tree>
+
+                    </field>
+
+
+                    <field name="hotel_ids">
+
+                        <tree editable="bottom">
+
+                            <field name="hotel_id"/>
+
+                            <field name="date_from"/>
+
+                            <field name="date_to"/>
+
+                            <field name="nights"/>
+
+                            <field name="currency_id"/>
+
+                            <field name="price"/>
+
+                        </tree>
+
+                    </field>
+
+
+                    <group string="Visa Details">
+
+                        <field name="visa"/>
+
+                        <field name="start_date"/>
+
+                        <field name="to_date"/>
+
+                        <field name="book_details_id" widget="many2many_binary"/>
+
+                        <field name="details"/>
+
+                        <field name="cost"/>
+
+                    </group>
+
+
+                    <group>
+
+                        <field name="total_price_all"/>
+
+                    </group>
+
+                </page>
+
+            <!-- REMAINING VISIBLE CUSTOM TABS --><page id="extra_information" string="Extra Information">
+
+                    <group>
+
+                        <group>
+
+                            <field name="clcs_qty"/>
+
+                            <field name="tr_expiry_date"/>
+
+                            <field name="poref"/>
+
+                            <field name="invref"/>
+
+                        </group>
+
+                    </group>
+
+                </page>
+
+
+                <!-- HIDDEN LEGACY TABS --><page id="clcs" name="Costs Details" invisible="1">
+    
+                    <group>
+
+                        <button name="action_create_cost_line" type="object" string="Add Cost Line" class="oe_highlight"/>
+
+                    </group>
+
+
+                    <field name="cost_details_ids" nolabel="1">
+
+                        <tree editable="bottom">
+
+                            <!-- Hidden helper used for EnterOne CLC condition -->
+                            <field name="is_clc" column_invisible="1"/>
+
+
+                            <!-- Learning Partner -->
+                            <field name="learning_partner" string="Learning Partner" width="140"/>
+
+
+                            <!-- Logistics -->
+                            <field name="total_price_all" string="Logistics Cost" width="120" readonly="1"/>
+
+
+                            <!-- Instructor -->
+                            <field name="ins_time" string="Instructor" width="110"/>
+
+
+                            <!-- Total Costs -->
+                            <field name="margin1" string="Total Costs" width="120" readonly="1"/>
+
+
+                            <!-- NIL ME Share -->
+                            <field name="nilme_share" string="NIL ME Share $" width="130" readonly="1"/>
+
+
+                            <!-- Partner Share -->
+                            <field name="training_vendor" string="Partner Share" width="120" readonly="learning_partner == 'EnterOne' and is_clc" force_save="1"/>
+
+
+                            <!-- Margin -->
+                            <field name="margin" string="Margin (%)" widget="percentage" width="100" readonly="1"/>
+
+
+                            <!-- Sales Commission -->
+                            <field name="sales_commission" string="Sales Commission (5%)" width="150" readonly="1"/>
+
+                        </tree>
+
+                    </field>
+
+                </page>
+
+
+                <page id="pro" name="Professional Services">
+
+                    <group>
+                        <field name="ordering_partner_id"/>
+                    </group>
+
+                    <field name="nil_ps_custom_heading" invisible="1"/>
+                    <field name="nil_ps_custom_heading_2" invisible="1"/>
+                    <div class="alert alert-info" role="alert" style="margin:6px 0 10px 0;">
+                        Click either of the two custom column headings to enter its title. Each column has an independent editable value per service row. Leave columns blank if unused.
+                    </div>
+                    <field name="pro_service_ids" widget="nil_ps_editable_column">
+                        <tree editable="bottom">
+                            <field name="training_id" string="Service Name"/>
+                            <field name="descriptions" string="Description"/>
+                            <field name="wor_hour_number" string="Qty"/>
+                            <field name="hourly_rate" string="Unit Price"/>
+                            <field name="price" string="Total" readonly="1" force_save="1"/>
+                            <field name="nil_custom_value" string="Custom Column" placeholder="Write this row's value..."/>
+                            <field name="nil_custom_value_2" string="Custom Column 2" placeholder="Write the second value..."/>
+                        </tree>
+                    </field>
+
+                    <group>
+
+                        <group>
+                            <field name="total_service_price"/>
+                        </group>
+
+                    </group>
+
+                </page>
+
+
+                </xpath><!-- ========================================================= -->
+            <!-- EXPECTED REVENUE IN USD -->
+            <!-- ========================================================= -->
+
+            <xpath expr="//field[@name='expected_revenue']" position="attributes">
+
+                <attribute name="widget">monetary</attribute>
+
+                <attribute name="options">
+                    {'currency_field': 'currency_id'}
+                </attribute>
+
+            </xpath>
+
+
+            <xpath expr="//field[@name='expected_revenue']" position="after">
+
+                <field name="currency_id" invisible="1"/>
+
+            </xpath>
+
+        </field>
+
+    </record>
+
+    <!-- ============================================================= -->
+    <!-- PURCHASE ORDER: TRAINING VENDOR + INSTRUCTOR PO               -->
+    <!-- ============================================================= -->
+
+    <record id="purchase_order_form_crm_opportunity_link" model="ir.ui.view">
+        <field name="name">purchase.order.form.crm.opportunity.link</field>
+        <field name="model">purchase.order</field>
+        <field name="inherit_id" ref="purchase.purchase_order_form"/>
+        <field name="arch" type="xml">
+
+            <xpath expr="//field[@name='origin']" position="after">
+                <field name="crm_lead_id" readonly="1"/>
+                <field name="end_customer_id" readonly="1"/>
+                <field name="is_training_order" invisible="1"/>
+                <field name="po_training_type" invisible="not is_training_order"/>
+            </xpath>
+
+            <xpath expr="//sheet/notebook" position="inside">
+
+                <!-- TRAINING VENDOR PO -->
+                <page string="Training" name="training" invisible="not is_training_order or po_training_type != 'training_vendor'">
+
                     <field name="training_course_ids">
                         <tree editable="bottom">
-                           
                             <field name="training_id"/>
                             <field name="descriptions"/>
                             <field name="cost_clc"/>
                             <field name="hyperlink"/>
                             <field name="instructor_id"/>
-                            <field name="train_language"/>
                             <field name="location"/>
-                            <!--<field name="where_location"/>-->
-                            <field name="where_location2" />
+                            <field name="where_location2"/>
                             <field name="payment_method"/>
-                            <!--<field name="name"/>-->
                             <field name="no_of_student"/>
                             <field name="duration"/>
                             <field name="training_date_start"/>
@@ -43,137 +337,147 @@
                             <field name="price"/>
                         </tree>
                     </field>
-                    <group>
-                        <group>
-                            <field name="total_training_price"/>
-                        </group>
-                    </group>
-                </page>
-                
-                <page id="clcs" name="CLC Details">
-                    <group>
-                        <field name="clc_cost"/>
-                        <field name="rate_card"/>
-                        <field name="nilme_share"/>
 
+                    <group string="Terms and Conditions">
+                        <field name="term_and_cond" nolabel="1" colspan="2"/>
                     </group>
-                    
-                </page>
-                 <page id="pro" name="Professional Services">
-                    <group>
-                        <field name="service_name"/>
-                        
-                    </group>
-                    <field name="pro_service_ids">
-                        <tree editable="bottom">
-                            
-                            <field name="training_id"/>
-                            <field name="descriptions" string="Service Description"/>
-                           <field name="cost_clc"/>
-                            <field name="hyperlink"/>
-                            <field name="wor_hour_number"/>
-                            <field name="train_language"/>
-                            <!--<field name="location"/>-->
-                            <!--<field name="where_location" invisible="location != 'Customer Choice'"/>-->
-                            <!--<field name="payment_method"/>-->
-                            
-                            <!--<field name="name"/>-->
-                            <!--<field name="no_of_student"/>-->
-                            <field name="duration"/>
-                            <field name="training_date_start"/>
-                            <field name="hourly_rate"/>
-                            <field name="price"/>
-                        </tree>
-                    </field>
-                    <group>
-                        <group>
-                            <field name="total_service_price"/>
-                        </group>
-                        <!--<group>-->
-                        <!--    <field name="half_advance_payment_before"/>-->
-                        <!--    <field name="half_payment_after"/>-->
-                        <!--</group>-->
-                    </group>
-                </page>
 
-                <page id="extra_information" string="Extra Information">
                     <group>
-                        <group>
-                            <field name="clcs_qty"/>
-                            <field name="so_no"/>
-                            <field name="tr_expiry_date"/>
+                        <group string="Report PDF Element Display">
+                            <field name="display_training_table"/>
+                            <field name="display_signature"/>
+                            <field name="display_stamp"/>
+                        </group>
+
+                        <group string="Column Display">
+                            <field name="display_description"/>
+                            <field name="display_instructor"/>
+                            <field name="display_location"/>
+                            <field name="display_where"/>
+                            <field name="display_total"/>
                         </group>
                     </group>
                 </page>
 
-                <page id="logistics" string="Logistics">
-                    <group>
-                        <!--<group>-->
-                            <field name="instructor_logistics"/>
-                            <field name="catering"/>
+
+                <!-- INSTRUCTOR PO -->
+                <page string="Instructor" name="instructor_purchase" invisible="not is_training_order or po_training_type != 'instructor'">
+
+                    <group string="Training &amp; Instructor">
+                        <group>
+                            <field name="instructor_training_course_id" domain="[('lead_id', '=', crm_lead_id)]" required="po_training_type == 'instructor'"/>
+                            <field name="instructor_id" required="po_training_type == 'instructor'"/>
+                        </group>
+
+                        <group>
+                            <field name="instructor_from" required="po_training_type == 'instructor'"/>
+                            <field name="instructor_to" required="po_training_type == 'instructor'"/>
+                            <field name="instructor_days" readonly="1"/>
+                        </group>
                     </group>
-                        <!--<group string="Flights">-->
-                            <!--<group>-->
-                            <field name="ticket_ids">
-                            <tree editable="bottom">
-                                <field name="airline_id"/>
-                                <field name="origin_id"/>
-                                <field name="destination_id"/>
-                                <field name="date"/>
-                                <field name="duration"/>
-                                <field name="time_from" widget="timesheet_uom"/>
-                                <field name="time_to" widget="timesheet_uom"/>
-                                <field name="stop"/>
-                                <field name="class_type_id"/>
-                                <field name="currency_id"/>
-                                <field name="price"/>
-                            
-                            </tree>
-                            </field>
-                            <!--</group>-->
-                        <!--</group>-->
-                        
-                        <!--<group string="Hotels">-->
-                            <!--<group>-->
-                            <field name="hotel_ids">
-                            <tree editable="bottom">
-                                <field name="hotel_id"/>
-                                <field name="date_from"/>
-                                <field name="date_to"/>
-                                <field name="nights"/>
-                                <field name="location"/>
-                                <field name="pax"/>
-                                <field name="des"/>
-                                <field name="room_type"/>
-                                <field name="currency_id"/>
-                                <field name="price_without_tax"/>
-                                <field name="tax"/>
-                                <field name="price"/>
-                               
-                            </tree>
-                            </field>
-                            
-                           
-                            <group string="Visa Details">
-                                <field name="visa"/>
-                                <field name="start_date"/>
-                                <field name="to_date"/>
-                                <field name="book_details_id" widget="many2many_binary"/>
-                                <field name="details"/>
-                                <field name="cost"/>
-                                
-                            </group>
-                            <group>
-                                <field name="total_price_all"/>
-                            </group>
-                            
-                            <!--</group>-->
-                        <!--</group>-->
-                    <!--</group>-->
+
+                    <group string="Instructor Fee">
+                        <group>
+                            <field name="instructor_daily_rate" required="po_training_type == 'instructor'"/>
+                        </group>
+                        <group>
+                            <field name="instructor_total" readonly="1"/>
+                        </group>
+                    </group>
+
+                    <div class="alert alert-info" role="alert">
+                        The Purchase Order line is generated from Instructor Days × Daily Rate.
+                        This is the amount that will flow to the Vendor Bill.
+                    </div>
+
+                    <group string="Terms and Conditions">
+                        <field name="term_and_cond" nolabel="1" colspan="2"/>
+                    </group>
+
+                    <group>
+                        <group string="Report PDF Element Display">
+                            <field name="display_signature"/>
+                            <field name="display_stamp"/>
+                            <field name="display_total"/>
+                        </group>
+                    </group>
+
                 </page>
 
             </xpath>
         </field>
     </record>
 
+
+    <!-- ============================================================= -->
+    <!-- VENDOR BILL: COPY TRAINING / INSTRUCTOR DETAILS FROM PO        -->
+    <!-- ============================================================= -->
+
+    <record id="account_move_form_crm_opportunity_link" model="ir.ui.view">
+        <field name="name">account.move.form.crm.opportunity.link</field>
+        <field name="model">account.move</field>
+        <field name="inherit_id" ref="account.view_move_form"/>
+        <field name="arch" type="xml">
+
+            <xpath expr="//field[@name='invoice_origin']" position="after">
+                <field name="crm_lead_id" readonly="1"/>
+                <field name="source_purchase_order_id" readonly="1" invisible="not source_purchase_order_id"/>
+                <field name="purchase_training_type" readonly="1" invisible="not source_purchase_order_id"/>
+            </xpath>
+
+            <xpath expr="//sheet/notebook" position="inside">
+                <page string="Training Details" name="purchase_training_bill" invisible="not source_purchase_order_id">
+
+                    <group invisible="purchase_training_type != 'instructor'">
+                        <group string="Instructor">
+                            <field name="instructor_training_course_id" readonly="1"/>
+                            <field name="instructor_id" readonly="1"/>
+                        </group>
+                        <group string="Instructor Fee">
+                            <field name="instructor_from" readonly="1"/>
+                            <field name="instructor_to" readonly="1"/>
+                            <field name="instructor_days" readonly="1"/>
+                            <field name="instructor_daily_rate" readonly="1"/>
+                            <field name="instructor_total" readonly="1"/>
+                        </group>
+                    </group>
+
+                    <field name="training_course_ids" readonly="1" invisible="purchase_training_type == 'instructor'">
+                        <tree>
+                            <field name="training_id"/>
+                            <field name="descriptions"/>
+                            <field name="instructor_id"/>
+                            <field name="location"/>
+                            <field name="where_location2"/>
+                            <field name="payment_method"/>
+                            <field name="no_of_student"/>
+                            <field name="duration"/>
+                            <field name="training_date_start"/>
+                            <field name="training_date_end"/>
+                        </tree>
+                    </field>
+
+                    <field name="training_course_ids" readonly="1" invisible="purchase_training_type != 'instructor'">
+                        <tree>
+                            <field name="training_id"/>
+                            <field name="instructor_id"/>
+                            <field name="location"/>
+                            <field name="where_location2"/>
+                            <field name="duration"/>
+                            <field name="training_date_start"/>
+                            <field name="training_date_end"/>
+                        </tree>
+                    </field>
+
+                    <group string="Terms and Conditions" invisible="not term_and_cond">
+                        <field name="term_and_cond" readonly="1" nolabel="1" colspan="2"/>
+                    </group>
+
+                </page>
+            </xpath>
+
+        </field>
+    </record>
+
 </odoo>
+

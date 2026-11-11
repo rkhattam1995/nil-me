@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <template id="report_po_document_partner_invoice_patch"
+              inherit_id="invoice_training_details.report_po_document_training">
+
+        <xpath expr="//table[@name='training_line_table']//th[span[@t-if='not is_clc_order' and normalize-space()='Training Price']]/span[@t-if='not is_clc_order']" position="replace">
+            <span t-if="not is_clc_order">Partner Invoice</span>
+        </xpath>
+
+        <xpath expr="//table[@name='training_line_table']//tbody//span[@t-field='training.price']/.." position="replace">
+            <td t-if="not is_cisco_u_all_access" style="font-size:18px; text-align:center; vertical-align:middle;">
+                <span t-if="is_clc_order"
+                      t-esc="'$ {:,.2f}'.format(training._nil_wo_clc_rate_per_seat())"/>
+                <span t-if="not is_clc_order"
+                      t-esc="'$ {:,.2f}'.format(training.lcp_partner_share or 0.0)"/>
+            </td>
+        </xpath>
+
+        <xpath expr="//table[@name='training_line_table']//th[normalize-space()='Total Price']" position="replace">
+            <th t-if="o.display_total" style="font-size:18px; text-align:center; vertical-align:middle;">
+                <span t-if="is_clc_order">Total Revenue</span>
+                <span t-if="not is_clc_order">Partner Invoice Total</span>
+            </th>
+        </xpath>
+
+        <xpath expr="//table[@name='training_line_table']//tbody//span[@t-field='o.total_training_price']" position="replace">
+            <span t-if="is_clc_order"
+                  t-esc="'$ {:,.2f}'.format(sum(course._nil_wo_clc_total_revenue() for course in o.training_course_ids))"/>
+            <span t-if="not is_clc_order"
+                  t-esc="'$ {:,.2f}'.format(sum(o.training_course_ids.mapped('lcp_partner_share')) or 0.0)"/>
+        </xpath>
+
+    </template>
+</odoo>

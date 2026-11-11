@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <!-- Same form placement as PO Subject: after the header, before all tabs. -->
+    <record id="sale_order_form_manual_subject" model="ir.ui.view">
+        <field name="name">sale.order.form.manual.subject</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale.view_order_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//sheet/notebook" position="before">
+                <group>
+                    <field name="nil_so_subject"
+                           string="Subject"
+                           placeholder="Enter subject for this Sales Order..."/>
+                </group>
+            </xpath>
+        </field>
+    </record>
+</odoo>

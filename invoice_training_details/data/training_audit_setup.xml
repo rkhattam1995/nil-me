@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="0">
+    <function model="training.course.audit" name="_nil_setup_ruba_access"/>
+</odoo>

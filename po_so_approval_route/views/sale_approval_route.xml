@@ -31,7 +31,6 @@
             <field name="name">SO Teams</field>
             <field name="res_model">sale.team.custom</field>
             <field name="view_mode">tree,form</field>
-            <field name="active" eval="False"/>
         </record>
 
         <menuitem name="SO Teams"

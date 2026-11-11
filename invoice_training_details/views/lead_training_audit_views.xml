@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="crm_lead_form_training_change_log" model="ir.ui.view">
+        <field name="name">crm.lead.form.training.change.log</field>
+        <field name="model">crm.lead</field>
+        <field name="inherit_id" ref="invoice_training_details.crm_reveal_lead_opportunity_form_training"/>
+        <field name="arch" type="xml">
+            <xpath expr="//div[@name='button_box']" position="inside">
+                <button name="action_view_training_audit"
+                        type="object"
+                        class="oe_stat_button"
+                        icon="fa-history"
+                        groups="invoice_training_details.group_training_audit_ruba">
+                    <field name="training_audit_count"
+                           widget="statinfo"
+                           string="Change Log"/>
+                </button>
+            </xpath>
+        </field>
+    </record>
+</odoo>

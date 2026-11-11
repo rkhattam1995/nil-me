@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="crm_lead_form_inherit_sales_commission" model="ir.ui.view">
+        <field name="name">crm.lead.form.inherit.sales.commission</field>
+        <field name="model">crm.lead</field>
+        <field name="inherit_id" ref="crm.crm_lead_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//div[@name='button_box']" position="inside">
+
+                <field name="commission_count"
+                       invisible="1"
+                       groups="nil_sales_commission.group_nil_commission_manager"/>
+
+                <button name="action_view_sales_commission"
+                        type="object"
+                        class="oe_stat_button"
+                        icon="fa-money"
+                        invisible="commission_count == 0"
+                        groups="nil_sales_commission.group_nil_commission_manager">
+                    <field name="commission_count"
+                           widget="statinfo"
+                           string="Commission"
+                           groups="nil_sales_commission.group_nil_commission_manager"/>
+                </button>
+
+            </xpath>
+        </field>
+    </record>
+</odoo>

@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <!-- Preserve all standard X2ManyField behavior; change its ListRenderer only. -->
+    <t t-name="invoice_training_details.NilPSX2ManyField"
+       t-inherit="web.X2ManyField"
+       t-inherit-mode="primary">
+        <xpath expr="//ListRenderer" position="replace">
+            <NilPSListRenderer t-if="props.viewMode === 'list'"
+                               t-props="rendererProps"
+                               headingRecord="props.record"/>
+        </xpath>
+    </t>
+
+    <!-- Each of the two custom headings is edited ONCE in its own table header.
+         Each value below remains editable independently per pro.service row. -->
+    <t t-name="invoice_training_details.NilPSListRenderer"
+       t-inherit="web.ListRenderer"
+       t-inherit-mode="primary">
+        <xpath expr="//th[@t-if=&quot;column.type === 'field'&quot;]//span[@t-esc='column.label']"
+               position="replace">
+            <t t-if="column.name === 'nil_custom_value' || column.name === 'nil_custom_value_2'">
+                <input type="text"
+                       class="form-control form-control-sm nil_ps_custom_header_input"
+                       style="min-width:155px;font-weight:600;text-align:left;"
+                       placeholder="Write your column title..."
+                       title="Click here to edit this column title"
+                       t-att-data-heading-field="column.name === 'nil_custom_value' ? 'nil_ps_custom_heading' : 'nil_ps_custom_heading_2'"
+                       t-att-value="column.name === 'nil_custom_value' ? (props.headingRecord.data.nil_ps_custom_heading || '') : (props.headingRecord.data.nil_ps_custom_heading_2 || '')"
+                       t-att-readonly="!props.headingRecord.isInEdition"
+                       t-on-click.stop="stopHeaderEvent"
+                       t-on-pointerdown.stop="stopHeaderEvent"
+                       t-on-pointerup.stop="stopHeaderEvent"
+                       t-on-keydown.stop="onHeadingKeydown"
+                       t-on-change.stop="onHeadingChange"/>
+            </t>
+            <span t-else=""
+                  class="d-block min-w-0 text-truncate flex-grow-1"
+                  t-att-class="isNumeric ? 'o_list_number_th' : ''"
+                  t-esc="column.label"/>
+        </xpath>
+    </t>
+</templates>

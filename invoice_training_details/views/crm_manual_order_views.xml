@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="crm_lead_kanban_manual_order" model="ir.ui.view">
+        <field name="name">crm.lead.kanban.manual.order</field>
+        <field name="model">crm.lead</field>
+        <field name="inherit_id" ref="crm.crm_case_kanban_view_leads"/>
+        <field name="arch" type="xml">
+            <xpath expr="//kanban" position="attributes">
+                <attribute name="default_order">sequence</attribute>
+            </xpath>
+            <xpath expr="//kanban/field[@name='stage_id']" position="after">
+                <field name="sequence" widget="handle" invisible="1"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>

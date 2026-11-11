@@ -1,56 +1,229 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <odoo>
-
     <template id="report_quotation_document_training" name="Quotation Report Training">
-         <t t-call="web.html_container">
+        <t t-call="web.html_container">
             <t t-foreach="docs" t-as="o">
                 <t t-set="lang" t-value="o.partner_id.lang"/>
+
                 <t t-call="invoice_training_details.custom_invoice_report_layout">
-                    <t t-set="o" t-value="o.with_context(lang=lang)"/>
+
+                    <t t-set="o" t-value="o.with_context(lang=lang, quotation_repeat_meta=True)"/>
                     <t t-set="forced_vat" t-value="o.fiscal_position_id.foreign_vat"/>
-                    <div class="row">
-                        <div class="col-12">
-                            <span class="h4 text-info">QUOTATION</span>
+
+                    <style>
+
+                        table[name="training_line_table"] thead th {
+                            background-color: #EAF9FC !important;
+                            color: #075E68 !important;
+                        }
+
+                        .proforma-text-section,
+                        .proforma-text-section * {
+                            font-size: 16px !important;
+                            font-family: inherit !important;
+                        }
+
+
+                        /* TABLES: LTR + black text */
+                        table,
+                        table * {
+                            direction:ltr !important;
+                            color:#000 !important;
+                        }
+
+                        /* Table headings: shaded + bold + black */
+                        table thead th {
+                            background-color:#EAF9FC !important;
+                            color:#000 !important;
+                            font-weight:700 !important;
+                        }
+
+                        /* TOTAL TABLE: one font size everywhere */
+                        .quotation-total-box,
+                        .quotation-total-box td,
+                        .quotation-total-box th,
+                        .quotation-total-box span,
+                        .quotation-total-box strong {
+                            font-size:16px !important;
+                            color:#000 !important;
+                            direction:ltr !important;
+                        }
+
+                        .quotation-total-box td:first-child {
+                            text-align:left !important;
+                            font-weight:700 !important;
+                            background-color:#EAF9FC !important;
+                        }
+
+                        .quotation-total-box td:first-child strong {
+                            font-weight:700 !important;
+                        }
+
+                        .quotation-total-box td:last-child {
+                            text-align:right !important;
+                            font-weight:400 !important;
+                            background-color:#fff !important;
+                            white-space:nowrap !important;
+                        }
+
+                    </style>
+
+                    <!-- Use company record if contact belongs to a company -->
+                    <t t-set="customer_partner"
+                       t-value="o.partner_id if o.partner_id.is_company else (o.partner_id.parent_id or o.partner_id)"/>
+
+
+                    <!-- Proforma Invoice Title -->
+                    <div class="row" style="margin:0 0 4px 0; padding:0;">
+
+                        <div class="col-12"
+                             style="margin:0; padding-top:0; padding-bottom:0;">
+
+                            <span class="h4 text-info"
+                                  style="display:block; margin:0; padding:0;">
+                                Quotation
+                            </span>
+
                         </div>
+
                     </div>
-                    <div class="row pt-3 pb-3">
+
+
+                    <!-- Customer Details -->
+                    <div class="row"
+                         style="margin-top:0; padding-top:0; padding-bottom:10px;">
+
                         <div class="col-8">
+
                             <div>
-                                <!--<strong>INVOICE TO</strong>-->
-                                 <strong t-if="o.partner_id.is_company == True">Company Name:</strong><br/>
-                                <div t-if="o.partner_id.is_company == True" t-field="o.partner_id.name"/>
-                                
-                                <strong t-if="o.partner_id.is_company == False">Company Name:</strong><br/>
-                                <div t-if="o.partner_id.is_company == False" t-field="o.partner_id.parent_id.name"/>
-                                <strong t-if="o.partner_id.is_company == False">Attention:</strong><br/>
-                                <div t-if="o.partner_id.is_company == False" t-field="o.partner_id.name"/>
-                                <!--<div t-field="o.partner_id" t-options="{&quot;widget&quot;: &quot;contact&quot;, &quot;fields&quot;: [&quot;address&quot;, &quot;name&quot;], &quot;no_marker&quot;: True}"/>-->
-                                 
+
+                                <!-- Company Name -->
+                                <div style="margin:0 0 3px 0;">
+                                    <strong>Company Name:</strong>
+                                    <span t-field="customer_partner.name"/>
+                                </div>
+
+
+                                <!-- Address -->
+                                <div style="margin:0 0 3px 0;">
+
+                                    <strong>Address:</strong>
+
+                                    <span t-if="customer_partner.street"
+                                          t-field="customer_partner.street"/>
+
+                                    <t t-if="customer_partner.street2">
+                                        <t t-if="customer_partner.street">, </t>
+                                        <span t-field="customer_partner.street2"/>
+                                    </t>
+
+                                    <t t-if="customer_partner.city">
+                                        <t t-if="customer_partner.street or customer_partner.street2">, </t>
+                                        <span t-field="customer_partner.city"/>
+                                    </t>
+
+                                    <t t-if="customer_partner.state_id">
+                                        <t t-if="customer_partner.street or customer_partner.street2 or customer_partner.city">, </t>
+                                        <span t-field="customer_partner.state_id.name"/>
+                                    </t>
+
+                                    <t t-if="customer_partner.zip">
+                                        <t t-if="customer_partner.street or customer_partner.street2 or customer_partner.city or customer_partner.state_id">, </t>
+                                        <span t-field="customer_partner.zip"/>
+                                    </t>
+
+                                    <t t-if="customer_partner.country_id">
+                                        <t t-if="customer_partner.street or customer_partner.street2 or customer_partner.city or customer_partner.state_id or customer_partner.zip">, </t>
+                                        <span t-field="customer_partner.country_id.name"/>
+                                    </t>
+
+                                </div>
+
+
+                                <!-- Email -->
+                                <div t-if="o.partner_id.email or customer_partner.email"
+                                     style="margin:0 0 3px 0;">
+
+                                    <strong>Email:</strong>
+
+                                    <span t-if="o.partner_id.email"
+                                          t-field="o.partner_id.email"/>
+
+                                    <span t-else=""
+                                          t-field="customer_partner.email"/>
+
+                                </div>
+
+
+                                <!-- Tax Number -->
+                                <div t-if="customer_partner.vat"
+                                     style="margin:0 0 3px 0;">
+
+                                    <strong>Tax Number:</strong>
+                                    <span t-field="customer_partner.vat"/>
+
+                                </div>
+
+
+                                <!-- Attention -->
+                                <div t-if="o.partner_id.is_company == False"
+                                     style="margin:0 0 3px 0;">
+
+                                    <strong>Attention:</strong>
+                                    <span t-field="o.partner_id.name"/>
+
+                                </div>
+
                             </div>
+
                         </div>
+
+
+                        <!-- Document Details -->
                         <div class="col-4">
-                            <div>
-                                <table class="table table-borderless">
-                                    <tr class="p-0">
-                                        <td class="p-0">QUOTATION</td>
-                                        <td class="p-0"><span t-field="o.name"/></td>
-                                    </tr>
-                                    <tr class="p-0">
-                                        <td class="p-0">DATE</td>
-                                        <td class="p-0"><span t-field="o.date_order"/></td>
-                                    </tr>
-                                    <!--<tr class="p-0" t-if="o.invoice_payment_term_id">-->
-                                    <!--    <td class="p-0">TERMS</td>-->
-                                    <!--    <td class="p-0"><span t-field="o.invoice_payment_term_id"/></td>-->
-                                    <!--</tr>-->
-                                    <tr class="p-0">
-                                        <td class="p-0">DUE DATE</td>
-                                        <td class="p-0"><span t-field="o.validity_date"/></td>
-                                    </tr>
-                                </table>
+
+                            <div style="
+                                margin-left:auto;
+                                width:220px;
+                                line-height:1.2;
+                            ">
+
+                                <div style="
+                                    margin:0 0 3px 0;
+                                    padding:0;
+                                    white-space:nowrap;
+                                ">
+                                    <span>Quot#: </span>
+                                    <span t-if="o.name"
+                                          t-esc="
+                                            o.name
+                                            if o.name.startswith('Q')
+                                            else 'Q' + (
+                                                o.name[2:]
+                                                if o.name.startswith('SO')
+                                                else o.name[1:]
+                                                if o.name.startswith('S')
+                                                else o.name
+                                            )
+                                          "/>
+                                </div>
+
+                                <div style="
+                                    margin:0;
+                                    padding:0;
+                                    white-space:nowrap;
+                                ">
+                                    <span>DATE: </span>
+                                    <span t-field="o.date_order"
+                                          t-options="{&quot;widget&quot;: &quot;date&quot;}"/>
+                                </div>
+
                             </div>
+
                         </div>
+
                     </div>
+
 
                     <!--<table class="table table-sm o_main_table table-borderless" name="order_lines">-->
                     <!--    <thead class="bg-light text-info">-->
@@ -58,7 +231,7 @@
                     <!--            <th name="th_description" class="text-start"><span>DESCRIPTION</span></th>-->
                     <!--            <th name="th_quantity" class="text-end"><span>QTY</span></th>-->
                     <!--            <th name="th_rate" class="text-end"><span>RATE</span></th>-->
-                                <!--<th name="th_amount" class="text-end"><span>AMOUNT</span></th>-->
+                    <!--            <th name="th_amount" class="text-end"><span>AMOUNT</span></th>-->
                     <!--        </tr>-->
                     <!--    </thead>-->
                     <!--    <tbody>-->
@@ -67,121 +240,341 @@
                     <!--                <td class="text-start" style="max-width:50px;"><span t-field="line.name"/></td>-->
                     <!--                <td class="text-end"><span t-field="line.quantity"/></td>-->
                     <!--                <td class="text-end"><span t-field="line.price_unit"/></td>-->
-                                    <!--<td class="text-end"><span t-field="line.quantity"/></td>-->
+                    <!--                <td class="text-end"><span t-field="line.quantity"/></td>-->
                     <!--            </tr>-->
                     <!--        </t>-->
                     <!--    </tbody>-->
                     <!--</table>-->
 
-                    <div class="row pt-3 pb-2">
-                        <div class="col-12">
-                            Training Courses Details: <span t-field="o.training_name"/>
-                        </div>
-                    </div>
 
-                    <table t-if="o.display_training_table" class="table table-sm o_main_table table-bordered text-center" name="training_line_table">
+                    <!-- TWO-LINE SPACE BEFORE TRAINING TABLE -->
+                    <div style="height:30px;"></div>
+
+
+                    <!-- Training Table -->
+                    <t t-set="is_cisco_u_all_access" t-value="any('cisco u' in (name or '').lower() for name in o.training_course_ids.mapped('training_id.name'))"/>
+                    <table t-if="o.display_training_table"
+                           class="table table-sm o_main_table table-bordered text-center"
+                           name="training_line_table">
+
                         <thead>
-                            <tr>
-                                <th name="th_item" style="text-align: center; vertical-align: middle;"><span>Item</span></th>
-                                <th name="th_training_name" style="text-align: center; vertical-align: middle;"><span>Training Name</span></th>
-                                <th t-if="o.display_description" name="th_training_name" style="text-align: center; vertical-align: middle;"><span>Description</span></th>
-                                <th t-if="o.display_instructor" name="th_training_name" style="text-align: center; vertical-align: middle;"><span>Instructor Name</span></th>
-                                <th name="th_training_name" style="text-align: center; vertical-align: middle;"><span>Language</span></th>
-                                <th name="th_of_students" style="text-align: center; vertical-align: middle;"><span># Of Students</span></th>
-                                <th t-if="o.display_location" name="th_training_name" style="text-align: center; vertical-align: middle;"><span>Location</span></th>
-                                <th t-if="o.display_where" name="th_training_name" style="text-align: center; vertical-align: middle;"><span>Location1</span></th>
-                                <th name="th_duration" style="text-align: center; vertical-align: middle;"><span>Duration</span></th>
-                                <th name="th_training_date" style="text-align: center; vertical-align: middle;"><span>Training Dates</span></th>
-                                <th name="th_training_date" style="text-align: center; vertical-align: middle;"><span>Training Price</span></th>
 
-                                <th t-if="o.display_total" name="th_training_date" style="max-width:80px;text-align: center; vertical-align: middle;"> <span>Total Price</span></th>
+                            <tr>
+
+                                <th name="th_item"
+                                    style="text-align:center; vertical-align:middle;">
+                                    <span>Item</span>
+                                </th>
+
+
+                                <th name="th_training_name"
+                                    style="text-align:center; vertical-align:middle;">
+                                    <span t-if="is_cisco_u_all_access">Subscription Name</span>
+                                    <span t-else="">Training Name</span>
+                                </th>
+
+
+                                <th t-if="o.display_instructor"
+                                    name="th_training_name"
+                                    style="text-align:center; vertical-align:middle;">
+                                    <span>Instructor Name</span>
+                                </th>
+
+
+                                <th name="th_of_students"
+                                    style="text-align:center; vertical-align:middle;">
+                                    <span t-if="is_cisco_u_all_access"># Of Subscriptions</span>
+                                    <span t-else=""># Of Students</span>
+                                </th>
+
+
+                                <th t-if="not is_cisco_u_all_access"
+                                    name="th_training_name"
+                                    style="text-align:center; vertical-align:middle;">
+
+                                    <span t-if="o.display_location">
+                                        Location
+                                    </span>
+
+                                    <span t-elif="o.display_where">
+                                        Location1
+                                    </span>
+
+                                </th>
+
+
+                                <th t-if="not is_cisco_u_all_access"
+                                    name="th_duration"
+                                    style="text-align:center; vertical-align:middle;">
+                                    <span>Duration</span>
+                                </th>
+
+
+                                <th t-if="not is_cisco_u_all_access"
+                                    name="th_training_date"
+                                    style="text-align:center; vertical-align:middle;">
+                                    <span>Training Dates</span>
+                                </th>
+
+
+                                <th t-if="not is_cisco_u_all_access"
+                                    name="th_training_date"
+                                    style="text-align:center; vertical-align:middle;">
+                                    <span>Training Price</span>
+                                </th>
+
+
+                                <th t-if="o.display_total"
+                                    name="th_training_date"
+                                    style="max-width:80px; text-align:center; vertical-align:middle;">
+                                    <span>Total Price</span>
+                                </th>
+
                                 <!--<th t-if="o.display_downpayment" name="th_training_date" style="max-width:80px;"><span>Advance Payment amount 50% (paid)</span></th>-->
                                 <!--<th t-if="o.display_due_amount" name="th_training_date" style="max-width:80px;"><span>50% amount after training delivery (Not yet paid)</span></th>-->
+
                             </tr>
+
                         </thead>
+
+
                         <tbody>
+
                             <t t-set="item" t-value="1"/>
                             <t t-set="total_rows" t-value="len(o.training_course_ids)"/>
-                            <t t-foreach="o.training_course_ids" t-as="training">
+
+
+                            <t t-foreach="o.training_course_ids"
+                               t-as="training">
+
                                 <tr>
-                                    <td style="text-align: center; vertical-align: middle;"><span t-esc="item"/></td>
-                                    <td style="text-align: center; vertical-align: middle;"><span t-field="training.training_id"/></td>
-                                    <td t-if="o.display_description" style="text-align: center; vertical-align: middle;"><span t-field="training.descriptions"/></td>
-                                    <td t-if="o.display_instructor" style="text-align: center; vertical-align: middle;"><span t-field="training.instructor_id.name"/></td>
-                                    <td style="text-align: center; vertical-align: middle;"><span t-field="training.train_language"/></td>
-                                    <td style="text-align: center; vertical-align: middle;"><span t-field="training.no_of_student"/></td>
-                                    <td t-if="o.display_location" style="text-align: center; vertical-align: middle;"><span t-field="training.location"/></td>
-                                    <td t-if="o.display_where" style="text-align: center; vertical-align: middle;"><span t-field="training.where_location2"/></td>
-                                    <td style="text-align: center; vertical-align: middle;"><span t-field="training.duration"/></td>
-                                    <td style="text-align: center; vertical-align: middle;"><span t-field="training.training_date_start"/> - <span t-field="training.training_date_end"/></td>
-                                    <td style="text-align: center; vertical-align: middle;"><span t-field="training.price"/></td>
+
+                                    <td style="text-align:center; vertical-align:middle;">
+                                        <span t-esc="item"/>
+                                    </td>
+
+
+                                    <td style="text-align:left; vertical-align:middle;">
+                                        <span t-field="training.training_id"/>
+                                    </td>
+
+
+                                    <td t-if="o.display_instructor"
+                                        style="text-align:center; vertical-align:middle;">
+                                        <span t-field="training.instructor_id.name"/>
+                                    </td>
+
+
+                                    <td style="text-align:center; vertical-align:middle;">
+                                        <span t-field="training.no_of_student"/>
+                                    </td>
+
+
+                                    <td t-if="not is_cisco_u_all_access"
+                                        style="text-align:center; vertical-align:middle;">
+
+                                        <span t-if="o.display_location"
+                                              t-field="training.location"/>
+
+                                        <span t-if="o.display_location and o.display_where">, </span>
+
+                                        <span t-if="o.display_where"
+                                              t-field="training.where_location2"/>
+
+                                    </td>
+
+
+                                    <td t-if="not is_cisco_u_all_access"
+                                        style="text-align:center; vertical-align:middle;">
+                                        <span t-field="training.duration"/>
+                                    </td>
+
+
+                                    <td t-if="not is_cisco_u_all_access"
+                                        style="text-align:center; vertical-align:middle;">
+
+                                        <span t-field="training.training_date_start"/>
+
+                                        -
+
+                                        <span t-field="training.training_date_end"/>
+
+                                    </td>
+
+
+                                    <td t-if="not is_cisco_u_all_access"
+                                        style="text-align:center; vertical-align:middle;">
+                                        <span t-field="training.price"/>
+                                    </td>
+
+
                                     <t t-if="item == 1">
-                                        <td t-if="o.display_total" t-att-rowspan="total_rows" style="text-align: center; vertical-align: middle;"><span t-field="o.total_training_price"/></td>
+
+                                        <td t-if="o.display_total"
+                                            t-att-rowspan="total_rows"
+                                            style="text-align:center; vertical-align:middle;">
+
+                                            <span t-field="o.total_training_price"/>
+
+                                        </td>
+
                                     </t>
+
                                 </tr>
-                                <t t-set="item" t-value="item + 1"/>
+
+                                <t t-set="item"
+                                   t-value="item + 1"/>
+
                             </t>
+
                         </tbody>
+
                     </table>
-               <div class="clearfix" name="so_total_summary">
-                  <div id="total" class="row" name="total">
-                    <div t-attf-class="#{'col-6' if report_type != 'html' else 'col-sm-7 col-md-6'} ms-auto">
-                        <table class="table table-sm table-borderless" style="background-color:#fff;">
+
+                    <div style="
+                        width:100%;
+                        margin:6px 0 6px 0;
+                        text-align:right;
+                        page-break-inside:avoid;
+                    ">
+
+                        <table class="table table-sm table-border quotation-total-box"
+                               style="
+                                   display:inline-table;
+                                   background-color:#fff;
+                                   width:300px;
+                                   margin:0 0 0 auto;
+                               ">
+
                             <!-- Tax totals -->
-                            <t t-set="tax_totals" t-value="o.tax_totals"/>
-                            <t t-foreach="tax_totals.get('subtotals')" t-as="subtotal">
-                  <tr class="border-black o_subtotal">
-                    <td style="background-color:#fff;"><strong t-out="subtotal['name']">Untaxed Amount</strong></td>
+                            <t t-set="tax_totals"
+                               t-value="o.tax_totals"/>
 
-                    <td style="background-color:#fff;" class="text-end">
-                        <span t-att-class="oe_subtotal_footer_separator" t-out="subtotal['formatted_amount']">27.00</span>
-                    </td>
-                </tr>
+                            <t t-if="tax_totals.get('subtotals')">
 
-                <t t-set="subtotal_to_show" t-value="subtotal['name']"/>
-                <t t-call="account.tax_groups_totals"/>
-            </t>
+                                <t t-foreach="tax_totals.get('subtotals')"
+                                   t-as="subtotal">
 
-            <tr t-if="'formatted_rounding_amount' in tax_totals and tax_totals.get('rounding_amount') != 0">
-                <td>Rounding</td>
-                <td class="text-end">
-                    <span t-out="tax_totals.get('formatted_rounding_amount')">0</span>
-                </td>
-            </tr>
-            
-            <!--Total amount with all taxes-->
-            <tr class="border-black o_total">
-                <td style="background-color:#fff;"><strong>Total</strong></td>
-                <td style="background-color:#fff;" class="text-end">
-                    <span t-out="tax_totals.get('formatted_amount_total')">31.05</span>
-                </td>
-            </tr>
-            <tr class="border-black o_total">
-                                                <td style="background-color:#fff;"><strong>Currency Rate</strong></td>
-                                                <td style="background-color:#fff;" class="text-end">
-                                                    <span t-field="o.currency_id.rate">31.05</span>
-                                                </td>
-                                            </tr>
-                                            <tr class="border-black o_total">
-                                                <td style="background-color:#fff;"><strong>Total Currency @ <span t-field="o.company_id.currency_id.symbol"/></strong></td>
-                                                <td style="background-color:#fff;" class="text-end">
-                                                    <span t-field="o.currency_total"/>
-                                                </td>
-                                            </tr>
+                                    <tr class="border-grey o_subtotal">
+
+                                        <td style="background-color:#fff;">
+                                            <strong t-out="subtotal['name']">
+                                                Untaxed Amount
+                                            </strong>
+                                        </td>
+
+                                        <td style="
+                                            background-color:#fff;
+                                            text-align:right;
+                                        ">
+                                            <span t-att-class="oe_subtotal_footer_separator"
+                                                  t-out="subtotal['formatted_amount']"/>
+                                        </td>
+
+                                    </tr>
+
+                                    <t t-set="subtotal_to_show"
+                                       t-value="subtotal['name']"/>
+
+                                    <t t-call="account.tax_groups_totals"/>
+
+                                </t>
+
+                            </t>
+
+                            <!-- Total Amount -->
+                            <tr class="border-grey o_total">
+
+                                <td style="background-color:#fff;">
+                                    <strong>Total Amount</strong>
+                                </td>
+
+                                <td style="
+                                    background-color:#fff;
+                                    text-align:right;
+                                ">
+                                    <span t-out="o.amount_total"
+                                          t-options="{
+                                              &quot;widget&quot;: &quot;monetary&quot;,
+                                              &quot;display_currency&quot;: o.currency_id
+                                          }"/>
+                                </td>
+
+                            </tr>
+
                         </table>
-                    </div>
-                </div>
-            </div>
 
-                    <div class="row pt-3 pb-2" style="page-break-inside:avoid;">
-                        <div class="col-8">
-                            <p>
-                           <span t-field="o.term_and_cond"/>
-                            </p>
+                    </div>
+
+
+                    <!-- Course Materials -->
+                    <t t-set="courses_with_content"
+                       t-value="o.training_course_ids.filtered('hyperlink')"/>
+
+                    <div t-if="courses_with_content"
+                         style="
+                            width:100%;
+                            margin:8px 0 4px 0;
+                            padding:0;
+                            font-size:16px;
+                            line-height:1.45;
+                         ">
+
+                        <div style="
+                            margin:0 0 3px 0;
+                            font-weight:700;
+                         ">
+                            Course Materials
                         </div>
+
+                        <t t-foreach="courses_with_content"
+                           t-as="course_material">
+
+                            <div style="margin:0 0 2px 0;">
+                                <span t-field="course_material.training_id"/>
+                                <span>: </span>
+                                <a t-att-href="course_material.hyperlink"
+                                   target="_blank"
+                                   style="text-decoration:underline;">
+                                    View Course Content
+                                </a>
+                            </div>
+
+                        </t>
+
                     </div>
 
-                    <hr/>
+
+
+                    <!-- Terms & Conditions -->
+                    <div class="row pb-2"
+                         style="margin-top:0; padding-top:0; page-break-inside:avoid;">
+
+                        <div class="col-12 proforma-text-section"
+                             style="
+                                width:100%;
+                                font-size:16px;
+                                font-family:inherit;
+                             ">
+
+                            <!-- Upgrade compatibility: the previously stored
+                                 report_quotation_terms_finishing inherited view
+                                 still targets span[@t-field='o.term_and_cond']
+                                 while this parent view is reloaded. Keep this
+                                 non-rendering anchor so the old view validates
+                                 before Odoo loads its corrected XPath. -->
+                            <span t-if="False" t-field="o.term_and_cond"/>
+
+                            <!-- Real Terms: block HTML is required for native
+                                 editor ordered, alphabetic and bullet lists. -->
+                            <div t-field="o.term_and_cond"
+                                 style="text-align:justify; margin:0;
+                                        font-size:16px; font-family:inherit;"/>
+
+                        </div>
+
+                    </div>
+
 
                     <!--<div class="row" style="page-break-inside:avoid;">-->
                     <!--    <div class="col-6"/>-->
@@ -193,31 +586,83 @@
                     <!--    </div>-->
                     <!--</div>-->
 
-                    <div class="row" style="page-break-inside:avoid;">
-                        <!--<div name="ksa_qr" class="col-4">-->
-                        <!--    <t t-if="o.display_ksa_qr">-->
-                        <!--        <img t-if="o.ks_qr_code" class="pt-5" t-att-src="image_data_uri(o.ks_qr_code)" style="max-height: 200px;" alt="KSA QR"/>-->
-                        <!--    </t>-->
-                        <!--</div>-->
-                        <div name="stamp" class="col-4">
-                            <img t-if="o.company_id.stamp and o.display_stamp" class="pt-5" t-att-src="image_data_uri(o.company_id.stamp)" style="max-height: 200px;" alt="Stamp"/>
+
+                    <!-- Bank Details -->
+                    <div class="row pt-3 pb-2"
+                         style="page-break-inside:avoid;">
+
+                        <div class="col-8 proforma-text-section"
+                             style="
+                                width:600px;
+                                font-size:16px;
+                                font-family:inherit;
+                             ">
+
+                            <p style="
+                                text-align:justify;
+                                margin:0;
+                                font-size:16px;
+                                font-family:inherit;
+                               ">
+
+                                <span t-field="o.bank_details"/>
+
+                            </p>
+
                         </div>
-                        <div name="signature" class="col-4">
-                            <img t-if="o.company_id.signature and o.display_signature" class="pt-5" t-att-src="image_data_uri(o.company_id.signature)" style="max-height: 200px;" alt="Stamp"/>
-                        </div>
+
                     </div>
 
-                    <div class="row pt-3 pb-2" style="page-break-inside:avoid;">
-                        <div class="col-12">
-                            <p>
-                            <span t-field="o.bank_details"/>
-                            </p>
+
+                    <!-- Signature + Stamp Bottom Right -->
+                    <div t-if="(o.company_id.stamp and o.display_stamp) or (o.company_id.signature and o.display_signature)"
+                         class="row"
+                         style="
+                             page-break-inside:avoid;
+                             position:relative;
+                             min-height:170px;
+                             margin-top:4px;
+                         ">
+                        <div style="
+                            position:absolute;
+                            bottom:0;
+                            right:0;
+                            text-align:right;
+                            white-space:nowrap;
+                        ">
+                            <img t-if="o.company_id.signature and o.display_signature"
+                                 t-att-src="image_data_uri(o.company_id.signature)"
+                                 style="
+                                     max-height:120px;
+                                     max-width:180px;
+                                     width:auto;
+                                     height:auto;
+                                     object-fit:contain;
+                                     vertical-align:bottom;
+                                     display:inline-block;
+                                     margin-right:8px;
+                                 "
+                                 alt="Signature"/>
+
+                            <img t-if="o.company_id.stamp and o.display_stamp"
+                                 t-att-src="image_data_uri(o.company_id.stamp)"
+                                 style="
+                                     max-height:135px;
+                                     max-width:165px;
+                                     width:auto;
+                                     height:auto;
+                                     object-fit:contain;
+                                     vertical-align:bottom;
+                                     display:inline-block;
+                                 "
+                                 alt="Stamp"/>
                         </div>
                     </div>
 
                 </t>
-            </t>
-        </t>
-                   </template>
 
+            </t>
+
+        </t>
+    </template>
 </odoo>

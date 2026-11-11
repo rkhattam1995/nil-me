@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Tree View -->
+    <record id="view_purchase_training_details_tree" model="ir.ui.view">
+        <field name="name">purchase.training.details.tree</field>
+        <field name="model">purchase.training.details</field>
+        <field name="arch" type="xml">
+            <tree string="Training Details">
+                <field name="name"/>
+                <field name="purchase_order_id"/>
+                <field name="training_id"/>
+                <field name="instructor_id"/>
+                <field name="start_date"/>
+                <field name="end_date"/>
+                <field name="location"/>
+                <field name="number_of_participants"/>
+                <field name="training_cost"/>
+                <field name="currency_id" invisible="1"/>
+                <field name="state"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Form View -->
+    <record id="view_purchase_training_details_form" model="ir.ui.view">
+        <field name="name">purchase.training.details.form</field>
+        <field name="model">purchase.training.details</field>
+        <field name="arch" type="xml">
+            <form string="Training Details">
+                <header>
+                    <button name="action_confirm" string="Confirm" type="object" class="oe_highlight" states="draft"/>
+                    <button name="action_done" string="Mark as Done" type="object" class="oe_highlight" states="confirmed"/>
+                    <button name="action_cancel" string="Cancel" type="object" states="draft,confirmed"/>
+                    <button name="action_draft" string="Set to Draft" type="object" states="cancelled"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,confirmed,done"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name" readonly="1"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="purchase_order_id"/>
+                            <field name="training_id"/>
+                            <field name="instructor_id"/>
+                        </group>
+                        <group>
+                            <field name="start_date"/>
+                            <field name="end_date"/>
+                            <field name="location"/>
+                            <field name="number_of_participants"/>
+                            <field name="training_cost"/>
+                            <field name="currency_id" invisible="1"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Notes">
+                            <field name="notes"/>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Search View -->
+    <record id="view_purchase_training_details_search" model="ir.ui.view">
+        <field name="name">purchase.training.details.search</field>
+        <field name="model">purchase.training.details</field>
+        <field name="arch" type="xml">
+            <search string="Training Details">
+                <field name="name"/>
+                <field name="purchase_order_id"/>
+                <field name="training_id"/>
+                <field name="instructor_id"/>
+                <field name="location"/>
+                <separator/>
+                <filter string="Draft" name="draft" domain="[('state','=','draft')]"/>
+                <filter string="Confirmed" name="confirmed" domain="[('state','=','confirmed')]"/>
+                <filter string="Done" name="done" domain="[('state','=','done')]"/>
+                <filter string="Cancelled" name="cancelled" domain="[('state','=','cancelled')]"/>
+                <group expand="0" string="Group By">
+                    <filter string="Purchase Order" name="group_by_po" context="{'group_by':'purchase_order_id'}"/>
+                    <filter string="Training" name="group_by_training" context="{'group_by':'training_id'}"/>
+                    <filter string="Instructor" name="group_by_instructor" context="{'group_by':'instructor_id'}"/>
+                    <filter string="Status" name="group_by_state" context="{'group_by':'state'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- Action -->
+    <record id="action_purchase_training_details" model="ir.actions.act_window">
+        <field name="name">Training Details</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">purchase.training.details</field>
+        <field name="view_mode">tree,form</field>
+        <field name="search_view_id" ref="view_purchase_training_details_search"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create a new training detail
+            </p>
+        </field>
+    </record>
+
+    <!-- Menu Item -->
+    <menuitem id="menu_purchase_training_details"
+              name="Training Details"
+              parent="purchase.menu_purchase_root"
+              action="action_purchase_training_details"
+              sequence="6"/>
+</odoo> 

@@ -1,0 +1,282 @@
+<odoo>
+    <template id="report_po_document_training" name="Training PUrchase Order">
+        <t t-call="web.html_container">
+
+            <t t-foreach="docs" t-as="o">
+                <t t-set="lang" t-value="o.partner_id.lang"/>
+                <t t-set="o" t-value="o.with_context(lang=lang, po_repeat_meta=True)"/>
+                <t t-call="invoice_training_details.custom_invoice_report_layout">
+                    <t t-set="forced_vat" t-value="o.fiscal_position_id.foreign_vat"/>
+                    <t t-set="is_clc_order" t-value="'clc' in [(method or '').lower() for method in o.training_course_ids.mapped('payment_method')]"/>
+
+                    <div class="row">
+                        <div class="col-18">
+                            <span t-if="is_clc_order" style="font-size:30px; font-weight:bold; color:#0DCAF0;">Work Order</span>
+                            <span t-if="not is_clc_order" style="font-size:30px; font-weight:bold; color:#0DCAF0;">Purchase Order</span>
+                        </div>
+                    </div>
+
+                    <div class="row pt-3 pb-3">
+                        <div class="col-8">
+                            <div>
+                                <strong t-if="o.partner_id.is_company == True" style="font-size:20px;">Company Name:</strong>
+                                <div t-if="o.partner_id.is_company == True" t-field="o.partner_id.name" style="font-size:20px;"/>
+                                <strong t-if="o.partner_id.is_company == False" style="font-size:20px;">Company Name:</strong>
+                                <div t-if="o.partner_id.is_company == False" t-field="o.partner_id.parent_id.name" style="font-size:20px;"/>
+
+                                <div style="
+                                    font-size:20px;
+                                    line-height:1.35;
+                                    margin:0 0 4px 0;
+                                    max-width:100%;
+                                ">
+                                    <strong>Address:</strong>
+                                    <span t-if="o.partner_id.street" t-field="o.partner_id.street"/>
+                                    <t t-if="o.partner_id.street2">
+                                        <t t-if="o.partner_id.street">, </t>
+                                        <span t-field="o.partner_id.street2"/>
+                                    </t>
+                                    <t t-if="o.partner_id.city">
+                                        <t t-if="o.partner_id.street or o.partner_id.street2">, </t>
+                                        <span t-field="o.partner_id.city"/>
+                                    </t>
+                                    <t t-if="o.partner_id.country_id">
+                                        <t t-if="o.partner_id.street or o.partner_id.street2 or o.partner_id.city">, </t>
+                                        <span t-field="o.partner_id.country_id.name"/>
+                                    </t>
+                                </div>
+
+                                <strong t-if="o.partner_id.is_company == True and o.partner_id.vat" style="font-size:20px;">Tax Number:</strong>
+                                <div t-if="o.partner_id.is_company == True and o.partner_id.vat" t-field="o.partner_id.vat" style="font-size:20px;"/>
+                                <strong t-if="o.partner_id.is_company == False and o.partner_id.parent_id.vat" style="font-size:20px;">Tax Number:</strong>
+                                <div t-if="o.partner_id.is_company == False and o.partner_id.parent_id.vat" t-field="o.partner_id.parent_id.vat" style="font-size:20px;"/>
+
+                                <strong t-if="o.partner_id.is_company == False" style="font-size:20px;">Attention:</strong>
+                                <div t-if="o.partner_id.is_company == False" t-field="o.partner_id.name" style="font-size:20px;"/>
+                            </div>
+                        </div>
+
+                        <div class="col-4">
+                            <div style="
+                                margin-left:auto;
+                                width:100%;
+                                max-width:330px;
+                                font-size:20px;
+                                line-height:1.35;
+                            ">
+                                <table class="table table-borderless"
+                                       style="
+                                           width:auto;
+                                           margin:0 0 0 auto;
+                                           border-collapse:collapse;
+                                       ">
+                                    <tr>
+                                        <td style="border:0; padding:0 8px 4px 0; vertical-align:top; font-size:20px; white-space:nowrap;">
+                                            <span t-if="is_clc_order">Work Order:</span>
+                                            <span t-if="not is_clc_order">Purchase Order:</span>
+                                        </td>
+                                        <td style="border:0; padding:0 0 4px 0; vertical-align:top; font-size:20px; white-space:nowrap;">
+                                            <span t-if="is_clc_order" t-esc="o.name.replace('PO-', 'WO-', 1) if o.name.startswith('PO-') else 'WO-' + o.name"/>
+                                            <span t-if="not is_clc_order" t-field="o.name"/>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td style="border:0; padding:0 8px 4px 0; vertical-align:top; font-size:20px; white-space:nowrap;">Date:</td>
+                                        <td style="border:0; padding:0 0 4px 0; vertical-align:top; font-size:20px; white-space:nowrap;">
+                                            <span t-field="o.date_order" t-options="{&quot;widget&quot;:&quot;date&quot;}"/>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td style="border:0; padding:0 8px 0 0; vertical-align:top; font-size:20px; white-space:nowrap;">Validity Date:</td>
+                                        <td style="border:0; padding:0; vertical-align:top; font-size:20px; white-space:nowrap;">
+                                            <span t-field="o.validity_date"/>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <style>
+                        table[name="training_line_table"] th {
+                            background-color: #D9F4FA !important;
+                            color: #075E68 !important;
+                            text-align: center !important;
+                            vertical-align: middle !important;
+                            border-color: #9DDDE7 !important;
+                        }
+                        table[name="training_line_table"] td {
+                            text-align: center !important;
+                            vertical-align: middle !important;
+                        }
+
+                        /* Invoice total box only */
+                        .po-invoice-total-box,
+                        .po-invoice-total-box * {
+                            direction:ltr !important;
+                        }
+
+                        .po-invoice-total-box td,
+                        .po-invoice-total-box th,
+                        .po-invoice-total-box span,
+                        .po-invoice-total-box strong {
+                            font-size:18px !important;
+                            font-weight:700 !important;
+                        }
+
+                        .po-invoice-total-box td:first-child {
+                            text-align:left !important;
+                        }
+
+                        .po-invoice-total-box td:last-child {
+                            text-align:right !important;
+                            white-space:nowrap !important;
+                        }
+
+                    </style>
+                    <t t-set="is_cisco_u_all_access" t-value="any('cisco u' in (name or '').lower() for name in o.training_course_ids.mapped('training_id.name'))"/>
+                    <table t-if="o.display_training_table" class="table table-sm o_main_table table-bordered text-center" name="training_line_table">
+                        <thead>
+                            <tr>
+                                <th style="font-size:18px; text-align:center; vertical-align:middle;">Item</th>
+<th style="font-size:18px; text-align:center; vertical-align:middle;">
+    <span t-if="is_cisco_u_all_access">Subscription Name</span>
+    <span t-if="not is_cisco_u_all_access">Training Name</span>
+</th>
+<th t-if="o.display_instructor" style="font-size:18px; text-align:center; vertical-align:middle;">Instructor Name</th>
+<th style="font-size:18px; text-align:center; vertical-align:middle;">
+    <span t-if="is_cisco_u_all_access"># Of Subscriptions</span>
+    <span t-if="not is_cisco_u_all_access"># Of Students</span>
+</th>
+<th t-if="is_cisco_u_all_access" style="font-size:18px; text-align:center; vertical-align:middle;">Total Rate</th>
+<th t-if="not is_cisco_u_all_access" style="font-size:18px; text-align:center; vertical-align:middle;">
+    <span t-if="o.display_location">Location</span>
+    <span t-elif="o.display_where">Location1</span>
+</th>
+<th t-if="not is_cisco_u_all_access" style="font-size:18px; text-align:center; vertical-align:middle;">Duration</th>
+<th t-if="not is_cisco_u_all_access" style="font-size:18px; text-align:center; vertical-align:middle;">Training Dates</th>
+<th t-if="not is_cisco_u_all_access" style="font-size:18px; text-align:center; vertical-align:middle;">
+    <span t-if="is_clc_order">Rate Card</span>
+    <span t-if="not is_clc_order">Training Price</span>
+</th>
+<th t-if="o.display_total" style="font-size:18px; text-align:center; vertical-align:middle;">Total Price</th>
+
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <t t-set="item" t-value="1"/>
+                            <t t-set="total_rows" t-value="len(o.training_course_ids)"/>
+                            <t t-foreach="o.training_course_ids" t-as="training">
+                                <tr>
+                                    <td style="font-size:9px;"><span t-esc="item"/></td>
+                                    <td style="font-size:9px;"><span t-field="training.training_id"/></td>
+                                    <td t-if="o.display_instructor" style="font-size:9px;"><span t-field="training.instructor_id.name"/></td>
+                                    <td style="font-size:9px;"><span t-field="training.no_of_student"/></td>
+                                    <td t-if="is_cisco_u_all_access" style="font-size:9px; text-align:center; vertical-align:middle;">
+                                        <span t-out="training.price or 0.0"
+                                              t-options="{&quot;widget&quot;: &quot;monetary&quot;, &quot;display_currency&quot;: o.currency_id}"/>
+                                    </td>
+                                    <td t-if="not is_cisco_u_all_access" style="font-size:9px;">
+                                        <span t-if="o.display_location" t-field="training.location"/>
+                                        <span t-if="o.display_location and o.display_where">, </span>
+                                        <span t-if="o.display_where" t-field="training.where_location2"/>
+                                    </td>
+                                    <td t-if="not is_cisco_u_all_access" style="font-size:9px;"><span t-field="training.duration"/></td>
+                                    <td t-if="not is_cisco_u_all_access" style="font-size:9px;"><span t-field="training.training_date_start"/> - <span t-field="training.training_date_end"/></td>
+                                    <td t-if="not is_cisco_u_all_access" style="font-size:9px;"><span t-field="training.price"/></td>
+                                    <t t-if="item == 1">
+                                        <td t-if="o.display_total" t-att-rowspan="total_rows" style="font-size:9px;"><span t-field="o.total_training_price"/></td>
+                                    </t>
+                                </tr>
+                                <t t-set="item" t-value="item + 1"/>
+                            </t>
+                        </tbody>
+                    </table>
+
+                    <div style="
+                        width:100%;
+                        margin:6px 0 6px 0;
+                        text-align:right;
+                        page-break-inside:avoid;
+                    ">
+                        <table class="table table-sm table-border po-invoice-total-box"
+                               style="
+                                   display:inline-table;
+                                   width:auto;
+                                   min-width:300px;
+                                   max-width:48%;
+                                   margin:0 0 0 auto;
+                                   background-color:#fff;
+                                   border-collapse:collapse;
+                               ">
+                            <t t-set="tax_totals" t-value="o.tax_totals"/>
+                            <t t-if="tax_totals.get('subtotals')">
+                                <t t-foreach="tax_totals.get('subtotals')" t-as="subtotal">
+                                    <tr class="border-grey o_subtotal">
+                                        <td style="background-color:#fff; font-size:18px; line-height:1.3; padding:5px 8px; white-space:nowrap;">
+                                            <strong t-out="subtotal['name']">Untaxed Amount</strong>
+                                        </td>
+                                        <td style="background-color:#fff; text-align:right; font-size:18px; line-height:1.3; padding:5px 8px; white-space:nowrap;">
+                                            <span t-att-class="oe_subtotal_footer_separator" t-out="subtotal['formatted_amount']"/>
+                                        </td>
+                                    </tr>
+                                    <t t-set="subtotal_to_show" t-value="subtotal['name']"/>
+                                    <t t-call="account.tax_groups_totals"/>
+                                </t>
+                            </t>
+
+                            <tr class="border-grey o_total">
+                                <td style="background-color:#fff; font-size:18px; line-height:1.3; padding:5px 8px; white-space:nowrap;">
+                                    <strong t-if="is_clc_order">NIL ME Invoice Amount</strong>
+                                    <strong t-if="not is_clc_order">Partner Invoice Amount</strong>
+                                </td>
+                                <td style="background-color:#fff; text-align:right; font-size:18px; line-height:1.3; padding:5px 8px; white-space:nowrap;">
+                                    <span t-out="o.amount_total" t-options="{&quot;widget&quot;: &quot;monetary&quot;, &quot;display_currency&quot;: o.currency_id}"/>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+
+<!-- Keep terms/bank text and the stamp/signature in the same
+     closing area. The images are positioned in the otherwise empty right
+     column instead of reserving a full-height row after the terms. -->
+<div class="po-wo-closing"
+     style="position:relative;width:100%;min-height:105px;margin:2px 0 0;padding:0;page-break-inside:auto;">
+    <div class="po-wo-closing-copy" style="width:61%;margin:0;padding:0;">
+        <div class="row" style="margin:0;padding:0 0 3px 0;">
+            <div class="col-12" style="margin:0;padding:0;">
+                <div t-field="o.term_and_cond" style="width:100%;font-size:22px;"/>
+            </div>
+        </div>
+        <div t-if="o.bank_details" class="row" style="margin:0;padding:0;">
+            <div class="col-12" style="margin:0;padding:0;">
+                <p style="margin:0;font-size:22px;">
+                    <span t-field="o.bank_details" style="font-size:22px;"/>
+                </p>
+            </div>
+        </div>
+    </div>
+
+
+    <div t-if="(o.company_id.stamp and o.display_stamp) or (o.company_id.signature and o.display_signature)"
+         class="po-wo-signature-area"
+         style="position:absolute;right:0;bottom:0;width:38%;height:175px;margin:0;padding:0;line-height:1;">
+        <!-- Keep the original WO stamp/signature sizes. They share the blank
+             right-hand area without reserving another printable row. -->
+        <img t-if="o.company_id.stamp and o.display_stamp"
+             t-att-src="image_data_uri(o.company_id.stamp)"
+             style="position:absolute;right:32px;bottom:8px;max-height:160px;max-width:190px;width:auto;height:auto;object-fit:contain;"
+             alt="Stamp"/>
+        <img t-if="o.company_id.signature and o.display_signature"
+             t-att-src="image_data_uri(o.company_id.signature)"
+             style="position:absolute;right:0;bottom:0;max-height:120px;max-width:180px;width:auto;height:auto;object-fit:contain;"
+             alt="Signature"/>
+    </div>
+</div>
+
+                </t>
+            </t>
+        </t>
+    </template>
+
+</odoo>

@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="crm_lead_view_form_lcp_per_training" model="ir.ui.view">
+        <field name="name">crm.lead.form.lcp.per.training</field>
+        <field name="model">crm.lead</field>
+        <field name="inherit_id" ref="invoice_training_details.crm_reveal_lead_opportunity_form_training"/>
+        <field name="arch" type="xml">
+
+            <xpath expr="//page[@name='lcp_details']" position="replace">
+                <page name="lcp_details" string="LCP Details" class="o_lcp_full_width_page px-0 py-2">
+                    <div class="o_lcp_force_full_width">
+                        <field name="training_course_ids"
+                               widget="lcp_per_training"
+                               class="o_lcp_force_field"
+                               nolabel="1"
+                               options="{'no_create': True, 'no_delete': True}">
+                            <tree create="false" delete="false">
+                                <field name="name"/>
+                                <field name="training_id"/>
+                                <field name="lead_id"/>
+                                <field name="payment_method"/>
+                                <field name="location"/>
+                                <field name="no_of_student"/>
+                                <field name="duration"/>
+                                <field name="training_date_start"/>
+                                <field name="training_date_end"/>
+                                <field name="price"/>
+                                <field name="lcp_allowed_instructor_ids" column_invisible="1"/>
+                                <field name="instructor_id"
+                                       domain="[('id', 'in', lcp_allowed_instructor_ids)]"
+                                       options="{'no_create': True, 'no_create_edit': True}"/>
+
+                                <field name="lcp_currency_id"/>
+                                <field name="lcp_so_no"/>
+                                <field name="lcp_vat_rate"/>
+                                <field name="lcp_clcs_per_seat"/>
+                                <field name="lcp_rate_card_per_seat"/>
+                                <field name="lcp_instructor_source"/>
+                                <field name="lcp_instructor_md_rate"/>
+                                <field name="lcp_vendor_instructor_day"/>
+                                <field name="lcp_uber_day_rate"/>
+                                <field name="lcp_per_diem_rate"/>
+                                <field name="lcp_per_diem_days"/>
+                                <field name="lcp_cost_learning_partner"/>
+                                <field name="lcp_partner_share_pct"/>
+                                <field name="lcp_markup_pct"/>
+                                <field name="lcp_partner_cash_cost"/>
+                                <field name="lcp_venue_cost"/>
+                                <field name="lcp_catering_cost"/>
+                                <field name="lcp_koenig_discount_pct"/>
+                                <field name="lcp_koenig_discounted_seat_cost"/>
+                                <field name="lcp_koenig_nil_return"/>
+
+                                <field name="lcp_is_online"/>
+                                <field name="lcp_days"/>
+                                <field name="lcp_total_seats"/>
+                                <field name="lcp_total_clcs"/>
+                                <field name="lcp_total_clcs_with_vat"/>
+                                <field name="lcp_total_rate_card"/>
+                                <field name="lcp_total_instructor_cost"/>
+                                <field name="lcp_total_instructor_md"/>
+                                <field name="lcp_total_vendor_instructor"/>
+                                <field name="lcp_total_per_diem"/>
+                                <field name="lcp_total_uber_estimate"/>
+                                <field name="lcp_ticket_total"/>
+                                <field name="lcp_hotel_total"/>
+                                <field name="lcp_total_logistics"/>
+                                <field name="lcp_all_onsite_expenses"/>
+                                <field name="lcp_partner_share"/>
+                                <field name="lcp_total_costs"/>
+                                <field name="lcp_nilme_profit"/>
+                                <field name="lcp_profit_margin"/>
+                                <field name="lcp_unassigned_logistics_count"/>
+                            </tree>
+                        </field>
+                    </div>
+                </page>
+            </xpath>
+
+            <xpath expr="//page[@id='logistics']//field[@name='ticket_ids']/tree/field[@name='airline_id']"
+                   position="before">
+                <field name="lcp_training_course_id"
+                       string="Training"
+                       domain="[('lead_id', '=', parent.id), ('location', '=', 'On site')]"
+                       options="{'no_create': True}"/>
+            </xpath>
+
+            <xpath expr="//page[@id='logistics']//field[@name='hotel_ids']/tree/field[@name='hotel_id']"
+                   position="before">
+                <field name="lcp_training_course_id"
+                       string="Training"
+                       domain="[('lead_id', '=', parent.id), ('location', '=', 'On site')]"
+                       options="{'no_create': True}"/>
+            </xpath>
+
+            <xpath expr="//page[@id='logistics']//field[@name='ticket_ids']/tree/field[@name='currency_id']"
+                   position="attributes">
+                <attribute name="column_invisible">1</attribute>
+                <attribute name="readonly">1</attribute>
+            </xpath>
+
+            <xpath expr="//page[@id='logistics']//field[@name='hotel_ids']/tree/field[@name='currency_id']"
+                   position="attributes">
+                <attribute name="column_invisible">1</attribute>
+                <attribute name="readonly">1</attribute>
+            </xpath>
+
+        </field>
+    </record>
+</odoo>

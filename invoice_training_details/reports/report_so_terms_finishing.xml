@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <template id="report_quotation_terms_finishing"
+              inherit_id="invoice_training_details.report_quotation_document_training">
+
+        <xpath expr="//table[@name='training_line_table']//span[normalize-space()='# Of Students']" position="replace">
+            <span t-if="not is_cisco_u_all_access">Seats</span>
+        </xpath>
+
+        <xpath expr="//div[@t-field='o.term_and_cond']" position="before">
+            <t t-set="enterone_terms_pdf"
+               t-value="bool(o.training_course_ids.filtered(lambda t: t.lcp_cost_learning_partner == 'EnterOne'))"/>
+
+            <style t-if="enterone_terms_pdf">
+                .proforma-text-section,
+                .proforma-text-section * {
+                    font-family: Arial, Helvetica, sans-serif !important;
+                    font-size: 18px !important;
+                    line-height: 1.4 !important;
+                }
+                .proforma-text-section table {
+                    min-width: 520px !important;
+                    width: auto !important;
+                    border-collapse: collapse !important;
+                }
+                .proforma-text-section table td,
+                .proforma-text-section table th {
+                    padding: 10px 14px !important;
+                    font-size: 18px !important;
+                }
+            </style>
+        </xpath>
+
+    </template>
+</odoo>

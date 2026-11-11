@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <!-- Reuse the Purchase Order Subject typography on all Sales PDFs. -->
+    <template id="sale_subject_report_block">
+        <div t-if="sale_subject_record.nil_so_subject and sale_subject_record.nil_so_subject.strip()"
+             class="nil-sale-report-subject"
+             style="margin:8px 0 14px 0; font-size:16px !important; line-height:1.4; page-break-inside:avoid; text-align:left;">
+            <strong>Subject:</strong>
+            <span t-field="sale_subject_record.nil_so_subject"/>
+        </div>
+    </template>
+
+    <!-- Standard Odoo quotation/order and pro-forma PDF share this template.
+         On Odoo 17 the actual sale order line table has class o_main_table. -->
+    <template id="report_standard_sale_subject"
+              inherit_id="sale.report_saleorder_document">
+        <xpath expr="//table[hasclass('o_main_table')]" position="before">
+            <t t-call="invoice_training_details.sale_subject_report_block">
+                <t t-set="sale_subject_record" t-value="doc"/>
+            </t>
+        </xpath>
+    </template>
+
+    <!-- Training Quotation (including CLC patched quotation). -->
+    <template id="report_training_quotation_subject"
+              inherit_id="invoice_training_details.report_quotation_document_training">
+        <xpath expr="//table[@name='training_line_table']" position="before">
+            <t t-call="invoice_training_details.sale_subject_report_block">
+                <t t-set="sale_subject_record" t-value="o"/>
+            </t>
+        </xpath>
+    </template>
+
+    <!-- PS Quotation ONLY: print the subject value, without the Subject: label. -->
+    <template id="report_ps_quotation_subject"
+              inherit_id="invoice_training_details.report_ps_quotation_document">
+        <xpath expr="//table[@name='training_line_table']" position="before">
+            <div t-if="o.nil_so_subject and o.nil_so_subject.strip()"
+                 class="nil-sale-report-subject"
+                 style="margin:8px 0 14px 0;font-size:18px !important;font-weight:700 !important;line-height:1.4;page-break-inside:avoid;text-align:left;">
+                <span t-field="o.nil_so_subject"
+                      style="font-size:18px !important;font-weight:700 !important;"/>
+            </div>
+        </xpath>
+    </template>
+
+    <!-- Training PO/CLC Work Order from a Sales Order. -->
+    <template id="report_training_wo_subject"
+              inherit_id="invoice_training_details.report_po_document_training">
+        <xpath expr="//table[@name='training_line_table']" position="before">
+            <t t-call="invoice_training_details.sale_subject_report_block">
+                <t t-set="sale_subject_record" t-value="o"/>
+            </t>
+        </xpath>
+    </template>
+</odoo>

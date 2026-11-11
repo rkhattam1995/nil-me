@@ -1,0 +1,576 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <!-- One consistent money display for PS line prices AND quote tax totals.
+         Integral amounts have no .00; fractional amounts use Odoo monetary formatting. -->
+    <template id="ps_quotation_compact_money">
+        <t t-set="nil_ps_money_value" t-value="nil_ps_money_amount or 0.0"/>
+        <span t-if="abs(nil_ps_money_value - round(nil_ps_money_value)) &lt; 0.000001"
+              t-out="('{:,.0f}'.format(nil_ps_money_value) + ' ' + (o.currency_id.symbol or o.currency_id.name)) if o.currency_id.position == 'after' else ((o.currency_id.symbol or o.currency_id.name) + ' ' + '{:,.0f}'.format(nil_ps_money_value))"/>
+        <span t-else="" t-out="nil_ps_money_value"
+              t-options="{'widget':'monetary','display_currency':o.currency_id}"/>
+    </template>
+
+    <template id="report_ps_quotation_document" name="PS Quotation Report">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="o">
+                <t t-set="lang" t-value="o.partner_id.lang"/>
+
+                <t t-call="invoice_training_details.custom_invoice_report_layout">
+
+                    <t t-set="o" t-value="o.with_context(lang=lang, quotation_repeat_meta=True)"/>
+                    <t t-set="forced_vat" t-value="o.fiscal_position_id.foreign_vat"/>
+
+                    <style>
+
+                        table[name="training_line_table"] thead th {
+                            background-color: #EAF9FC !important;
+                            color: #075E68 !important;
+                        }
+
+                        .proforma-text-section,
+                        .proforma-text-section * {
+                            font-size: 16px !important;
+                            font-family: inherit !important;
+                        }
+
+
+                        /* TABLES: LTR + black text */
+                        table,
+                        table * {
+                            direction:ltr !important;
+                            color:#000 !important;
+                        }
+
+                        /* Table headings: shaded + bold + black */
+                        table thead th {
+                            background-color:#EAF9FC !important;
+                            color:#000 !important;
+                            font-weight:700 !important;
+                        }
+
+                        /* TOTAL TABLE: one font size everywhere */
+                        .quotation-total-box,
+                        .quotation-total-box td,
+                        .quotation-total-box th,
+                        .quotation-total-box span,
+                        .quotation-total-box strong {
+                            font-size:16px !important;
+                            color:#000 !important;
+                            direction:ltr !important;
+                        }
+
+                        .quotation-total-box td:first-child {
+                            text-align:left !important;
+                            font-weight:700 !important;
+                            background-color:#EAF9FC !important;
+                        }
+
+                        .quotation-total-box td:first-child strong {
+                            font-weight:700 !important;
+                        }
+
+                        .quotation-total-box td:last-child {
+                            text-align:right !important;
+                            font-weight:400 !important;
+                            background-color:#fff !important;
+                            white-space:nowrap !important;
+                        }
+
+                    </style>
+
+                    <!-- Use company record if contact belongs to a company -->
+                    <t t-set="customer_partner"
+                       t-value="o.partner_id if o.partner_id.is_company else (o.partner_id.parent_id or o.partner_id)"/>
+
+
+                    <!-- Proforma Invoice Title -->
+                    <div class="row" style="margin:0 0 4px 0; padding:0;">
+
+                        <div class="col-12"
+                             style="margin:0; padding-top:0; padding-bottom:0;">
+
+                            <span class="h4 text-info"
+                                  style="display:block; margin:0; padding:0;">
+                                PS Quotation
+                            </span>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- Customer Details -->
+                    <div class="row"
+                         style="margin-top:0; padding-top:0; padding-bottom:10px;">
+
+                        <div class="col-8">
+
+                            <div>
+
+                                <!-- Company Name -->
+                                <div style="margin:0 0 3px 0;">
+                                    <strong>Company Name:</strong>
+                                    <span t-field="customer_partner.name"/>
+                                </div>
+
+
+                                <!-- Address -->
+                                <div style="margin:0 0 3px 0;">
+
+                                    <strong>Address:</strong>
+
+                                    <span t-if="customer_partner.street"
+                                          t-field="customer_partner.street"/>
+
+                                    <t t-if="customer_partner.street2">
+                                        <t t-if="customer_partner.street">, </t>
+                                        <span t-field="customer_partner.street2"/>
+                                    </t>
+
+                                    <t t-if="customer_partner.city">
+                                        <t t-if="customer_partner.street or customer_partner.street2">, </t>
+                                        <span t-field="customer_partner.city"/>
+                                    </t>
+
+                                    <t t-if="customer_partner.state_id">
+                                        <t t-if="customer_partner.street or customer_partner.street2 or customer_partner.city">, </t>
+                                        <span t-field="customer_partner.state_id.name"/>
+                                    </t>
+
+                                    <t t-if="customer_partner.zip">
+                                        <t t-if="customer_partner.street or customer_partner.street2 or customer_partner.city or customer_partner.state_id">, </t>
+                                        <span t-field="customer_partner.zip"/>
+                                    </t>
+
+                                    <t t-if="customer_partner.country_id">
+                                        <t t-if="customer_partner.street or customer_partner.street2 or customer_partner.city or customer_partner.state_id or customer_partner.zip">, </t>
+                                        <span t-field="customer_partner.country_id.name"/>
+                                    </t>
+
+                                </div>
+
+
+                                <!-- Email -->
+                                <div t-if="o.partner_id.email or customer_partner.email"
+                                     style="margin:0 0 3px 0;">
+
+                                    <strong>Email:</strong>
+
+                                    <span t-if="o.partner_id.email"
+                                          t-field="o.partner_id.email"/>
+
+                                    <span t-else=""
+                                          t-field="customer_partner.email"/>
+
+                                </div>
+
+
+                                <!-- Tax Number -->
+                                <div t-if="customer_partner.vat"
+                                     style="margin:0 0 3px 0;">
+
+                                    <strong>Tax Number:</strong>
+                                    <span t-field="customer_partner.vat"/>
+
+                                </div>
+
+
+                                <!-- Attention -->
+                                <div t-if="o.partner_id.is_company == False"
+                                     style="margin:0 0 3px 0;">
+
+                                    <strong>Attention:</strong>
+                                    <span t-field="o.partner_id.name"/>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+
+                        <!-- Document Details -->
+                        <div class="col-4">
+
+                            <div style="
+                                margin-left:auto;
+                                width:220px;
+                                line-height:1.2;
+                            ">
+
+                                <div style="
+                                    margin:0 0 3px 0;
+                                    padding:0;
+                                    white-space:nowrap;
+                                ">
+                                    <span>Quot#: </span>
+                                    <span t-if="o.name"
+                                          t-esc="
+                                            o.name
+                                            if o.name.startswith('Q')
+                                            else 'Q' + (
+                                                o.name[2:]
+                                                if o.name.startswith('SO')
+                                                else o.name[1:]
+                                                if o.name.startswith('S')
+                                                else o.name
+                                            )
+                                          "/>
+                                </div>
+
+                                <div style="
+                                    margin:0;
+                                    padding:0;
+                                    white-space:nowrap;
+                                ">
+                                    <span>DATE: </span>
+                                    <span t-field="o.date_order"
+                                          t-options="{&quot;widget&quot;: &quot;date&quot;}"/>
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <!--<table class="table table-sm o_main_table table-borderless" name="order_lines">-->
+                    <!--    <thead class="bg-light text-info">-->
+                    <!--        <tr>-->
+                    <!--            <th name="th_description" class="text-start"><span>DESCRIPTION</span></th>-->
+                    <!--            <th name="th_quantity" class="text-end"><span>QTY</span></th>-->
+                    <!--            <th name="th_rate" class="text-end"><span>RATE</span></th>-->
+                    <!--            <th name="th_amount" class="text-end"><span>AMOUNT</span></th>-->
+                    <!--        </tr>-->
+                    <!--    </thead>-->
+                    <!--    <tbody>-->
+                    <!--        <t t-foreach="o.order_lines" t-as="line">-->
+                    <!--            <tr>-->
+                    <!--                <td class="text-start" style="max-width:50px;"><span t-field="line.name"/></td>-->
+                    <!--                <td class="text-end"><span t-field="line.quantity"/></td>-->
+                    <!--                <td class="text-end"><span t-field="line.price_unit"/></td>-->
+                    <!--                <td class="text-end"><span t-field="line.quantity"/></td>-->
+                    <!--            </tr>-->
+                    <!--        </t>-->
+                    <!--    </tbody>-->
+                    <!--</table>-->
+
+
+                    <!-- TWO-LINE SPACE BEFORE TRAINING TABLE -->
+                    <div style="height:30px;"></div>
+
+
+                    <!-- PS Quotation: use ONLY the service fields requested.
+                         Custom columns appear only when at least one row has content. -->
+                    <t t-set="nil_ps_show_custom_1"
+                       t-value="any((line.nil_custom_value or '').strip() for line in o.pro_service_ids)"/>
+                    <t t-set="nil_ps_show_custom_2"
+                       t-value="any((line.nil_custom_value_2 or '').strip() for line in o.pro_service_ids)"/>
+                    <style>
+                        /* Fluid full-width table: narrow number columns take only
+                           what their content needs, and text columns get the rest. */
+                        table.nil_ps_quotation_items {
+                            width:100% !important;
+                            table-layout:auto !important;
+                            border-collapse:collapse !important;
+                            font-size:15px !important;
+                        }
+                        table.nil_ps_quotation_items thead th {
+                            padding:7px 5px !important;
+                            font-size:15px !important;
+                            line-height:1.4 !important;
+                            vertical-align:middle !important;
+                        }
+                        table.nil_ps_quotation_items tbody td,
+                        table.nil_ps_quotation_items tbody td * {
+                            font-size:15px !important;
+                            line-height:1.4 !important;
+                        }
+                        table.nil_ps_quotation_items tbody td {
+                            padding:7px 6px !important;
+                            vertical-align:middle !important;
+                        }
+                        table.nil_ps_quotation_items .nil_ps_col_item,
+                        table.nil_ps_quotation_items .nil_ps_col_qty,
+                        table.nil_ps_quotation_items .nil_ps_col_unit,
+                        table.nil_ps_quotation_items .nil_ps_col_total {
+                            width:1% !important;
+                            white-space:nowrap !important;
+                        }
+                        table.nil_ps_quotation_items .nil_ps_col_name,
+                        table.nil_ps_quotation_items .nil_ps_col_desc,
+                        table.nil_ps_quotation_items .nil_ps_col_custom {
+                            white-space:normal !important;
+                            word-wrap:break-word !important;
+                            overflow-wrap:break-word !important;
+                            word-break:normal !important;
+                        }
+                        table.nil_ps_quotation_items .nil_ps_col_custom {
+                            min-width:85px;
+                            width:12% !important;
+                            max-width:105px;
+                        }
+                        /* The editable column heading contains a span.  Unlike
+                           the other headings, the global table * color rule
+                           otherwise overrides its teal title color. */
+                        table.nil_ps_quotation_items thead th.nil_ps_col_custom,
+                        table.nil_ps_quotation_items thead th.nil_ps_col_custom span {
+                            color:#075E68 !important;
+                            font-weight:700 !important;
+                        }
+                        table.nil_ps_quotation_items tbody td.nil_ps_col_custom,
+                        table.nil_ps_quotation_items tbody td.nil_ps_col_custom span {
+                            color:#000 !important;
+                            font-weight:400 !important;
+                        }
+                    </style>
+                    <table t-if="o.pro_service_ids"
+                           class="table table-sm o_main_table table-bordered text-center nil_ps_quotation_items"
+                           name="training_line_table"
+                           style="width:100%;table-layout:auto;font-size:15px;">
+                        <thead>
+                            <tr>
+                                <th class="nil_ps_col_item" style="text-align:center;vertical-align:middle;">Item</th>
+                                <th class="nil_ps_col_name" style="text-align:center;vertical-align:middle;">Service Name</th>
+                                <th class="nil_ps_col_desc" style="text-align:center;vertical-align:middle;">Description</th>
+                                <th class="nil_ps_col_qty" style="text-align:center;vertical-align:middle;">Qty</th>
+                                <th class="nil_ps_col_unit" style="text-align:center;vertical-align:middle;">Unit Price</th>
+                                <th class="nil_ps_col_total" style="text-align:center;vertical-align:middle;">Total</th>
+                                <th t-if="nil_ps_show_custom_1" class="nil_ps_col_custom" style="text-align:center;vertical-align:middle;">
+                                    <span t-out="o.nil_ps_custom_heading or 'Custom Column 1'"/>
+                                </th>
+                                <th t-if="nil_ps_show_custom_2" class="nil_ps_col_custom" style="text-align:center;vertical-align:middle;">
+                                    <span t-out="o.nil_ps_custom_heading_2 or 'Custom Column 2'"/>
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <t t-set="item" t-value="1"/>
+                            <t t-foreach="o.pro_service_ids" t-as="service">
+                                <tr>
+                                    <td class="nil_ps_col_item" style="text-align:center;vertical-align:middle;">
+                                        <span t-esc="item"/>
+                                    </td>
+                                    <td class="nil_ps_col_name" style="text-align:left;vertical-align:middle;">
+                                        <span t-if="service.training_id" t-field="service.training_id"/>
+                                        <span t-else="" t-field="service.name"/>
+                                    </td>
+                                    <td class="nil_ps_col_desc" style="text-align:left;vertical-align:middle;white-space:normal;">
+                                        <span t-field="service.descriptions"/>
+                                    </td>
+                                    <td class="nil_ps_col_qty" style="text-align:center;vertical-align:middle;">
+                                        <span t-out="int(round(service.wor_hour_number or 0))"/>
+                                    </td>
+                                    <td class="nil_ps_col_unit" style="text-align:center;vertical-align:middle;white-space:nowrap;">
+                                        <t t-call="invoice_training_details.ps_quotation_compact_money">
+                                            <t t-set="nil_ps_money_amount" t-value="service.hourly_rate or 0.0"/>
+                                        </t>
+                                    </td>
+                                    <td class="nil_ps_col_total" style="text-align:center;vertical-align:middle;white-space:nowrap;">
+                                        <t t-call="invoice_training_details.ps_quotation_compact_money">
+                                            <t t-set="nil_ps_money_amount" t-value="(service.wor_hour_number or 0.0) * (service.hourly_rate or 0.0)"/>
+                                        </t>
+                                    </td>
+                                    <td t-if="nil_ps_show_custom_1" class="nil_ps_col_custom" style="text-align:left;vertical-align:middle;white-space:normal;word-wrap:break-word;">
+                                        <span t-field="service.nil_custom_value"/>
+                                    </td>
+                                    <td t-if="nil_ps_show_custom_2" class="nil_ps_col_custom" style="text-align:left;vertical-align:middle;white-space:normal;word-wrap:break-word;">
+                                        <span t-field="service.nil_custom_value_2"/>
+                                    </td>
+                                </tr>
+                                <t t-set="item" t-value="item + 1"/>
+                            </t>
+                        </tbody>
+                    </table>
+
+                    <div style="
+                        width:100%;
+                        margin:6px 0 6px 0;
+                        text-align:right;
+                        page-break-inside:avoid;
+                    ">
+
+                        <table class="table table-sm table-border quotation-total-box"
+                               style="
+                                   display:inline-table;
+                                   background-color:#fff;
+                                   width:300px;
+                                   margin:0 0 0 auto;
+                               ">
+
+                            <!-- Same quote totals/tax labels and styling, with
+                                 decimal display matching Unit Price and Total. -->
+                            <t t-set="tax_totals" t-value="o.tax_totals or {}"/>
+                            <t t-foreach="tax_totals.get('subtotals', [])" t-as="subtotal">
+                                <tr class="border-grey o_subtotal">
+                                    <td style="background-color:#fff;">
+                                        <strong t-out="subtotal['name']">Untaxed Amount</strong>
+                                    </td>
+                                    <td style="background-color:#fff;text-align:right;">
+                                        <span t-att-class="oe_subtotal_footer_separator">
+                                            <t t-call="invoice_training_details.ps_quotation_compact_money">
+                                                <t t-set="nil_ps_money_amount" t-value="subtotal['amount']"/>
+                                            </t>
+                                        </span>
+                                    </td>
+                                </tr>
+                                <t t-foreach="tax_totals.get('groups_by_subtotal', {}).get(subtotal['name'], [])"
+                                   t-as="amount_by_group">
+                                    <tr>
+                                        <td style="background-color:#fff;">
+                                            <span t-out="amount_by_group['tax_group_name']"/>
+                                            <t t-if="tax_totals.get('display_tax_base') and not amount_by_group.get('hide_base_amount')">
+                                                <span> on </span>
+                                                <t t-call="invoice_training_details.ps_quotation_compact_money">
+                                                    <t t-set="nil_ps_money_amount" t-value="amount_by_group['tax_group_base_amount']"/>
+                                                </t>
+                                            </t>
+                                        </td>
+                                        <td style="background-color:#fff;text-align:right;">
+                                            <t t-call="invoice_training_details.ps_quotation_compact_money">
+                                                <t t-set="nil_ps_money_amount" t-value="amount_by_group['tax_group_amount']"/>
+                                            </t>
+                                        </td>
+                                    </tr>
+                                </t>
+                            </t>
+
+                            <!-- Preserve the original total row and amount exactly. -->
+                            <tr class="border-grey o_total">
+                                <td style="background-color:#fff;">
+                                    <strong>Total Amount</strong>
+                                </td>
+                                <td style="background-color:#fff;text-align:right;">
+                                    <t t-call="invoice_training_details.ps_quotation_compact_money">
+                                        <t t-set="nil_ps_money_amount" t-value="o.amount_total"/>
+                                    </t>
+                                </td>
+                            </tr>
+
+                        </table>
+
+                    </div>
+
+
+                    <!-- Optional Service Details: same placement and typography as Course Materials. -->
+                    <t t-set="services_with_content"
+                       t-value="o.pro_service_ids.filtered('hyperlink')"/>
+
+                    <div t-if="services_with_content"
+                         style="width:100%;margin:8px 0 4px 0;padding:0;font-size:16px;line-height:1.45;">
+                        <div style="margin:0 0 3px 0;font-weight:700;">Service Details</div>
+                        <t t-foreach="services_with_content" t-as="service_document">
+                            <div style="margin:0 0 2px 0;">
+                                <span t-if="service_document.training_id" t-field="service_document.training_id"/>
+                                <span t-else="" t-field="service_document.name"/>
+                                <span>: </span>
+                                <a t-att-href="service_document.hyperlink"
+                                   target="_blank"
+                                   style="text-decoration:underline;">
+                                    View Service Details
+                                </a>
+                            </div>
+                        </t>
+                    </div>
+
+
+                    <!-- Terms & Conditions -->
+                    <div class="row pb-2"
+                         style="margin-top:0; padding-top:0; page-break-inside:avoid;">
+
+                        <div class="col-12 proforma-text-section"
+                             style="
+                                width:100%;
+                                font-size:16px;
+                                font-family:inherit;
+                             ">
+
+                            <p style="
+                                text-align:justify;
+                                margin:0;
+                                font-size:16px;
+                                font-family:inherit;
+                               ">
+
+                                <span t-field="o.term_and_cond"/>
+
+                            </p>
+
+                        </div>
+
+                    </div>
+
+
+                    <!--<div class="row" style="page-break-inside:avoid;">-->
+                    <!--    <div class="col-6"/>-->
+                    <!--    <div class="col-3">-->
+                    <!--        BALANCE DUE-->
+                    <!--    </div>-->
+                    <!--    <div class="col-3">-->
+                    <!--        <span t-field="o.total_training_price"/>-->
+                    <!--    </div>-->
+                    <!--</div>-->
+
+
+                    <!-- Bank Details -->
+                    <div class="row pt-3 pb-2"
+                         style="page-break-inside:avoid;">
+
+                        <div class="col-8 proforma-text-section"
+                             style="
+                                width:600px;
+                                font-size:16px;
+                                font-family:inherit;
+                             ">
+
+                            <p style="
+                                text-align:justify;
+                                margin:0;
+                                font-size:16px;
+                                font-family:inherit;
+                               ">
+
+                                <span t-field="o.bank_details"/>
+
+                            </p>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- Compact signature and stamp, matching the active Training Quotation. -->
+                    <div t-if="(o.company_id.stamp and o.display_stamp) or (o.company_id.signature and o.display_signature)"
+                         style="width:100%;margin:4px 0 0 0;padding:0;text-align:right;line-height:1;page-break-before:avoid;">
+                        <div style="display:inline-block;text-align:right;white-space:nowrap;margin:0;padding:0;vertical-align:bottom;">
+                            <img t-if="o.company_id.signature and o.display_signature"
+                                 t-att-src="image_data_uri(o.company_id.signature)"
+                                 style="max-height:100px;max-width:145px;width:auto;height:auto;object-fit:contain;vertical-align:bottom;display:inline-block;margin:0 6px 0 0;padding:0;"
+                                 alt="Signature"/>
+                            <img t-if="o.company_id.stamp and o.display_stamp"
+                                 t-att-src="image_data_uri(o.company_id.stamp)"
+                                 style="max-height:115px;max-width:135px;width:auto;height:auto;object-fit:contain;vertical-align:bottom;display:inline-block;margin:0;padding:0;"
+                                 alt="Stamp"/>
+                        </div>
+                    </div>
+
+                </t>
+
+            </t>
+
+        </t>
+    </template>
+
+    <record id="quotation_ps_report" model="ir.actions.report">
+        <field name="name">PS Quotation</field>
+        <field name="model">sale.order</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">invoice_training_details.report_ps_quotation_document</field>
+        <field name="report_file">invoice_training_details.report_ps_quotation_document</field>
+        <field name="print_report_name">'PS Quotation - %s' % (object.name or '')</field>
+        <field name="binding_model_id" ref="sale.model_sale_order"/>
+        <field name="paperformat_id" ref="invoice_training_details.paperformat_euro_training_report"/>
+        <field name="binding_type">report</field>
+    </record>
+</odoo>

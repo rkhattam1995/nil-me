@@ -2,23 +2,24 @@
 <odoo>
     <data>
         
-    <record id="view_contract_form_inherit" model="ir.ui.view">
-        <field name="name">contract.form.inherit</field>
-        <field name="model">hr.contract</field>
-        <field name="inherit_id" ref="hr_contract.hr_contract_view_form"/>
-        <field name="arch" type="xml">
-           <xpath expr="//page/group/group/div[@name='wage']" position="after">
-                <!--<group string="Salary Computation Details">-->
-                <field name="basic_salary"/>
-                <field name="mobile_allowance"/>
-                <field name="transport_allowance"/>
-                <field name="housing_allowance"/>
-                <field name="schooling_allowance"/>
-                <field name="other_allowance"/>
-                <!--</group>-->
-            </xpath>
-        </field>
-    </record>
+        <record id="view_contract_form_inherit" model="ir.ui.view">
+            <field name="name">contract.form.inherit</field>
+            <field name="model">hr.contract</field>
+            <field name="inherit_id" ref="hr_contract.hr_contract_view_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//page/group/group/div[@name='wage']" position="after">
+                    <!-- Salary Computation Details Group -->
+                    <group string="Salary Computation Details" groups="base.group_hr_user">
+                        <field name="basic_salary"/>
+                        <field name="mobile_allowance"/>
+                        <field name="transport_allowance"/>
+                        <field name="housing_allowance"/>
+                        <field name="schooling_allowance"/>
+                        <field name="other_allowance"/>
+                    </group>
+                </xpath>
+            </field>
+        </record>
 
     </data>
 </odoo>

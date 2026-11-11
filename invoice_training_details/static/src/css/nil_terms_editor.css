@@ -1,0 +1,160 @@
+.nil_terms_editor_pro {
+    width: 100%;
+    border: 1px solid #c9ccd1;
+    border-radius: 7px;
+    background: #fff;
+    overflow: hidden;
+    box-shadow: 0 1px 2px rgba(0,0,0,.04);
+}
+
+.nil_terms_toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+    padding: 8px;
+    background: #f7f8fa;
+    border-bottom: 1px solid #d9dce1;
+    position: sticky;
+    top: 0;
+    z-index: 3;
+}
+
+.nil_toolbar_group {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px;
+    padding-right: 7px;
+    margin-right: 1px;
+    border-right: 1px solid #d9dce1;
+}
+
+.nil_toolbar_group:last-child {
+    border-right: 0;
+}
+
+.nil_toolbar_caption {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: .06em;
+    color: #697079;
+    margin-right: 2px;
+}
+
+.nil_terms_toolbar button,
+.nil_terms_toolbar select,
+.nil_terms_toolbar .nil_color_control {
+    height: 31px;
+    border: 1px solid #cdd1d6;
+    border-radius: 5px;
+    background: #fff;
+    color: #222;
+    font-size: 12px;
+    line-height: 1;
+    padding: 0 8px;
+}
+
+.nil_terms_toolbar button {
+    min-width: 31px;
+    cursor: pointer;
+}
+
+.nil_terms_toolbar button:hover,
+.nil_terms_toolbar select:hover,
+.nil_terms_toolbar .nil_color_control:hover {
+    border-color: #8d969f;
+    background: #f1f4f6;
+}
+
+.nil_terms_toolbar select {
+    cursor: pointer;
+    max-width: 125px;
+}
+
+.nil_color_control {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    cursor: pointer;
+}
+
+.nil_color_control input[type="color"] {
+    width: 18px;
+    height: 18px;
+    border: 0;
+    padding: 0;
+    background: transparent;
+    cursor: pointer;
+}
+
+.nil_terms_editor_surface {
+    min-height: 330px;
+    max-height: 650px;
+    overflow: auto;
+    padding: 18px 20px;
+    outline: none;
+    background: #fff;
+    color: #151515;
+    font-size: 15px;
+    line-height: 1.5;
+}
+
+.nil_terms_editor_surface:focus {
+    box-shadow: inset 0 0 0 2px rgba(1, 126, 132, .08);
+}
+
+.nil_terms_editor_surface p {
+    margin: 0 0 8px 0;
+}
+
+.nil_terms_editor_surface h2,
+.nil_terms_editor_surface h3,
+.nil_terms_editor_surface h4 {
+    margin-top: 12px;
+    margin-bottom: 8px;
+}
+
+.nil_terms_editor_surface ul,
+.nil_terms_editor_surface ol {
+    margin-top: 6px;
+    margin-bottom: 10px;
+    padding-left: 28px;
+}
+
+.nil_terms_editor_surface li {
+    margin-bottom: 4px;
+}
+
+.nil_terms_editor_surface table {
+    border-collapse: collapse;
+    margin-top: 10px;
+    margin-bottom: 12px;
+}
+
+.nil_terms_editor_surface td,
+.nil_terms_editor_surface th {
+    border: 1px solid #777;
+    padding: 8px;
+    min-width: 55px;
+    vertical-align: top;
+}
+
+.nil_terms_editor_surface th {
+    background: #eef6f7;
+    font-weight: 700;
+}
+
+.nil_terms_editor_surface td:focus,
+.nil_terms_editor_surface th:focus {
+    outline: 2px solid #64aab0;
+}
+
+.nil_terms_hint {
+    padding: 5px 10px;
+    border-top: 1px solid #eceef1;
+    background: #fbfbfc;
+    color: #7a8087;
+    font-size: 11px;
+    text-align: right;
+}

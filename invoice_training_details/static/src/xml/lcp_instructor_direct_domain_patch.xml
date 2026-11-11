@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="invoice_training_details.LcpInstructorDirectDomainPatch"
+       t-inherit="invoice_training_details.LcpPerTrainingField"
+       t-inherit-mode="extension">
+        <xpath expr="//Many2OneField[@name=&quot;'instructor_id'&quot;]" position="attributes">
+            <attribute name="domain">line.data.lcp_instructor_source === 'nil_me' ? [['active', '=', true], ['job_id.name', '=ilike', 'Instructor']] : [['active', '=', true]]</attribute>
+            <attribute name="canCreate">false</attribute>
+            <attribute name="canQuickCreate">false</attribute>
+            <attribute name="canCreateEdit">false</attribute>
+        </xpath>
+    </t>
+</templates>

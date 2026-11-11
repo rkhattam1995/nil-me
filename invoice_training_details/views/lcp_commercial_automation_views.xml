@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="crm_lead_view_form_lcp_commercial_automation" model="ir.ui.view">
+        <field name="name">crm.lead.form.lcp.commercial.automation</field>
+        <field name="model">crm.lead</field>
+        <field name="inherit_id" ref="invoice_training_details.crm_lead_view_form_lcp_per_training"/>
+        <field name="arch" type="xml">
+            <xpath expr="//page[@name='lcp_details']//field[@name='training_course_ids']/tree/field[@name='lcp_vat_rate']" position="after">
+                <field name="lcp_vat_locked" column_invisible="1"/>
+                <field name="lcp_allowed_instructor_ids" column_invisible="1"/>
+                <field name="lcp_auto_price_generated" column_invisible="1"/>
+            </xpath>
+            <xpath expr="//page[@name='lcp_details']//field[@name='training_course_ids']/tree/field[@name='instructor_id']" position="attributes">
+                <attribute name="domain">[('id', 'in', lcp_allowed_instructor_ids)]</attribute>
+            </xpath>
+        </field>
+    </record>
+</odoo>

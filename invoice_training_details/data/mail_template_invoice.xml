@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <record id="mail_template_nil_invoice_sending" model="mail.template">
+            <field name="name">NIL Invoice: Sending</field>
+            <field name="model_id" ref="account.model_account_move"/>
+            <field name="email_from">{{ (object.invoice_user_id.email_formatted or object.company_id.email_formatted or user.email_formatted) }}</field>
+            <field name="use_default_to" eval="True"/>
+            <field name="subject">{{ object.company_id.name }} - Invoice {{ object.name or '' }}</field>
+            <field name="description">Default NIL invoice email used by Send &amp; Print</field>
+            <field name="body_html" type="html">
+                <div style="margin:0;padding:0;">
+                    <p style="margin:0 0 12px 0;">
+                        Dear <t t-out="object.partner_id.name or 'Customer'"/>,
+                    </p>
+                    <p style="margin:0 0 12px 0;">
+                        Please find attached invoice
+                        <strong><t t-out="object.name or ''"/></strong>
+                        for your reference.
+                    </p>
+                    <p t-if="object.invoice_date_due" style="margin:0 0 12px 0;">
+                        Due Date:
+                        <strong><t t-out="object.invoice_date_due"/></strong>
+                    </p>
+                    <p style="margin:0 0 12px 0;">
+                        Should you require any further information, please feel free to contact us.
+                    </p>
+                    <p style="margin:0;">
+                        Best regards,<br/>
+                        <t t-out="object.company_id.name"/>
+                    </p>
+                </div>
+            </field>
+        </record>
+    </data>
+</odoo>

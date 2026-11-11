@@ -1,0 +1,457 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="invoice_training_details.LcpPerTrainingField">
+        <div class="o_lcp_per_training">
+            <t t-if="!records.length">
+                <div class="alert alert-info mb-0" role="status">
+                    Add at least one Training line to see LCP pricing.
+                </div>
+            </t>
+
+            <t t-foreach="records" t-as="line" t-key="line.id">
+                <div class="border rounded shadow-sm p-3 mb-4 bg-white">
+                    <div class="card bg-dark text-white border-0 shadow-sm mb-4">
+                        <div class="card-body py-3 px-4">
+                            <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+                                <div class="d-flex align-items-center gap-3">
+                                    <div class="fs-3">
+                                        <i class="fa fa-line-chart" title="LCP"/>
+                                    </div>
+                                    <div>
+                                        <div class="fs-4 fw-bold">
+                                            LCP Financial Overview -
+                                            <t t-esc="trainingName(line)"/>
+                                        </div>
+                                        <div class="small text-white-50">
+                                            Pricing, delivery costs and profitability for this training only
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="d-flex gap-2 flex-wrap">
+                                    <span class="badge bg-primary rounded-pill px-3 py-2">
+                                        <t t-esc="selectionLabel(line, 'payment_method')"/>
+                                    </span>
+                                    <span class="badge bg-secondary rounded-pill px-3 py-2">
+                                        <t t-esc="selectionLabel(line, 'location')"/>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div t-if="line.data.lcp_unassigned_logistics_count"
+                         class="alert alert-warning py-2 px-3 mb-3"
+                         role="alert">
+                        <strong>Logistics need assignment:</strong>
+                        <t t-esc="line.data.lcp_unassigned_logistics_count"/>
+                        ticket/hotel line(s) are not assigned to a Training.
+                        Assign existing unassigned entries in the Logistics tab.
+                        New travel entries can be added from the Logistics button on each On-site Training row.
+                    </div>
+
+                    <div t-if="!line.data.lcp_is_online" class="alert alert-info py-2 px-3 mb-3" role="status">
+                        This training has independent On-site Logistics.
+                        Use the <strong>Logistics</strong> button on its row in the Training tab
+                        to manage flights, hotels, visa and booking documents.
+                        Venue, Catering, Uber and Per Diem apply only to this training.
+                    </div>
+
+                    <div class="d-flex align-items-center gap-2 mb-3">
+                        <span class="badge bg-primary">01</span>
+                        <div class="fs-5 fw-bold">Pricing &amp; Delivery Inputs</div>
+                    </div>
+
+                    <div class="row g-3 mb-4">
+                        <div class="col-12 col-md-6 col-xl-3">
+                            <div class="card h-100 shadow-sm border-top border-3 border-primary">
+                                <div class="card-header bg-light fw-bold py-2">
+                                    <i class="fa fa-briefcase text-primary me-2" title="Commercial"/>
+                                    Commercial
+                                </div>
+                                <div class="card-body">
+                                    <div class="small text-muted fw-bold mb-1">Learning Partner</div>
+                                    <SelectionField record="line"
+                                                    name="'lcp_cost_learning_partner'"
+                                                    readonly="props.readonly"/>
+
+                                    <div t-if="line.data.payment_method === 'clc'" class="mt-3">
+                                        <div class="small text-muted fw-bold mb-1">SO#</div>
+                                        <CharField record="line"
+                                                   name="'lcp_so_no'"
+                                                   readonly="props.readonly"/>
+                                    </div>
+
+                                    <div class="small text-muted fw-bold mb-1 mt-3">Payment Method</div>
+                                    <div class="bg-light rounded p-2">
+                                        <SelectionField record="line"
+                                                        name="'payment_method'"
+                                                        readonly="true"/>
+                                    </div>
+
+                                    <div t-if="line.data.payment_method === 'clc' || (line.data.payment_method === 'cash' &amp;&amp; line.data.lcp_cost_learning_partner === 'EnterOne')"
+                                         class="mt-3">
+                                        <div class="small text-muted fw-bold mb-1">Partner Share %</div>
+                                        <FloatField record="line"
+                                                    name="'lcp_partner_share_pct'"
+                                                    readonly="props.readonly"/>
+                                    </div>
+
+                                    <div t-if="line.data.payment_method === 'cash'"
+                                         class="mt-3">
+                                        <div class="small text-muted fw-bold mb-1">Partner Cost</div>
+                                        <MonetaryField record="line"
+                                                       name="'lcp_partner_cash_cost'"
+                                                       currencyField="'lcp_currency_id'"
+                                                       readonly="props.readonly"/>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-12 col-md-6 col-xl-3">
+                            <div class="card h-100 shadow-sm border-top border-3 border-info">
+                                <div class="card-header bg-light fw-bold py-2">
+                                    <i class="fa fa-usd text-info me-2" title="Training Pricing"/>
+                                    Training Pricing
+                                </div>
+                                <div class="card-body">
+                                    <div class="alert alert-info py-2 px-3 mb-3" role="status">
+                                        <div class="small fw-bold mb-1">Training Value</div>
+                                        <div class="fs-5 fw-bold">
+                                            <MonetaryField record="line"
+                                                           name="'price'"
+                                                           currencyField="'lcp_currency_id'"
+                                                           readonly="true"/>
+                                        </div>
+                                    </div>
+
+                                    <div class="small text-muted fw-bold mb-1">VAT %</div>
+                                    <FloatField record="line"
+                                                name="'lcp_vat_rate'"
+                                                readonly="props.readonly"/>
+
+                                    <div t-if="line.data.payment_method === 'clc'" class="mt-3">
+                                        <div class="small text-muted fw-bold mb-1">CLCs / Seat</div>
+                                        <FloatField record="line"
+                                                    name="'lcp_clcs_per_seat'"
+                                                    readonly="props.readonly"/>
+                                    </div>
+
+                                    <div t-if="line.data.payment_method === 'cash'" class="mt-3">
+                                        <div class="small text-muted fw-bold mb-1">USD / Seat</div>
+                                        <FloatField record="line"
+                                                    name="'lcp_clcs_per_seat'"
+                                                    readonly="props.readonly"/>
+                                    </div>
+
+                                    <div t-if="line.data.payment_method === 'cash'" class="mt-3">
+                                        <div class="small text-muted fw-bold mb-1">Markup %</div>
+                                        <FloatField record="line"
+                                                    name="'lcp_markup_pct'"
+                                                    readonly="props.readonly"/>
+                                    </div>
+
+                                    <div t-if="line.data.payment_method === 'clc'" class="mt-3">
+                                        <div class="small text-muted fw-bold mb-1">Rate Card / Seat</div>
+                                        <MonetaryField record="line"
+                                                       name="'lcp_rate_card_per_seat'"
+                                                       currencyField="'lcp_currency_id'"
+                                                       readonly="props.readonly"/>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-12 col-md-6 col-xl-3">
+                            <div class="card h-100 shadow-sm border-top border-3 border-success">
+                                <div class="card-header bg-light fw-bold py-2">
+                                    <i class="fa fa-user text-success me-2" title="Instructor"/>
+                                    Instructor
+                                </div>
+                                <div class="card-body">
+                                    <div class="small text-muted fw-bold mb-1">Instructor From</div>
+                                    <SelectionField record="line"
+                                                    name="'lcp_instructor_source'"
+                                                    readonly="props.readonly"/>
+
+                                    <div class="small text-muted fw-bold mb-1 mt-3">Instructor</div>
+                                    <Many2OneField record="line"
+                                                   name="'instructor_id'"
+                                                   readonly="props.readonly"/>
+
+                                    <div t-if="line.data.lcp_instructor_source === 'nil_me'" class="mt-3">
+                                        <div class="small text-muted fw-bold mb-1">Instructor Rate</div>
+                                        <MonetaryField record="line"
+                                                       name="'lcp_instructor_md_rate'"
+                                                       currencyField="'lcp_currency_id'"
+                                                       readonly="props.readonly"/>
+                                    </div>
+
+                                    <div t-if="line.data.lcp_instructor_source === 'vendor'" class="mt-3">
+                                        <div class="small text-muted fw-bold mb-1">Vendor Instructor / Day</div>
+                                        <MonetaryField record="line"
+                                                       name="'lcp_vendor_instructor_day'"
+                                                       currencyField="'lcp_currency_id'"
+                                                       readonly="props.readonly"/>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div t-if="!line.data.lcp_is_online" class="col-12 col-md-6 col-xl-3">
+                            <div class="card h-100 shadow-sm border-top border-3 border-warning">
+                                <div class="card-header bg-light fw-bold py-2">
+                                    <i class="fa fa-map-marker text-warning me-2" title="On-site Costs"/>
+                                    On-site Costs
+                                </div>
+                                <div class="card-body">
+                                    <div class="small text-muted fw-bold mb-1">Uber / Day</div>
+                                    <MonetaryField record="line"
+                                                   name="'lcp_uber_day_rate'"
+                                                   currencyField="'lcp_currency_id'"
+                                                   readonly="props.readonly"/>
+
+                                    <div t-if="line.data.lcp_instructor_source === 'nil_me'" class="mt-3">
+                                        <div class="small text-muted fw-bold mb-1">Per Diem / Day</div>
+                                        <MonetaryField record="line"
+                                                       name="'lcp_per_diem_rate'"
+                                                       currencyField="'lcp_currency_id'"
+                                                       readonly="props.readonly"/>
+
+                                        <div class="small text-muted fw-bold mb-1 mt-3">Per Diem Days</div>
+                                        <IntegerField record="line"
+                                                      name="'lcp_per_diem_days'"
+                                                      readonly="props.readonly"/>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div t-if="line.data.lcp_is_online" class="col-12 col-md-6 col-xl-3">
+                            <div class="alert alert-success h-100 d-flex align-items-center mb-0" role="status">
+                                <i class="fa fa-globe me-2" title="Online"/>
+                                Online training - on-site costs are excluded.
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="d-flex align-items-center gap-2 mb-3">
+                        <span class="badge bg-success">02</span>
+                        <div class="fs-5 fw-bold">LCP Summary</div>
+                    </div>
+
+                    <div class="row g-3 mb-3">
+                        <div class="col-12 col-lg-4">
+                            <div class="card h-100 shadow-sm border-primary">
+                                <div class="card-header bg-primary text-white fw-bold">
+                                    <i class="fa fa-graduation-cap me-2" title="Training Totals"/>
+                                    Training Totals
+                                </div>
+                                <div class="card-body p-3">
+                                    <table class="table table-sm table-borderless align-middle mb-0">
+                                        <tbody>
+                                            <tr>
+                                                <td class="text-muted">Total Training Days</td>
+                                                <td class="text-end fw-bold">
+                                                    <IntegerField record="line" name="'lcp_days'" readonly="true"/>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td class="text-muted">Total Seats</td>
+                                                <td class="text-end fw-bold">
+                                                    <IntegerField record="line" name="'lcp_total_seats'" readonly="true"/>
+                                                </td>
+                                            </tr>
+                                            <tr t-if="line.data.payment_method === 'clc'" class="table-primary">
+                                                <td class="fw-bold">Total CLCs + VAT</td>
+                                                <td class="text-end fw-bold">
+                                                    <IntegerField record="line" name="'lcp_total_clcs_with_vat'" readonly="true"/>
+                                                </td>
+                                            </tr>
+                                            <tr t-if="line.data.payment_method === 'clc'">
+                                                <td class="text-muted">Total Rate Card</td>
+                                                <td class="text-end fw-bold">
+                                                    <MonetaryField record="line"
+                                                                   name="'lcp_total_rate_card'"
+                                                                   currencyField="'lcp_currency_id'"
+                                                                   readonly="true"/>
+                                                </td>
+                                            </tr>
+                                            <tr t-if="line.data.lcp_instructor_source === 'nil_me'">
+                                                <td class="text-muted">Total Instructor Cost</td>
+                                                <td class="text-end fw-bold">
+                                                    <MonetaryField record="line"
+                                                                   name="'lcp_total_instructor_md'"
+                                                                   currencyField="'lcp_currency_id'"
+                                                                   readonly="true"/>
+                                                </td>
+                                            </tr>
+                                            <tr t-if="line.data.lcp_instructor_source === 'nil_me'">
+                                                <td class="text-muted">Total Per Diem</td>
+                                                <td class="text-end fw-bold">
+                                                    <MonetaryField record="line"
+                                                                   name="'lcp_total_per_diem'"
+                                                                   currencyField="'lcp_currency_id'"
+                                                                   readonly="true"/>
+                                                </td>
+                                            </tr>
+                                            <tr t-if="line.data.lcp_instructor_source === 'vendor'">
+                                                <td class="text-muted">Total Vendor Instructor</td>
+                                                <td class="text-end fw-bold">
+                                                    <MonetaryField record="line"
+                                                                   name="'lcp_total_vendor_instructor'"
+                                                                   currencyField="'lcp_currency_id'"
+                                                                   readonly="true"/>
+                                                </td>
+                                            </tr>
+                                            <tr t-if="!line.data.lcp_is_online">
+                                                <td class="text-muted">Total Logistics</td>
+                                                <td class="text-end fw-bold">
+                                                    <MonetaryField record="line"
+                                                                   name="'lcp_total_logistics'"
+                                                                   currencyField="'lcp_currency_id'"
+                                                                   readonly="true"/>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div t-if="!line.data.lcp_is_online" class="col-12 col-lg-4">
+                            <div class="card h-100 shadow-sm border-info">
+                                <div class="card-header bg-info text-white fw-bold">
+                                    <i class="fa fa-plane me-2" title="Logistics"/>
+                                    Logistics
+                                </div>
+                                <div class="card-body p-3">
+                                    <table class="table table-sm table-borderless align-middle mb-0">
+                                        <tbody>
+                                            <tr>
+                                                <td class="text-muted">Tickets</td>
+                                                <td class="text-end fw-bold">
+                                                    <MonetaryField record="line"
+                                                                   name="'lcp_ticket_total'"
+                                                                   currencyField="'lcp_currency_id'"
+                                                                   readonly="true"/>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td class="text-muted">Hotels</td>
+                                                <td class="text-end fw-bold">
+                                                    <MonetaryField record="line"
+                                                                   name="'lcp_hotel_total'"
+                                                                   currencyField="'lcp_currency_id'"
+                                                                   readonly="true"/>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td class="text-muted">Venue</td>
+                                                <td class="text-end fw-bold">
+                                                    <MonetaryField record="line"
+                                                                   name="'lcp_venue_cost'"
+                                                                   currencyField="'lcp_currency_id'"
+                                                                   readonly="props.readonly"/>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td class="text-muted">Catering</td>
+                                                <td class="text-end fw-bold">
+                                                    <MonetaryField record="line"
+                                                                   name="'lcp_catering_cost'"
+                                                                   currencyField="'lcp_currency_id'"
+                                                                   readonly="props.readonly"/>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td class="text-muted">Uber</td>
+                                                <td class="text-end fw-bold">
+                                                    <MonetaryField record="line"
+                                                                   name="'lcp_total_uber_estimate'"
+                                                                   currencyField="'lcp_currency_id'"
+                                                                   readonly="true"/>
+                                                </td>
+                                            </tr>
+                                            <tr class="table-info">
+                                                <td class="fw-bold">All On-site Expenses</td>
+                                                <td class="text-end fw-bold">
+                                                    <MonetaryField record="line"
+                                                                   name="'lcp_all_onsite_expenses'"
+                                                                   currencyField="'lcp_currency_id'"
+                                                                   readonly="true"/>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-12 col-lg-4">
+                            <div class="card h-100 shadow-sm border-success">
+                                <div class="card-header bg-success text-white fw-bold">
+                                    <i class="fa fa-line-chart me-2" title="Profitability"/>
+                                    Profitability
+                                </div>
+                                <div class="card-body p-3">
+                                    <table class="table table-sm table-borderless align-middle mb-2">
+                                        <tbody>
+                                            <tr>
+                                                <td class="text-muted">Learning Partner</td>
+                                                <td class="text-end fw-bold">
+                                                    <SelectionField record="line"
+                                                                    name="'lcp_cost_learning_partner'"
+                                                                    readonly="true"/>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td class="text-muted">Partner Share</td>
+                                                <td class="text-end fw-bold">
+                                                    <MonetaryField record="line"
+                                                                   name="'lcp_partner_share'"
+                                                                   currencyField="'lcp_currency_id'"
+                                                                   readonly="true"/>
+                                                </td>
+                                            </tr>
+                                            <tr class="table-warning">
+                                                <td class="fw-bold">Total Costs</td>
+                                                <td class="text-end fw-bold">
+                                                    <MonetaryField record="line"
+                                                                   name="'lcp_total_costs'"
+                                                                   currencyField="'lcp_currency_id'"
+                                                                   readonly="true"/>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+
+                                    <div class="alert alert-success mb-2 py-2 px-3" role="status">
+                                        <div class="d-flex justify-content-between align-items-center gap-2">
+                                            <span class="fw-bold">NIL ME Profit</span>
+                                            <span class="fs-5 fw-bold">
+                                                <MonetaryField record="line"
+                                                               name="'lcp_nilme_profit'"
+                                                               currencyField="'lcp_currency_id'"
+                                                               readonly="true"/>
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                    <div class="bg-light rounded p-2">
+                                        <div class="d-flex justify-content-between align-items-center gap-2">
+                                            <span class="fw-bold">Profit Margin</span>
+                                            <span class="fs-5 fw-bold text-success">
+                                                <t t-esc="formatPercent(line.data.lcp_profit_margin)"/>
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </t>
+        </div>
+    </t>
+</templates>

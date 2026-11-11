@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <!-- Editable PO Subject directly after order header details, before lines. -->
+    <record id="purchase_order_form_manual_subject" model="ir.ui.view">
+        <field name="name">purchase.order.form.manual.subject</field>
+        <field name="model">purchase.order</field>
+        <field name="inherit_id" ref="purchase.purchase_order_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//sheet/notebook" position="before">
+                <group>
+                    <field name="nil_po_subject" string="Subject" placeholder="Enter subject for the Purchase Order..."/>
+                </group>
+            </xpath>
+        </field>
+    </record>
+</odoo>

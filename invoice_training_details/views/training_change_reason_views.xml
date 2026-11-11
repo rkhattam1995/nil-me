@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Legacy Change Reason views are disabled. The technical field stays in
+         the model only for backward compatibility with existing databases. -->
+    <record id="crm_training_change_reason" model="ir.ui.view">
+        <field name="active" eval="False"/>
+    </record>
+
+    <record id="sale_training_change_reason" model="ir.ui.view">
+        <field name="active" eval="False"/>
+    </record>
+
+    <record id="purchase_training_change_reason" model="ir.ui.view">
+        <field name="active" eval="False"/>
+    </record>
+
+    <!-- Keep only the posted-customer-invoice training lock. -->
+    <record id="invoice_training_change_reason_lock" model="ir.ui.view">
+        <field name="name">account.move.training.posted.lock</field>
+        <field name="model">account.move</field>
+        <field name="inherit_id" ref="invoice_training_details.view_move_form_inherit_training"/>
+        <field name="active" eval="True"/>
+        <field name="arch" type="xml">
+            <xpath expr="//page[@name='Training']//field[@name='training_course_ids']" position="attributes">
+                <attribute name="readonly">state == 'posted' and move_type in ('out_invoice', 'out_refund')</attribute>
+            </xpath>
+        </field>
+    </record>
+</odoo>

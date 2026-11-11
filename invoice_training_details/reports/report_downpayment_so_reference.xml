@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <!-- Read-only original SO order lines on PS down-payment invoices.
+         This report table never creates or bills invoice lines. -->
+    <template id="downpayment_source_sale_items_block">
+        <t t-set="nil_source_items"
+           t-value="o._nil_downpayment_source_sale_lines()"/>
+
+        <div t-if="nil_source_items"
+             style="width:100%;margin:8px 0 12px 0;font-family:Arial,Helvetica,sans-serif;">
+            <table class="table table-sm table-bordered"
+                   style="width:100% !important;max-width:100%;table-layout:fixed;border-collapse:collapse;margin:0;font-size:16px;line-height:1.45;">
+                <colgroup>
+                    <col style="width:58%;"/>
+                    <col style="width:10%;"/>
+                    <col style="width:16%;"/>
+                    <col style="width:16%;"/>
+                </colgroup>
+                <thead>
+                    <tr style="background-color:#F6F7F8;">
+                        <th style="padding:8px 10px;text-align:center;vertical-align:middle;font-size:16px;">DESCRIPTION</th>
+                        <th style="padding:8px 7px;text-align:center;vertical-align:middle;font-size:16px;">QTY</th>
+                        <th style="padding:8px 7px;text-align:center;vertical-align:middle;font-size:16px;">RATE</th>
+                        <th style="padding:8px 7px;text-align:center;vertical-align:middle;font-size:16px;">AMOUNT</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <t t-foreach="nil_source_items" t-as="nil_so_line">
+                        <tr>
+                            <td style="padding:8px 10px !important;text-align:left;vertical-align:middle;word-wrap:break-word;line-height:1.45;">
+                                <div style="font-size:16px;font-weight:700;text-align:left;margin:0 0 3px 0;">
+                                    <span t-field="nil_so_line.product_id"/>
+                                </div>
+                                <div t-if="nil_so_line.name"
+                                     style="font-size:15px;font-weight:400;text-align:left;white-space:normal;word-wrap:break-word;margin:0;">
+                                    <span t-field="nil_so_line.name"/>
+                                </div>
+                            </td>
+                            <td style="padding:8px 7px !important;text-align:center;vertical-align:middle;white-space:nowrap;">
+                                <span t-field="nil_so_line.product_uom_qty"/>
+                            </td>
+                            <td style="padding:8px 7px !important;text-align:center;vertical-align:middle;white-space:nowrap;">
+                                <span t-out="nil_so_line.price_unit"
+                                      t-options="{'widget':'monetary','display_currency':nil_so_line.currency_id}"/>
+                            </td>
+                            <td style="padding:8px 7px !important;text-align:center;vertical-align:middle;white-space:nowrap;">
+                                <span t-out="nil_so_line.price_subtotal"
+                                      t-options="{'widget':'monetary','display_currency':nil_so_line.currency_id}"/>
+                            </td>
+                        </tr>
+                    </t>
+                </tbody>
+            </table>
+        </div>
+    </template>
+</odoo>

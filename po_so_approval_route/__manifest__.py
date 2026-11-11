@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 {
     'name': 'PO Dynamic Approval Process',
-    'version': '17.0.0.1',
+    'version': '17.0.0.3',
     'summary': 'Dynamic approval process for purchase orders',
     'category': 'Purchases',
     'author': 'SGT',

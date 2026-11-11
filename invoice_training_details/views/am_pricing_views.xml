@@ -1,0 +1,173 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+
+    <record id="view_am_pricing_form" model="ir.ui.view">
+        <field name="name">am.pricing.form</field>
+        <field name="model">am.pricing</field>
+        <field name="arch" type="xml">
+            <form string="AM Pricing" create="false" edit="false" delete="false">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="lead_id"/>
+                            <field name="account_manager_id"/>
+                            <field name="sent_by_id"/>
+                            <field name="sent_at"/>
+                        </group>
+                        <group>
+                            <field name="currency_id"/>
+                            <field name="has_cash_pricing" invisible="1"/>
+                            <field name="has_clc_pricing" invisible="1"/>
+                            <field name="cash_total" invisible="not has_cash_pricing"/>
+                            <field name="clc_total" invisible="not has_clc_pricing"/>
+                        </group>
+                    </group>
+
+                    <separator string="Pricing Sent to Account Manager"/>
+
+                    <field name="line_ids" nolabel="1">
+                        <tree create="false" delete="false" edit="false">
+                            <field name="payment_method"/>
+                            <field name="training_name"/>
+                            <field name="delivery_type"/>
+                            <field name="students"/>
+                            <field name="rate_card_per_seat" column_invisible="1"/>
+                            <field name="training_value" column_invisible="1"/>
+                            <field name="clcs_per_seat" invisible="payment_method != 'clc'"/>
+                            <field name="total_clcs_with_vat" invisible="payment_method != 'clc'"/>
+                            <field name="price_before_vat" invisible="payment_method == 'clc'"/>
+                            <field name="vat_rate" invisible="payment_method == 'clc'"/>
+                            <field name="vat_amount" invisible="payment_method == 'clc'"/>
+                            <field name="total" invisible="payment_method == 'clc'"/>
+                        </tree>
+                    </field>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_am_pricing_tree" model="ir.ui.view">
+        <field name="name">am.pricing.tree</field>
+        <field name="model">am.pricing</field>
+        <field name="arch" type="xml">
+            <tree create="false" delete="false" edit="false">
+                <field name="sent_at"/>
+                <field name="account_manager_id"/>
+                <field name="sent_by_id"/>
+                <field name="subtotal"/>
+                <field name="vat_amount"/>
+                <field name="total"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_am_pricing_wizard_form" model="ir.ui.view">
+        <field name="name">am.pricing.wizard.form</field>
+        <field name="model">am.pricing.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Send Pricing to Account Manager">
+                <group>
+                    <group>
+                        <field name="lead_id"/>
+                        <field name="account_manager_id"
+                               options="{'no_create': True, 'no_create_edit': True}"/>
+                    </group>
+                    <group>
+                        <field name="currency_id"/>
+                    </group>
+                </group>
+
+                <div class="alert alert-info" role="alert">
+                    Select the Cash or CLC trainings you want to send.
+                    Cash sends the final selling price. CLC sends CLC quantities only.
+                    Internal LCP costs, partner shares, profitability, Rate Card, and CLC Training Value are not sent to the Account Manager.
+                </div>
+
+                <field name="currency_mismatch" invisible="1"/>
+
+                <div class="alert alert-warning"
+                     role="alert"
+                     invisible="not currency_mismatch">
+                    Selected trainings use different currencies. Select trainings with the same currency.
+                </div>
+
+                <field name="line_ids" nolabel="1">
+                    <tree editable="bottom" create="false" delete="false">
+                        <field name="course_id" column_invisible="1"/>
+                        <field name="currency_id" column_invisible="1"/>
+                        <field name="selected"/>
+                        <field name="payment_method" readonly="1"/>
+                        <field name="training_name" readonly="1"/>
+                        <field name="delivery_type" readonly="1"/>
+                        <field name="students" readonly="1"/>
+                        <field name="rate_card_per_seat" column_invisible="1"/>
+                        <field name="training_value" column_invisible="1"/>
+                        <field name="clcs_per_seat" readonly="1" invisible="payment_method != 'clc'"/>
+                        <field name="total_clcs_with_vat" readonly="1" invisible="payment_method != 'clc'"/>
+                        <field name="price_before_vat" readonly="1" invisible="payment_method == 'clc'"/>
+                        <field name="vat_rate" readonly="1" invisible="payment_method == 'clc'"/>
+                        <field name="vat_amount" readonly="1" invisible="payment_method == 'clc'"/>
+                        <field name="total" readonly="1" invisible="payment_method == 'clc'"/>
+                    </tree>
+                </field>
+
+                <field name="has_cash_pricing" invisible="1"/>
+                <field name="has_clc_pricing" invisible="1"/>
+
+                <group class="oe_subtotal_footer oe_right">
+                    <field name="cash_total"
+                           readonly="1"
+                           invisible="not has_cash_pricing"
+                           class="oe_subtotal_footer_separator"/>
+                    <field name="clc_total"
+                           readonly="1"
+                           invisible="not has_clc_pricing"
+                           class="oe_subtotal_footer_separator"/>
+                </group>
+
+                <footer>
+                    <button name="action_send"
+                            type="object"
+                            string="Send to Account Manager"
+                            class="btn-primary"/>
+                    <button string="Cancel"
+                            special="cancel"
+                            class="btn-secondary"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="crm_lead_view_form_am_pricing" model="ir.ui.view">
+        <field name="name">crm.lead.form.am.pricing</field>
+        <field name="model">crm.lead</field>
+        <field name="inherit_id" ref="invoice_training_details.crm_lead_view_form_lcp_per_training"/>
+        <field name="arch" type="xml">
+
+            <xpath expr="//header" position="inside">
+                <button name="action_open_am_pricing_wizard"
+                        type="object"
+                        string="Send Pricing to AM"
+                        class="oe_highlight"
+                        groups="base.group_system"
+                        invisible="not has_training"/>
+            </xpath>
+
+            <xpath expr="//sheet/notebook" position="inside">
+                <page string="AM Pricing" name="am_pricing">
+                    <field name="am_pricing_ids" nolabel="1" readonly="1">
+                        <tree create="false" delete="false" edit="false">
+                            <field name="sent_at"/>
+                            <field name="account_manager_id"/>
+                            <field name="sent_by_id"/>
+                            <field name="cash_total"/>
+                            <field name="clc_total"/>
+                        </tree>
+                    </field>
+                </page>
+            </xpath>
+
+        </field>
+    </record>
+
+</odoo>

@@ -192,8 +192,10 @@
 
                 <field name="currency_id" position="after">
                     <field name="po_order_approval_route" invisible="True"/>
-                    <field name="team_id" invisible="po_order_approval_route == 'no'"
-                           required="po_order_approval_route == 'required'"/>
+                    <field name="team_id"
+                           invisible="po_order_approval_route == 'no'"
+                           required="po_order_approval_route == 'required'"
+                           readonly="state not in ['draft', 'sent']"/>
                     <!--                    <field name="team_id" invisible=""-->
                     <!--                           attrs="{'invisible':[('po_order_approval_route', '=', 'no')], 'required':[('po_order_approval_route', '=', 'required')]}"/>-->
                 </field>

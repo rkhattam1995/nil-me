@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="module_category_nil_me" model="ir.module.category">
+        <field name="name">NIL ME</field>
+        <field name="description">NIL ME custom access rights</field>
+        <field name="sequence">100</field>
+    </record>
+
+    <!-- Ruba Khattam is the admin user in this database.
+         Reset membership on every module upgrade so ONLY Ruba remains
+         in Commission Manager. -->
+    <record id="group_nil_commission_manager" model="res.groups">
+        <field name="name">Commission Manager</field>
+        <field name="category_id"
+               ref="nil_sales_commission.module_category_nil_me"/>
+        <field name="users"
+               eval="[(6, 0, [ref('base.user_admin')])]"/>
+    </record>
+
+    <record id="sales_commission_rule_manager" model="ir.rule">
+        <field name="name">Commission Manager: all commissions</field>
+        <field name="model_id" ref="model_nil_sales_commission"/>
+        <field name="domain_force">[('auto_key', '!=', 'ruba'), ('is_auto_ruba', '=', False), '|', ('salesperson_id', '=', False), ('salesperson_id.name', 'not ilike', 'Ruba Khattam')]</field>
+        <field name="groups"
+               eval="[(4, ref('nil_sales_commission.group_nil_commission_manager'))]"/>
+        <field name="perm_read" eval="True"/>
+        <field name="perm_write" eval="True"/>
+        <field name="perm_create" eval="True"/>
+        <field name="perm_unlink" eval="True"/>
+    </record>
+
+</odoo>

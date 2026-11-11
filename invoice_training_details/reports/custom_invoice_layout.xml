@@ -1,32 +1,359 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <odoo>
+    <template id="custom_invoice_report_layout"
+              inherit_id="web.external_layout_standard"
+              primary="True">
 
-    <template id="custom_invoice_report_layout" inherit_id="web.external_layout_standard" primary="True">
+        <!-- IMPORTANT:
+             Odoo 17 external_layout_standard adds a <div class="pt-5">
+             before the report body. That pt-5 is the extra blank space.
+             Keep the structure, remove ONLY that padding. -->
+        <xpath expr="//div[contains(@t-attf-class, 'article')]/div[hasclass('pt-5')]"
+               position="attributes">
+            <attribute name="class"></attribute>
+            <attribute name="style">padding-top:0 !important; margin-top:0 !important;</attribute>
+        </xpath>
+
+        <!-- HEADER -->
         <div t-attf-class="header o_company_#{company.id}_layout" position="replace">
-            <t t-set="company" t-value="request.env.company"/>
-            <div class="header o_company_#{company.id}_layout">
-                <div class="row mb-2">
-                    <div class="col-9">
-                        <strong id="company_name" class="h5 fw-bold">
-                            <t t-esc="company.name" />
-                        </strong>
-                        <div t-field="company.street" class="pt-1"/>
-                        <div t-field="company.street2" class="pt-1"/>
-                        <div t-field="company.city" class="pt-1"/>
-                        <div t-field="company.state_id.name" class="pt-1"/>
-                        <div t-field="company.country_id.name" class="pt-1"/>
-                        <div t-field="company.phone" class="pt-1"/>
-                        <div t-field="company.email" class="pt-1"/>
+
+            <t t-set="company" t-value="o.company_id if o else request.env.company"/>
+
+            <div t-attf-class="header o_company_#{company.id}_layout"
+                 style="padding:0; margin:0;">
+
+                <div class="row"
+                     style="
+                        margin:0;
+                        padding:0;
+                        width:100%;
+                        align-items:flex-start;
+                     ">
+
+                    <!-- COMPANY INFORMATION -->
+                    <div class="col-9"
+                         style="
+                            padding:0;
+                            margin:0;
+                            line-height:1.35;
+                         ">
+
+                        <!-- Company Name -->
+                        <div style="
+                            margin:0 0 4px 0;
+                            padding:0;
+                            max-width:540px;
+                            font-size:17px;
+                            font-weight:700;
+                            line-height:1.25;
+                            letter-spacing:0;
+                            white-space:normal;
+                            word-break:normal;
+                        ">
+                            <t t-esc="company.name"/>
+                        </div>
+
+                        <!-- Address without P.O Box -->
+                        <div style="
+                            margin:0 0 2px 0;
+                            padding:0;
+                            font-size:14px;
+                            font-weight:400;
+                            line-height:1.35;
+                        ">
+                            <t t-if="company.street or company.street2">
+                                <span t-if="company.street"
+                                      t-esc="(company.street or '').replace('P.O Box 338408', '').replace('P.O. Box 338408', '').strip(' ,')"/>
+                                <t t-if="company.street and company.street2">, </t>
+                                <span t-if="company.street2"
+                                      t-esc="(company.street2 or '').replace('P.O Box 338408', '').replace('P.O. Box 338408', '').strip(' ,')"/>
+                            </t>
+                        </div>
+
+                        <!-- P.O Box -->
+                        <div t-if="'P.O Box 338408' in (company.street or '') or 'P.O. Box 338408' in (company.street or '') or 'P.O Box 338408' in (company.street2 or '') or 'P.O. Box 338408' in (company.street2 or '')"
+                             style="margin:0 0 2px 0; padding:0; font-size:12px; font-weight:400; line-height:1.35;">
+                            P.O Box 338408
+                        </div>
+
+                        <div t-if="company.city or company.state_id or company.zip or company.country_id"
+                             style="margin:0 0 3px 0; padding:0; font-size:12px; font-weight:400; line-height:1.35;">
+
+                            <span t-if="company.city" t-field="company.city"/>
+
+                            <t t-if="company.state_id">
+                                <t t-if="company.city">, </t>
+                                <span t-field="company.state_id.name"/>
+                            </t>
+
+                            <t t-if="company.zip">
+                                <t t-if="company.city or company.state_id"> </t>
+                                <span t-field="company.zip"/>
+                            </t>
+
+                            <t t-if="company.country_id">
+                                <t t-if="company.city or company.state_id or company.zip">, </t>
+                                <span t-field="company.country_id.name"/>
+                            </t>
+
+                        </div>
+
+                        <!-- Contact -->
+                        <div t-if="company.phone"
+                             style="margin:0 0 2px 0; font-size:12px; line-height:1.35;">
+                            <span t-field="company.phone"/>
+                        </div>
+
+                        <!-- Email + Tax Number -->
+                        <div t-if="company.email or company.vat"
+                             style="margin:0 0 2px 0; font-size:12px; line-height:1.35;">
+                            <span t-if="company.email" t-field="company.email"/>
+                            <t t-if="company.email and company.vat"> | </t>
+                            <t t-if="company.vat">
+                                <strong style="font-weight:600;">Tax Number:</strong>
+                                <span t-esc="company.vat"/>
+                            </t>
+                        </div>
+
+                        <!-- Saudi CRN -->
+                        <div t-if="company.country_id and company.country_id.name == 'Saudi Arabia' and company.l10n_sa_additional_identification_number"
+                             style="margin:0; font-size:12px; line-height:1.35;">
+                            <strong style="font-weight:600;">CRN:</strong>
+                            <span t-esc="company.l10n_sa_additional_identification_number"/>
+                        </div>
+
                     </div>
-                    <div class="col-3">
-                        <img t-if="company.logo" class="pt-5" t-att-src="image_data_uri(company.logo)" style="max-height: 130px;" alt="Logo"/>
+
+                    <!-- LOGO -->
+                    <div class="col-3"
+                         style="
+                            padding:0;
+                            margin:0;
+                            text-align:right;
+                         ">
+
+                        <img t-if="company.logo"
+                             t-att-src="image_data_uri(company.logo)"
+                             style="
+                                max-height:105px;
+                                max-width:180px;
+                                width:auto;
+                                height:auto;
+                                object-fit:contain;
+                                margin:0;
+                                padding:0;
+                             "
+                             alt="Logo"/>
+
                     </div>
+
                 </div>
+
+                <!-- Manual Purchases PDF: repeat ONLY PO number and order date
+                     in the shared company header from page 2 onward.
+                     Do not duplicate the first-page PO details or vendor data. -->
+                <t t-if="o and o._name == 'purchase.order' and not o.is_training_order and not o.crm_lead_id">
+                    <div class="nil_manual_purchase_repeat_meta"
+                         style="display:none; width:33.3333%; margin:4px 0 0 66.6667%;
+                                padding:0; text-align:left; font-family:Arial,Helvetica,sans-serif;
+                                font-size:16px; line-height:1.4; border:0 none !important;">
+                        <!-- Match the unbordered first-page Purchase Order / Date
+                             details, and avoid a table entirely. -->
+                        <div style="display:block; width:100%; margin:0 0 2px 0;
+                                    padding:0; border:0 none !important; white-space:nowrap;">
+                            <span style="display:inline-block; width:66%; text-align:left;
+                                         padding:0; border:0 none !important; vertical-align:top;">Purchase Order</span>
+                            <span style="display:inline-block; width:32%; text-align:right;
+                                         padding:0; border:0 none !important; vertical-align:top;"
+                                  t-field="o.name"/>
+                        </div>
+                        <div style="display:block; width:100%; margin:0;
+                                    padding:0; border:0 none !important; white-space:nowrap;">
+                            <span style="display:inline-block; width:66%; text-align:left;
+                                         padding:0; border:0 none !important; vertical-align:top;">Date</span>
+                            <span t-if="o.state in ('purchase', 'done') and o.date_approve"
+                                  style="display:inline-block; width:32%; text-align:right;
+                                         padding:0; border:0 none !important; vertical-align:top;"
+                                  t-field="o.date_approve"
+                                  t-options='{"widget":"date","format":"dd/MM/yy"}'/>
+                            <span t-elif="o.date_order"
+                                  style="display:inline-block; width:32%; text-align:right;
+                                         padding:0; border:0 none !important; vertical-align:top;"
+                                  t-field="o.date_order"
+                                  t-options='{"widget":"date","format":"dd/MM/yy"}'/>
+                        </div>
+                    </div>
+
+                    <script type="text/javascript">
+                        <![CDATA[
+                        (function () {
+                            var vars = {};
+                            var parts = document.location.search.substring(1).split('&');
+                            for (var i = 0; i < parts.length; i++) {
+                                var pair = parts[i].split('=', 2);
+                                if (pair.length === 2) {
+                                    vars[pair[0]] = unescape(pair[1]);
+                                }
+                            }
+                            // Odoo's PDF header typically supplies sitepage, while
+                            // wkhtmltopdf may supply page. Support either name.
+                            var pageNumber = parseInt(vars.sitepage || vars.page || '1', 10);
+                            var blocks = document.getElementsByClassName('nil_manual_purchase_repeat_meta');
+                            for (var j = 0; j < blocks.length; j++) {
+                                blocks[j].style.display = pageNumber > 1 ? 'block' : 'none';
+                            }
+                        })();
+                        ]]>
+                    </script>
+                </t>
+
+                <!-- PO / WO continuation details: PAGE 2+ ONLY -->
+                <t t-if="o and o.env.context.get('po_repeat_meta')">
+
+                    <t t-set="po_repeat_is_clc"
+                       t-value="'clc' in [(method or '').lower() for method in o.training_course_ids.mapped('payment_method')]"/>
+
+                    <div class="nil_po_repeat_meta"
+                         style="
+                            display:none;
+                            width:100%;
+                            margin:3px 0 0 0;
+                            padding:0;
+                            text-align:right;
+                            font-size:12px;
+                            line-height:1.2;
+                            white-space:nowrap;
+                         ">
+
+                        <strong>
+                            <span t-if="po_repeat_is_clc">Work Order:</span>
+                            <span t-if="not po_repeat_is_clc">Purchase Order:</span>
+                        </strong>
+
+                        <span t-if="po_repeat_is_clc"
+                              t-esc="o.name.replace('PO-', 'WO-', 1) if o.name.startswith('PO-') else 'WO-' + o.name"/>
+
+                        <span t-if="not po_repeat_is_clc"
+                              t-field="o.name"/>
+
+                        <span style="padding:0 8px;">|</span>
+
+                        <strong>Date:</strong>
+                        <span t-field="o.date_order" t-options="{&quot;widget&quot;:&quot;date&quot;}"/>
+
+                        <span style="padding:0 8px;">|</span>
+
+                        <strong>Validity Date:</strong>
+                        <span t-field="o.validity_date"/>
+
+                    </div>
+
+                    <script type="text/javascript">
+                        <![CDATA[
+                        (function () {
+                            var vars = {};
+                            var parts = document.location.search.substring(1).split('&');
+
+                            for (var i = 0; i < parts.length; i++) {
+                                var pair = parts[i].split('=', 2);
+                                if (pair.length === 2) {
+                                    vars[pair[0]] = unescape(pair[1]);
+                                }
+                            }
+
+                            var currentPage = parseInt(vars.sitepage || '1', 10);
+                            var blocks = document.getElementsByClassName('nil_po_repeat_meta');
+
+                            for (var j = 0; j < blocks.length; j++) {
+                                blocks[j].style.display = currentPage > 1 ? 'block' : 'none';
+                            }
+                        })();
+                        ]]>
+                    </script>
+
+                </t>
+
+                <!-- QUOTATION continuation details: PAGE 2+ ONLY -->
+                <t t-if="o and o.env.context.get('quotation_repeat_meta')">
+
+                    <t t-set="quotation_customer_partner"
+                       t-value="o.partner_id if o.partner_id.is_company else (o.partner_id.parent_id or o.partner_id)"/>
+
+                    <div class="nil_quotation_repeat_meta"
+                         style="
+                            display:none;
+                            width:100%;
+                            margin:3px 0 0 0;
+                            padding:0;
+                            text-align:right;
+                            font-size:12px;
+                            line-height:1.2;
+                            white-space:nowrap;
+                         ">
+
+                        <strong>Quotation:</strong>
+
+                        <span t-if="o.name"
+                              t-esc="
+                                o.name
+                                if o.name.startswith('Q')
+                                else 'Q' + (
+                                    o.name[2:]
+                                    if o.name.startswith('SO')
+                                    else o.name[1:]
+                                    if o.name.startswith('S')
+                                    else o.name
+                                )
+                              "/>
+
+                        <span style="padding:0 8px;">|</span>
+
+                        <strong>Date:</strong>
+                        <span t-field="o.date_order"
+                              t-options="{&quot;widget&quot;:&quot;date&quot;}"/>
+
+                        <span style="padding:0 8px;">|</span>
+
+                        <strong>To:</strong>
+                        <span t-field="quotation_customer_partner.name"/>
+
+                    </div>
+
+                    <script type="text/javascript">
+                        <![CDATA[
+                        (function () {
+                            var vars = {};
+                            var parts = document.location.search.substring(1).split('&');
+
+                            for (var i = 0; i < parts.length; i++) {
+                                var pair = parts[i].split('=', 2);
+                                if (pair.length === 2) {
+                                    vars[pair[0]] = unescape(pair[1]);
+                                }
+                            }
+
+                            var currentPage = parseInt(vars.sitepage || '1', 10);
+                            var blocks = document.getElementsByClassName('nil_quotation_repeat_meta');
+
+                            for (var j = 0; j < blocks.length; j++) {
+                                blocks[j].style.display = currentPage > 1 ? 'block' : 'none';
+                            }
+                        })();
+                        ]]>
+                    </script>
+
+                </t>
+
+            </div>
+
+        </div>
+
+        <!-- FOOTER -->
+        <div t-attf-class="footer o_standard_footer o_company_#{company.id}_layout">
+            <div class="text-center">
+                <strong> </strong>
             </div>
         </div>
 
-        <xpath expr="//div[@t-attf-class='footer o_standard_footer o_company_#{company.id}_layout']" position="replace">
-        </xpath>
     </template>
-
 </odoo>

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="crm_lead_form_students_details" model="ir.ui.view">
+        <field name="name">crm.lead.form.students.details</field>
+        <field name="model">crm.lead</field>
+        <field name="inherit_id" ref="invoice_training_details.crm_reveal_lead_opportunity_form_training"/>
+        <field name="arch" type="xml">
+            <xpath expr="//page[@id='training']" position="after">
+                <page string="Students' Details" name="students_details">
+                    <field name="students_details"
+                           widget="nil_terms_editor"
+                           nolabel="1"
+                           class="w-100 o_nil_terms_full_width"/>
+                </page>
+            </xpath>
+        </field>
+    </record>
+</odoo>

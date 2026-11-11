@@ -1,4 +1,3 @@
-<?xml version="1.0" encoding="utf-8"?>
 <odoo>
 
     <record id="view_move_form_inherit_training" model="ir.ui.view">
@@ -9,25 +8,19 @@
             <xpath expr="//page[@id='other_tab']" position="before">
                 <page id="training" name="Training">
                     <group>
-                        <field name="training_name"/>
                          <field name="training_vendor"/>
                         <field name="training_type"/>
                         <field name="instructor_id"/>
                     </group>
                     <field name="training_course_ids">
                         <tree editable="bottom">
-                           
                             <field name="training_id"/>
-                            <field name="descriptions"/>
-                           <field name="cost_clc"/>
+                            <field name="cost_clc"/>
                             <field name="hyperlink"/>
                             <field name="instructor_id"/>
-                            <field name="train_language"/>
                             <field name="location"/>
-                            <!--<field name="where_location"/>-->
                             <field name="where_location2" />
                             <field name="payment_method"/>
-                            <!--<field name="name"/>-->
                             <field name="no_of_student"/>
                             <field name="duration"/>
                             <field name="training_date_start"/>
@@ -47,14 +40,12 @@
 
                     <group>
                         <group string="Report PDF Element Display">
-                            
                             <field name="display_training_table"/>
                             <field name="display_signature"/>
                             <field name="display_stamp"/>
                             <field name="display_ksa_qr"/>
                         </group>
                         <group string="Column Display">
-                           
                             <field name="display_instructor"/>
                             <field name="display_location"/>
                             <field name="display_downpayment"/>
@@ -62,14 +53,14 @@
                             <field name="display_due_amount"/>
                             <field name="display_where"/>
                             <field name="display_description"/>
-                            
                         </group>
-                        <group>
+                        <!-- Display QR code only if display_ksa_qr is True -->
+<group modifiers="{'invisible': [('display_ksa_qr', '=', False)]}">
                             <field name="ks_qr_code" widget="image" class="oe_avatar w-auto float-start"/>
                         </group>
                         <group string="Banks and Terms">
-                            <field name= "bank_details"/>
-                            <field name= "term_and_cond"/>
+                            <field name="bank_details"/>
+                            <field name="term_and_cond"/>
                         </group>
                     </group>
                 </page>
@@ -77,23 +68,14 @@
                 <page id="pro" name="Professional Services">
                     <group>
                         <field name="service_name"/>
-                        
                     </group>
                      <field name="pro_service_ids">
                         <tree editable="bottom">
-                            
                             <field name="training_id"/>
                             <field name="descriptions"/>
-                           <field name="cost_clc"/>
+                            <field name="cost_clc"/>
                             <field name="hyperlink"/>
                             <field name="wor_hour_number"/>
-                            <field name="train_language"/>
-                            <!--<field name="location"/>-->
-                            <!--<field name="where_location" invisible="location != 'Customer Choice'"/>-->
-                            <!--<field name="payment_method"/>-->
-                            
-                            <!--<field name="name"/>-->
-                            <!--<field name="no_of_student"/>-->
                             <field name="duration"/>
                             <field name="training_date_start"/>
                             <field name="hourly_rate"/>
@@ -104,21 +86,14 @@
                         <group>
                             <field name="total_service_price"/>
                         </group>
-                        <!--<group>-->
-                        <!--    <field name="half_advance_payment_before"/>-->
-                        <!--    <field name="half_payment_after"/>-->
-                        <!--</group>-->
                     </group>
                     <group>
                         <group string="Report PDF Element Display">
-                            
                             <field name="display_training_table"/>
                             <field name="display_signature"/>
                             <field name="display_stamp"/>
-                          
                         </group>
                         <group string="Column Display">
-                           
                             <field name="display_instructor"/>
                             <field name="display_location"/>
                             <field name="display_downpayment"/>
@@ -126,15 +101,11 @@
                             <field name="display_due_amount"/>
                             <field name="display_where"/>
                             <field name="display_description"/>
-                            
-                            
                         </group>
                         <group>
-                            <field name= "bank_details"/>
-                            <field name= "term_and_cond"/>
+                            <field name="bank_details"/>
+                            <field name="term_and_cond"/>
                         </group>
-                        
-                       
                     </group>
                 </page>
 
@@ -150,10 +121,7 @@
 
                 <page id="logistics" string="Logistics">
                     <group>
-                        <group>
-                            <field name="instructor_logistics"/>
-                            <field name="catering"/>
-                        </group>
+                        <group></group>
                     </group>
                 </page>
 
