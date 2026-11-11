@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+from hashlib import sha256
+
 from odoo import Command, api, fields, models, _
 from odoo.exceptions import AccessError
 from odoo.tools import html2plaintext
@@ -122,7 +124,7 @@ class CrmLead(models.Model):
                         record._description or record._name,
                         record.id,
                     )
-                names.append(name)
+                names.append('%s (#%s)' % (name, record.id))
             return ', '.join(names)
 
         if field.type == 'selection':
@@ -133,16 +135,23 @@ class CrmLead(models.Model):
                 return str(value or '')
 
         if field.type == 'html':
-            text = html2plaintext(value or '')
-            return ' '.join(text.split())
+            text = ' '.join(html2plaintext(value or '').split())
+            if not value:
+                return ''
+            fingerprint = sha256(str(value).encode('utf-8')).hexdigest()[:12]
+            return '%s [HTML fingerprint: %s]' % (text, fingerprint)
 
         if field.type == 'binary':
-            return '[File attached]' if value else ''
+            if not value:
+                return ''
+            return 'File fingerprint: %s' % sha256(
+                str(value).encode('utf-8')
+            ).hexdigest()[:12]
 
         if field.type == 'boolean':
             return 'Yes' if value else 'No'
 
-        if value in (False, None):
+        if value is False or value is None:
             return ''
 
         return str(value)
@@ -177,12 +186,64 @@ class CrmLead(models.Model):
             'operation': 'update',
             'field_name': field_name,
             'field_label': field.string or field_name,
-            'old_value': old_value,
-            'new_value': new_value,
+            'old_value': old_value if old_value != '' else '(empty)',
+            'new_value': new_value if new_value != '' else '(empty)',
             'changed_by_id': self.env.user.id,
             'changed_at': fields.Datetime.now(),
         })
         return True
+
+    @api.model_create_multi
+    def create(self, vals_list):
+        records = super().create(vals_list)
+        if self.env.context.get('nil_skip_lead_audit'):
+            return records
+        for rec, vals in zip(records, vals_list):
+            self.env['training.course.audit'].sudo().create({
+                'lead_id': rec.id,
+                'document_model': 'crm.lead',
+                'document_name': rec.display_name,
+                'operation': 'create',
+                'field_name': 'crm.lead',
+                'field_label': 'Lead created',
+                'old_value': '(not created)',
+                'new_value': rec.display_name,
+                'changed_by_id': self.env.user.id,
+                'changed_at': fields.Datetime.now(),
+            })
+            # Log only fields explicitly present at creation, not computed values.
+            for name in rec._nil_lead_audit_field_names(vals):
+                new_value = rec._nil_lead_audit_value(name)
+                rec.env['training.course.audit'].sudo().create({
+                    'lead_id': rec.id,
+                    'document_model': 'crm.lead',
+                    'document_name': rec.display_name,
+                    'operation': 'create',
+                    'field_name': name,
+                    'field_label': rec._fields[name].string or name,
+                    'old_value': '(empty)',
+                    'new_value': new_value if new_value != '' else '(empty)',
+                    'changed_by_id': self.env.user.id,
+                    'changed_at': fields.Datetime.now(),
+                })
+        return records
+
+    def unlink(self):
+        if not self.env.context.get('nil_skip_lead_audit'):
+            for rec in self:
+                self.env['training.course.audit'].sudo().create({
+                    'lead_id': rec.id,
+                    'document_model': 'crm.lead',
+                    'document_name': rec.display_name,
+                    'operation': 'delete',
+                    'field_name': 'crm.lead',
+                    'field_label': 'Lead deleted',
+                    'old_value': rec.display_name,
+                    'new_value': '(deleted)',
+                    'changed_by_id': self.env.user.id,
+                    'changed_at': fields.Datetime.now(),
+                })
+        return super().unlink()
 
     def write(self, vals):
         """
