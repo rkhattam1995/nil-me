@@ -642,7 +642,7 @@ class PurchaseOrder(models.Model):
                     # For the Vendor Bill's internal training details, this is
                     # the payable instructor total, not the customer selling price.
                     'price': self.instructor_total,
-                    'lead_id': course.lead_id.id or self.crm_lead_id.id or False,
+                    'lead_id': False,  # Bill copy belongs to the Vendor Bill, not the CRM Training tab.
                     'instructor_id': self.instructor_id.id or course.instructor_id.id or False,
                     'descriptions': course.descriptions,
                     'training_id': course.training_id.id or False,
@@ -663,7 +663,7 @@ class PurchaseOrder(models.Model):
                     'training_date_start': training.training_date_start,
                     'training_date_end': training.training_date_end,
                     'price': training.price,
-                    'lead_id': training.lead_id.id or self.crm_lead_id.id or False,
+                    'lead_id': False,  # Keep Bill-only training copies off the CRM Training tab.
                     'instructor_id': training.instructor_id.id or False,
                     'descriptions': training.descriptions,
                     'training_id': training.training_id.id or False,
