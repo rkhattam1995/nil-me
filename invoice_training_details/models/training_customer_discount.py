@@ -200,6 +200,8 @@ class SaleOrderLine(models.Model):
         return lines
 
     def write(self, vals):
+        if 'nil_discount_type' in vals and not vals['nil_discount_type'] and 'nil_discount_value' not in vals:
+            vals = dict(vals, nil_discount_value=0.0)
         relevant = {
             'nil_discount_type', 'nil_discount_value', 'price_unit',
             'product_uom_qty', 'discount',
