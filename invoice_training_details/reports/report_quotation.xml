@@ -38,6 +38,19 @@
                             font-weight:700 !important;
                         }
 
+                        /* Layout-only wrapper: no visible frame around Course Materials.
+                           Direct-child selectors intentionally leave the nested totals
+                           table's own borders and colored amount cells untouched. */
+                        table.nil-quotation-summary-grid,
+                        table.nil-quotation-summary-grid > tbody,
+                        table.nil-quotation-summary-grid > tbody > tr,
+                        table.nil-quotation-summary-grid > tbody > tr > td {
+                            border:0 none transparent !important;
+                            outline:none !important;
+                            box-shadow:none !important;
+                            background:transparent !important;
+                        }
+
                         /* TOTAL TABLE: one font size everywhere */
                         .quotation-total-box,
                         .quotation-total-box td,
@@ -436,12 +449,15 @@
                        t-value="o.training_course_ids.filtered('hyperlink')"/>
 
                     <table class="nil-quotation-summary-grid"
-                           style="width:100%;border:0;border-collapse:collapse;
+                           style="width:100%;border:0 none transparent !important;
+                                  border-collapse:separate;border-spacing:0;
+                                  background:transparent !important;
                                   table-layout:fixed;margin:4px 0 2px 0;">
                         <tbody>
                             <tr>
                                 <td style="width:55%;padding:0 12px 0 0;
-                                           border:0 !important;background:#fff !important;
+                                           border:0 none transparent !important;
+                                           background:transparent !important;
                                            text-align:left;vertical-align:top;">
                     <div t-if="courses_with_content"
                          style="
@@ -477,7 +493,8 @@
                     </div>
                                 </td>
                                 <td style="width:45%;padding:0;
-                                           border:0 !important;background:#fff !important;
+                                           border:0 none transparent !important;
+                                           background:transparent !important;
                                            text-align:right;vertical-align:top;">
                         <table class="table table-sm table-border quotation-total-box"
                                style="
