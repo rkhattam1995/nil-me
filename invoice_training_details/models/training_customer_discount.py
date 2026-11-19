@@ -3,6 +3,8 @@
 
 Keep legacy training fields for old data; do not backfill or modify old records.
 """
+import math
+
 from odoo import api, fields, models, _
 from odoo.exceptions import UserError, ValidationError
 
@@ -61,16 +63,16 @@ class SaleOrder(models.Model):
     )
 
     @api.depends(
-        'amount_untaxed', 'order_line.display_type',
+        'amount_total', 'order_line.display_type',
         'order_line.price_unit', 'order_line.product_uom_qty',
-        'order_line.discount', 'order_line.currency_id',
+        'order_line.discount', 'order_line.currency_id', 'order_line.price_total',
     )
     def _compute_nil_order_discount_totals(self):
         for order in self:
             lines = order.order_line.filtered(lambda line: not line.display_type)
             discount = sum(lines.mapped('nil_line_discount_amount'))
             order.nil_order_discount_amount = discount
-            order.nil_order_subtotal_before_discount = order.amount_untaxed + discount
+            order.nil_order_subtotal_before_discount = order.amount_total + discount
             order.nil_customer_training_discount_amount = discount
             order.nil_customer_training_net_total = order.amount_untaxed
 
@@ -98,27 +100,44 @@ class SaleOrderLine(models.Model):
         compute='_compute_nil_line_discount_amount',
     )
 
-    def _nil_untaxed_before_discount(self):
+    def _nil_line_total_at_discount(self, percent):
+        """Total with VAT/CLC rules at a candidate native discount percent.
+
+        Fixed amount is a reduction in the *payable* line total, not a
+        reduction in the untaxed amount plus an extra VAT reduction.
+        """
         self.ensure_one()
-        total = self.price_unit * self.product_uom_qty
+        discounted_unit = self.price_unit * (1.0 - percent / 100.0)
         if self.tax_id:
-            total = self.tax_id.compute_all(
-                self.price_unit, currency=self.currency_id,
+            totals = self.tax_id.compute_all(
+                discounted_unit, currency=self.currency_id,
                 quantity=self.product_uom_qty, product=self.product_id,
                 partner=self.order_id.partner_id,
-            )['total_excluded']
-        return total
+            )
+            total = totals['total_included']
+            if self.order_id and self.order_id._nil_is_clc_pricelist_quote():
+                # The existing CLC override rounds positive VAT up per line.
+                raw_tax = total - totals['total_excluded']
+                if raw_tax > 0:
+                    total = totals['total_excluded'] + math.ceil(round(raw_tax, 8))
+        else:
+            total = discounted_unit * self.product_uom_qty
+        return self.currency_id.round(total) if self.currency_id else total
+
+    def _nil_gross_before_discount(self):
+        return self._nil_line_total_at_discount(0.0)
 
     @api.depends(
-        'price_unit', 'product_uom_qty', 'discount', 'price_subtotal',
+        'price_unit', 'product_uom_qty', 'discount', 'price_total',
         'tax_id', 'product_id', 'order_id.partner_id', 'currency_id', 'display_type',
+        'order_id.pricelist_id', 'order_id.opportunity_id', 'order_id.is_training_so',
     )
     def _compute_nil_line_discount_amount(self):
         for line in self:
             if line.display_type:
                 line.nil_line_discount_amount = 0.0
                 continue
-            raw = max(0.0, line._nil_untaxed_before_discount() - line.price_subtotal)
+            raw = max(0.0, line._nil_gross_before_discount() - line.price_total)
             line.nil_line_discount_amount = (
                 line.currency_id.round(raw) if line.currency_id else raw
             )
@@ -129,8 +148,21 @@ class SaleOrderLine(models.Model):
         if self.nil_discount_type == 'percent':
             return self.nil_discount_value
         if self.nil_discount_type == 'amount':
-            base = self._nil_untaxed_before_discount()
-            return 100.0 * self.nil_discount_value / base if base > 0 else 0.0
+            original_total = self._nil_gross_before_discount()
+            if original_total <= 0:
+                return 0.0
+            target_total = original_total - self.nil_discount_value
+            # Find the precise native % that reduces the VAT-INCLUSIVE total
+            # by the requested fixed amount. Never over-discount due to
+            # VAT/CLC rounding. Price-unit and tax engine remain unchanged.
+            low, high = 0.0, 100.0
+            for _step in range(36):
+                mid = (low + high) / 2.0
+                if self._nil_line_total_at_discount(mid) >= target_total:
+                    low = mid
+                else:
+                    high = mid
+            return low
         return None
 
     @api.constrains('nil_discount_type', 'nil_discount_value', 'price_unit', 'product_uom_qty')
@@ -152,7 +184,7 @@ class SaleOrderLine(models.Model):
                 raise ValidationError(_('Discounts can only be applied to normal order lines.'))
             if kind == 'percent' and value > 100:
                 raise ValidationError(_('Percentage discount must be between 0 and 100.'))
-            if kind == 'amount' and value > line._nil_untaxed_before_discount() + 0.0000001:
+            if kind == 'amount' and value > line._nil_gross_before_discount() + 0.0000001:
                 raise ValidationError(_('Fixed discount cannot exceed the order line amount.'))
 
     @api.onchange('nil_discount_type', 'nil_discount_value', 'price_unit', 'product_uom_qty')
