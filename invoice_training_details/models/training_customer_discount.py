@@ -161,9 +161,20 @@ class SaleOrderLine(models.Model):
             if not self.tax_id:
                 return 100.0 * self.nil_discount_value / original_total
             target_total = original_total - self.nil_discount_value
-            # Find the precise native % that reduces the VAT-INCLUSIVE total
-            # by the requested fixed amount. Never over-discount due to
-            # VAT/CLC rounding. Price-unit and tax engine remain unchanged.
+            # Currency rounding makes a plateau of percent values yield the
+            # same exact payable amount. Find BOTH edges and choose the middle
+            # to avoid rounding a stored 12-digit percent across a cent edge.
+            # With CLC whole-unit VAT some totals may be unreachable; the
+            # post-sync validator rejects those instead of over-discounting.
+            low, high = 0.0, 100.0
+            for _step in range(48):
+                mid = (low + high) / 2.0
+                if self._nil_line_total_at_discount(mid) <= target_total:
+                    high = mid
+                else:
+                    low = mid
+            first_at_or_below = high
+
             low, high = 0.0, 100.0
             for _step in range(48):
                 mid = (low + high) / 2.0
@@ -171,14 +182,8 @@ class SaleOrderLine(models.Model):
                     low = mid
                 else:
                     high = mid
-            # Tax/CLC monetary totals are rounded. Choose the candidate whose
-            # final monetary total is closest to the requested exact target.
-            return min(
-                (low, high), key=lambda value: (
-                    abs(self._nil_line_total_at_discount(value) - target_total),
-                    value,
-                )
-            )
+            last_at_or_above = low
+            return (first_at_or_below + last_at_or_above) / 2.0
         return None
 
     @api.constrains('nil_discount_type', 'nil_discount_value', 'price_unit', 'product_uom_qty')
