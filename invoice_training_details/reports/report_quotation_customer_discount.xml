@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <!-- Applies to both draft quotations and confirmed sales orders when
+         printed through NIL's existing Training Quotation report action. -->
+    <template id="report_quotation_customer_discount_totals"
+              inherit_id="invoice_training_details.report_quotation_document_training">
+        <xpath expr="//table[contains(concat(' ', normalize-space(@class), ' '), ' quotation-total-box ')]/t[@t-set='tax_totals']"
+               position="before">
+            <tr t-if="o.training_course_ids and o.nil_customer_training_discount_amount &gt; 0.0">
+                <td style="background-color:#fff;"><strong>Training Total Before Discount</strong></td>
+                <td class="text-end" style="background-color:#fff;">
+                    <span t-field="o.total_training_price"/>
+                </td>
+            </tr>
+            <tr t-if="o.training_course_ids and o.nil_customer_training_discount_amount &gt; 0.0">
+                <td style="background-color:#fff;"><strong>Discount Amount</strong></td>
+                <td class="text-end" style="background-color:#fff;">
+                    -<span t-field="o.nil_customer_training_discount_amount"/>
+                </td>
+            </tr>
+            <tr t-if="o.training_course_ids and o.nil_customer_training_discount_amount &gt; 0.0">
+                <td style="background-color:#fff;"><strong>Training Total After Discount</strong></td>
+                <td class="text-end" style="background-color:#fff;">
+                    <span t-field="o.nil_customer_training_net_total"/>
+                </td>
+            </tr>
+        </xpath>
+    </template>
+</odoo>
