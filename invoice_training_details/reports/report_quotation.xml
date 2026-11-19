@@ -431,19 +431,60 @@
 
                     </table>
 
-                    <div style="
-                        width:100%;
-                        margin:6px 0 6px 0;
-                        text-align:right;
-                        page-break-inside:avoid;
-                    ">
+                    <!-- Keep course links alongside the totals, using otherwise empty space. -->
+                    <t t-set="courses_with_content"
+                       t-value="o.training_course_ids.filtered('hyperlink')"/>
 
+                    <table class="nil-quotation-summary-grid"
+                           style="width:100%;border:0;border-collapse:collapse;
+                                  table-layout:fixed;margin:4px 0 2px 0;">
+                        <tbody>
+                            <tr>
+                                <td style="width:55%;padding:0 12px 0 0;
+                                           border:0 !important;background:#fff !important;
+                                           text-align:left;vertical-align:top;">
+                    <div t-if="courses_with_content"
+                         style="
+                            width:100%;
+                            margin:0;
+                            padding:0;
+                            font-size:16px;
+                            line-height:1.45;
+                         ">
+
+                        <div style="
+                            margin:0 0 3px 0;
+                            font-weight:700;
+                         ">
+                            Course Materials
+                        </div>
+
+                        <t t-foreach="courses_with_content"
+                           t-as="course_material">
+
+                            <div style="margin:0 0 2px 0;">
+                                <span t-field="course_material.training_id"/>
+                                <span>: </span>
+                                <a t-att-href="course_material.hyperlink"
+                                   target="_blank"
+                                   style="text-decoration:underline;">
+                                    View Course Content
+                                </a>
+                            </div>
+
+                        </t>
+
+                    </div>
+                                </td>
+                                <td style="width:45%;padding:0;
+                                           border:0 !important;background:#fff !important;
+                                           text-align:right;vertical-align:top;">
                         <table class="table table-sm table-border quotation-total-box"
                                style="
-                                   display:inline-table;
+                                   display:table;
                                    background-color:#fff;
-                                   width:300px;
-                                   margin:0 0 0 auto;
+                                   width:100%;
+                                   margin:0;
                                ">
 
                             <!-- Tax totals -->
@@ -503,47 +544,10 @@
                             </tr>
 
                         </table>
-
-                    </div>
-
-
-                    <!-- Course Materials -->
-                    <t t-set="courses_with_content"
-                       t-value="o.training_course_ids.filtered('hyperlink')"/>
-
-                    <div t-if="courses_with_content"
-                         style="
-                            width:100%;
-                            margin:8px 0 4px 0;
-                            padding:0;
-                            font-size:16px;
-                            line-height:1.45;
-                         ">
-
-                        <div style="
-                            margin:0 0 3px 0;
-                            font-weight:700;
-                         ">
-                            Course Materials
-                        </div>
-
-                        <t t-foreach="courses_with_content"
-                           t-as="course_material">
-
-                            <div style="margin:0 0 2px 0;">
-                                <span t-field="course_material.training_id"/>
-                                <span>: </span>
-                                <a t-att-href="course_material.hyperlink"
-                                   target="_blank"
-                                   style="text-decoration:underline;">
-                                    View Course Content
-                                </a>
-                            </div>
-
-                        </t>
-
-                    </div>
-
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
 
 
                     <!-- Terms & Conditions -->
