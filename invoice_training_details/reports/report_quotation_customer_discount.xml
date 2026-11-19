@@ -7,13 +7,13 @@
         <xpath expr="//table[contains(concat(' ', normalize-space(@class), ' '), ' quotation-total-box ')]/t[@t-set='tax_totals']"
                position="before">
             <tr t-if="o.nil_order_discount_amount &gt; 0.0">
-                <td style="background-color:#fff;"><strong>Total Before Discount (incl. VAT)</strong></td>
+                <td style="background-color:#fff;"><strong>Subtotal</strong></td>
                 <td class="text-end" style="background-color:#fff;">
                     <span t-field="o.nil_order_subtotal_before_discount"/>
                 </td>
             </tr>
             <tr t-if="o.nil_order_discount_amount &gt; 0.0">
-                <td style="background-color:#fff;"><strong>Discount (incl. VAT)</strong></td>
+                <td style="background-color:#fff;"><strong>Discount Amount</strong></td>
                 <td class="text-end" style="background-color:#fff;">
                     -<span t-field="o.nil_order_discount_amount"/>
                 </td>
