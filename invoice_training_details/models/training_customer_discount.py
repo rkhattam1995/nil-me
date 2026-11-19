@@ -98,13 +98,27 @@ class SaleOrderLine(models.Model):
         compute='_compute_nil_line_discount_amount',
     )
 
-    @api.depends('price_unit', 'product_uom_qty', 'discount', 'currency_id', 'display_type')
+    def _nil_untaxed_before_discount(self):
+        self.ensure_one()
+        total = self.price_unit * self.product_uom_qty
+        if self.tax_id:
+            total = self.tax_id.compute_all(
+                self.price_unit, currency=self.currency_id,
+                quantity=self.product_uom_qty, product=self.product_id,
+                partner=self.order_id.partner_id,
+            )['total_excluded']
+        return total
+
+    @api.depends(
+        'price_unit', 'product_uom_qty', 'discount', 'price_subtotal',
+        'tax_id', 'product_id', 'order_id.partner_id', 'currency_id', 'display_type',
+    )
     def _compute_nil_line_discount_amount(self):
         for line in self:
             if line.display_type:
                 line.nil_line_discount_amount = 0.0
                 continue
-            raw = line.price_unit * line.product_uom_qty * line.discount / 100.0
+            raw = max(0.0, line._nil_untaxed_before_discount() - line.price_subtotal)
             line.nil_line_discount_amount = (
                 line.currency_id.round(raw) if line.currency_id else raw
             )
@@ -115,7 +129,7 @@ class SaleOrderLine(models.Model):
         if self.nil_discount_type == 'percent':
             return self.nil_discount_value
         if self.nil_discount_type == 'amount':
-            base = self.price_unit * self.product_uom_qty
+            base = self._nil_untaxed_before_discount()
             return 100.0 * self.nil_discount_value / base if base > 0 else 0.0
         return None
 
@@ -138,7 +152,7 @@ class SaleOrderLine(models.Model):
                 raise ValidationError(_('Discounts can only be applied to normal order lines.'))
             if kind == 'percent' and value > 100:
                 raise ValidationError(_('Percentage discount must be between 0 and 100.'))
-            if kind == 'amount' and value > line.price_unit * line.product_uom_qty + 0.0000001:
+            if kind == 'amount' and value > line._nil_untaxed_before_discount() + 0.0000001:
                 raise ValidationError(_('Fixed discount cannot exceed the order line amount.'))
 
     @api.onchange('nil_discount_type', 'nil_discount_value', 'price_unit', 'product_uom_qty')
