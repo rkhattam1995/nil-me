@@ -1,29 +1,48 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <odoo>
-    <!-- Applies to both draft quotations and confirmed sales orders when
-         printed through NIL's existing Training Quotation report action. -->
     <template id="report_quotation_customer_discount_totals"
               inherit_id="invoice_training_details.report_quotation_document_training">
+
+        <!-- Actual sale.order lines are the only financial source of truth. -->
         <xpath expr="//table[contains(concat(' ', normalize-space(@class), ' '), ' quotation-total-box ')]/t[@t-set='tax_totals']"
                position="before">
-            <tr t-if="o.training_course_ids and o.nil_customer_training_discount_amount &gt; 0.0">
-                <td style="background-color:#fff;"><strong>Training Total Before Discount</strong></td>
+            <tr t-if="o.nil_order_discount_amount &gt; 0.0">
+                <td style="background-color:#fff;"><strong>Subtotal (Before Discount)</strong></td>
                 <td class="text-end" style="background-color:#fff;">
-                    <span t-field="o.total_training_price"/>
+                    <span t-field="o.nil_order_subtotal_before_discount"/>
                 </td>
             </tr>
-            <tr t-if="o.training_course_ids and o.nil_customer_training_discount_amount &gt; 0.0">
-                <td style="background-color:#fff;"><strong>Discount Amount</strong></td>
+            <tr t-if="o.nil_order_discount_amount &gt; 0.0">
+                <td style="background-color:#fff;"><strong>Discount</strong></td>
                 <td class="text-end" style="background-color:#fff;">
-                    -<span t-field="o.nil_customer_training_discount_amount"/>
+                    -<span t-field="o.nil_order_discount_amount"/>
                 </td>
             </tr>
-            <tr t-if="o.training_course_ids and o.nil_customer_training_discount_amount &gt; 0.0">
-                <td style="background-color:#fff;"><strong>Training Total After Discount</strong></td>
-                <td class="text-end" style="background-color:#fff;">
-                    <span t-field="o.nil_customer_training_net_total"/>
-                </td>
-            </tr>
+        </xpath>
+
+        <xpath expr="//table[contains(concat(' ', normalize-space(@class), ' '), ' quotation-total-box ')]//strong[@t-out=&quot;subtotal['name']&quot;]"
+               position="attributes">
+            <attribute name="t-out">('Subtotal (After Discount, excl. VAT)' if o.nil_order_discount_amount and subtotal['name'] == 'Untaxed Amount' else subtotal['name'])</attribute>
+        </xpath>
+
+        <!-- Identical training names share one course-content link. -->
+        <xpath expr="//div[@t-if='courses_with_content']/t[@t-foreach='courses_with_content']"
+               position="replace">
+            <t t-set="nil_seen_course_names" t-value="[]"/>
+            <t t-foreach="courses_with_content" t-as="course_material">
+                <t t-set="nil_course_key"
+                   t-value="' '.join((course_material.training_id.name or course_material.name or '').split()).casefold()"/>
+                <t t-if="nil_course_key not in nil_seen_course_names">
+                    <t t-set="nil_seen_course_names"
+                       t-value="nil_seen_course_names + [nil_course_key]"/>
+                    <div style="margin:0 0 2px 0;">
+                        <span t-field="course_material.training_id"/>
+                        <span>: </span>
+                        <a t-att-href="course_material.hyperlink" target="_blank"
+                           style="text-decoration:underline;">View Course Content</a>
+                    </div>
+                </t>
+            </t>
         </xpath>
     </template>
 </odoo>
