@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <!-- Same order form covers draft Quotations and confirmed Sales Orders.
+         These fields are informational and never add accounting entries. -->
+    <record id="sale_order_required_downpayment_fields" model="ir.ui.view">
+        <field name="name">sale.order.required.downpayment.inputs</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale.view_order_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='tax_totals']" position="before">
+                <field name="nil_required_downpayment_type" string="Required Down Payment Type"/>
+                <field name="nil_required_downpayment_value" string="Required Down Payment Value"
+                       readonly="not nil_required_downpayment_type"/>
+                <field name="nil_required_downpayment_amount" string="Required Down Payment"
+                       readonly="1" invisible="not nil_required_downpayment_type"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>

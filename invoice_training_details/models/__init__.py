@@ -38,3 +38,4 @@ from . import po_subject
 from . import sale_subject
 from . import quotation_terms_only
 from . import training_customer_discount
+from . import required_downpayment

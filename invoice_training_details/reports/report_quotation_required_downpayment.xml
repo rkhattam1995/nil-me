@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <template id="report_quotation_required_downpayment"
+              inherit_id="invoice_training_details.report_quotation_document_training">
+        <xpath expr="//table[contains(concat(' ', normalize-space(@class), ' '), ' quotation-total-box ')]/tr[contains(concat(' ', normalize-space(@class), ' '), ' o_total ')]"
+               position="after">
+            <tr t-if="o.nil_required_downpayment_type and o.nil_required_downpayment_value &gt; 0.0"
+                style="page-break-inside:avoid;">
+                <td style="background-color:#fff;">
+                    <strong>Required Down Payment</strong>
+                    <t t-if="o.nil_required_downpayment_type == 'percent'">
+                        (<span t-esc="'{:g}'.format(o.nil_required_downpayment_value)"/>%)
+                    </t>
+                </td>
+                <td class="text-end" style="background-color:#fff;">
+                    <span t-field="o.nil_required_downpayment_amount"/>
+                </td>
+            </tr>
+        </xpath>
+    </template>
+</odoo>

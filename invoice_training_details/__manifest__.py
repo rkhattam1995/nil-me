@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 {
     "name": "Invoice Training Details",
-    "version": "17.0.1.96",
+    "version": "17.0.1.98",
     "summary": "Enhancements for Invoice Training Details",
     "description": "Customizations for invoicing related to training services, including improved reporting and CRM integration.",
     "category": "Customization",
@@ -40,6 +40,7 @@
         "views/am_pricing_views.xml",
         "views/sale_order_views.xml",
         "views/training_customer_discount_views.xml",
+        "views/required_downpayment_views.xml",
         "views/res_company_views.xml",
         "views/training_audit_views.xml",
         "views/training_change_reason_views.xml",
@@ -51,6 +52,7 @@
         "reports/report_quotation.xml",
         "reports/report_quotation_lcp_patch.xml",
         "reports/report_quotation_customer_discount.xml",
+        "reports/report_quotation_required_downpayment.xml",
         "reports/report_so_terms_finishing.xml",
         "reports/report_pro_invoice.xml",
         "reports/report_po_document.xml",
