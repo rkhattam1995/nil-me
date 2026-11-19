@@ -49,7 +49,7 @@ class SaleOrder(models.Model):
         compute='_compute_nil_order_discount_totals',
     )
     nil_order_subtotal_before_discount = fields.Monetary(
-        string='Subtotal Before Discount', currency_field='currency_id',
+        string='Total Before Discount (incl. VAT)', currency_field='currency_id',
         compute='_compute_nil_order_discount_totals',
     )
     # Compatibility with old nonstored fields, now computed from Order Lines.
@@ -96,7 +96,7 @@ class SaleOrderLine(models.Model):
     nil_discount_managed = fields.Boolean(default=False, copy=False)
     nil_original_discount_percent = fields.Float(default=0.0, copy=False)
     nil_line_discount_amount = fields.Monetary(
-        string='Discount Amount', currency_field='currency_id',
+        string='Discount Amount (incl. VAT)', currency_field='currency_id',
         compute='_compute_nil_line_discount_amount',
     )
 
