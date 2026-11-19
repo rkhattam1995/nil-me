@@ -1,35 +1,30 @@
 # -*- coding: utf-8 -*-
-"""Customer-facing per-training discounts for quotation / sales-order flows.
+"""Customer discounts belong to sale.order.line, not training.course.
 
-No changes to LCP partner-cost discounts or to historic invoices.
+Keep legacy training fields for old data; do not backfill or modify old records.
 """
-
 from odoo import api, fields, models, _
-from odoo.exceptions import ValidationError
+from odoo.exceptions import UserError, ValidationError
 
 
 class TrainingCourse(models.Model):
     _inherit = 'training.course'
 
+    # Previously installed fields stay readable, but never drive new prices.
     nil_customer_discount_type = fields.Selection(
         [('percent', 'Percentage (%)'), ('amount', 'Fixed Amount')],
-        string='Customer Discount Type',
-        default=False,
-        copy=True,
-        help='Leave empty to preserve the existing sale-line discount behavior.',
+        string='Legacy Training Discount Type', copy=False,
     )
     nil_customer_discount_value = fields.Float(
-        string='Customer Discount Value', digits=(16, 2), default=0.0,
+        string='Legacy Training Discount Value', digits=(16, 2), copy=False,
     )
     nil_customer_discount_amount = fields.Float(
-        string='Customer Discount Amount',
-        compute='_compute_nil_customer_discount',
-        digits=(16, 2),
+        string='Legacy Training Discount Amount',
+        compute='_compute_nil_customer_discount', digits=(16, 2),
     )
     nil_customer_net_price = fields.Float(
-        string='Training After Discount',
-        compute='_compute_nil_customer_discount',
-        digits=(16, 2),
+        string='Legacy Training After Discount',
+        compute='_compute_nil_customer_discount', digits=(16, 2),
     )
 
     @api.depends('price', 'nil_customer_discount_type', 'nil_customer_discount_value')
@@ -43,138 +38,171 @@ class TrainingCourse(models.Model):
             course.nil_customer_discount_amount = amount
             course.nil_customer_net_price = (course.price or 0.0) - amount
 
-    @api.constrains('price', 'nil_customer_discount_type', 'nil_customer_discount_value')
-    def _check_nil_customer_discount(self):
-        for course in self:
-            kind = course.nil_customer_discount_type
-            value = course.nil_customer_discount_value
-            if value < -0.0000001:
-                raise ValidationError(_('Customer discount cannot be negative.'))
-            if value and not kind:
-                raise ValidationError(_('Select a Customer Discount Type before entering a value.'))
-            if kind == 'percent' and value > 100.0000001:
-                raise ValidationError(_('Customer discount percentage cannot exceed 100%.'))
-            if kind == 'amount' and value > (course.price or 0.0) + 0.0000001:
-                raise ValidationError(_('Fixed customer discount cannot exceed the training price.'))
-
-    def _nil_apply_customer_discount_to_sale_vals(self, vals):
-        """Mutate only the target training line's price/discount payload.
-
-        For a fixed discount, adjust the unit price proportionally instead of
-        using Odoo's rounded percentage discount field. This retains the fixed
-        amount's precision for Cash/CLC and existing inclusive-VAT price rules.
-        """
-        self.ensure_one()
-        kind = self.nil_customer_discount_type
-        if not kind:
-            return vals
-        if kind == 'percent':
-            vals['discount'] = self.nil_customer_discount_value
-        else:
-            original = self.price or 0.0
-            ratio = self.nil_customer_discount_value / original if original > 0.0 else 0.0
-            vals['price_unit'] = (vals.get('price_unit') or 0.0) * (1.0 - ratio)
-            vals['discount'] = 0.0
-        return vals
-
-    @api.model
-    def _nil_snapshot_field_names(self):
-        # The snapshot helper explicitly whitelists ordinary fields. Include
-        # these inputs so CRM, WO/SO, and invoice snapshots remain independent.
-        names = super()._nil_snapshot_field_names()
-        return sorted(set(names) | {
-            'nil_customer_discount_type', 'nil_customer_discount_value',
-        })
-
-
-class CrmLead(models.Model):
-    _inherit = 'crm.lead'
-
-    def _lcp_sale_lines(self, courses, company):
-        lines = super()._lcp_sale_lines(courses, company)
-        for course, command in zip(courses, lines):
-            if course.nil_customer_discount_type:
-                course._nil_apply_customer_discount_to_sale_vals(command[2])
-                command[2]['nil_training_customer_discount_applied'] = True
-        return lines
-
 
 class SaleOrder(models.Model):
     _inherit = 'sale.order'
 
+    nil_order_discount_amount = fields.Monetary(
+        string='Order Lines Discount', currency_field='currency_id',
+        compute='_compute_nil_order_discount_totals',
+    )
+    nil_order_subtotal_before_discount = fields.Monetary(
+        string='Subtotal Before Discount', currency_field='currency_id',
+        compute='_compute_nil_order_discount_totals',
+    )
+    # Compatibility with old nonstored fields, now computed from Order Lines.
     nil_customer_training_discount_amount = fields.Monetary(
-        string='Training Customer Discount',
-        currency_field='currency_id',
-        compute='_compute_nil_customer_training_totals',
+        string='Order Lines Discount', currency_field='currency_id',
+        compute='_compute_nil_order_discount_totals',
     )
     nil_customer_training_net_total = fields.Monetary(
-        string='Training Total After Discount',
-        currency_field='currency_id',
-        compute='_compute_nil_customer_training_totals',
+        string='Untaxed Subtotal After Discount', currency_field='currency_id',
+        compute='_compute_nil_order_discount_totals',
     )
 
     @api.depends(
-        'training_course_ids.price',
-        'training_course_ids.nil_customer_discount_type',
-        'training_course_ids.nil_customer_discount_value',
+        'amount_untaxed', 'order_line.display_type',
+        'order_line.price_unit', 'order_line.product_uom_qty',
+        'order_line.discount', 'order_line.currency_id',
     )
-    def _compute_nil_customer_training_totals(self):
+    def _compute_nil_order_discount_totals(self):
         for order in self:
-            courses = order.training_course_ids
-            order.nil_customer_training_discount_amount = sum(
-                courses.mapped('nil_customer_discount_amount')
-            )
-            order.nil_customer_training_net_total = sum(
-                courses.mapped('nil_customer_net_price')
-            )
-
-    def synch_order(self):
-        # Parent maintains one training line per snapshot and protects unrelated
-        # manual order lines. Apply discount only after it has refreshed prices.
-        result = super().synch_order()
-        for order in self:
-            for course in order.training_course_ids:
-                line = order.order_line.filtered(
-                    lambda candidate: candidate.nil_sync_training_id == course
-                )
-                if len(line) != 1:
-                    continue  # Parent owns ambiguous-line validation.
-                if not course.nil_customer_discount_type:
-                    if line.nil_training_customer_discount_applied:
-                        # Reset only discounts previously managed by this feature.
-                        line.write({
-                            'discount': 0.0,
-                            'nil_training_customer_discount_applied': False,
-                        })
-                    continue  # Preserve unrelated legacy/manual discounts.
-
-                source = course.source_training_course_id or course
-                if source.lead_id and course.lcp_cost_learning_partner:
-                    # LCP prices were already discounted by _lcp_sale_lines().
-                    # Never apply a fixed amount a second time.
-                    if not line.nil_training_customer_discount_applied:
-                        line.write({'nil_training_customer_discount_applied': True})
-                    continue
-
-                values = course._nil_apply_customer_discount_to_sale_vals({
-                    'price_unit': line.price_unit,
-                    'discount': line.discount,
-                })
-                values['nil_training_customer_discount_applied'] = True
-                changes = {
-                    name: val for name, val in values.items()
-                    if abs(val - line[name]) > 0.0000001
-                }
-                if changes:
-                    line.write(changes)
-        return result
+            lines = order.order_line.filtered(lambda line: not line.display_type)
+            discount = sum(lines.mapped('nil_line_discount_amount'))
+            order.nil_order_discount_amount = discount
+            order.nil_order_subtotal_before_discount = order.amount_untaxed + discount
+            order.nil_customer_training_discount_amount = discount
+            order.nil_customer_training_net_total = order.amount_untaxed
 
 
 class SaleOrderLine(models.Model):
     _inherit = 'sale.order.line'
 
+    # Legacy flag remains, avoiding schema loss and double-discounting.
     nil_training_customer_discount_applied = fields.Boolean(
-        string='Training Customer Discount Applied',
-        default=False,
-        copy=False,
+        string='Legacy Training Discount Applied', default=False, copy=False,
     )
+    nil_discount_type = fields.Selection(
+        [('percent', 'Percentage (%)'), ('amount', 'Fixed Amount')],
+        string='Discount Type', copy=False,
+        help='Applies exclusively to this order line.',
+    )
+    nil_discount_value = fields.Float(
+        string='Discount Value', digits=(16, 2), default=0.0, copy=False,
+        help='A percentage or fixed amount in the order currency.',
+    )
+    nil_discount_managed = fields.Boolean(default=False, copy=False)
+    nil_original_discount_percent = fields.Float(default=0.0, copy=False)
+    nil_line_discount_amount = fields.Monetary(
+        string='Discount Amount', currency_field='currency_id',
+        compute='_compute_nil_line_discount_amount',
+    )
+
+    @api.depends('price_unit', 'product_uom_qty', 'discount', 'currency_id', 'display_type')
+    def _compute_nil_line_discount_amount(self):
+        for line in self:
+            if line.display_type:
+                line.nil_line_discount_amount = 0.0
+                continue
+            raw = line.price_unit * line.product_uom_qty * line.discount / 100.0
+            line.nil_line_discount_amount = (
+                line.currency_id.round(raw) if line.currency_id else raw
+            )
+
+    def _nil_discount_percent(self):
+        """Use native Odoo line.discount so tax/total/invoice stay consistent."""
+        self.ensure_one()
+        if self.nil_discount_type == 'percent':
+            return self.nil_discount_value
+        if self.nil_discount_type == 'amount':
+            base = self.price_unit * self.product_uom_qty
+            return 100.0 * self.nil_discount_value / base if base > 0 else 0.0
+        return None
+
+    @api.constrains('nil_discount_type', 'nil_discount_value', 'price_unit', 'product_uom_qty')
+    def _check_nil_order_line_discount(self):
+        for line in self:
+            kind = line.nil_discount_type
+            value = line.nil_discount_value
+            if value < 0:
+                raise ValidationError(_('Discount cannot be negative.'))
+            if value and not kind:
+                raise ValidationError(_('Select Discount Type before entering a value.'))
+            if kind and value and line.nil_training_customer_discount_applied:
+                raise ValidationError(_(
+                    'A legacy training discount is already applied to this line. '
+                    'Review and restore its undiscounted selling price before adding '
+                    'a new order-line discount.'
+                ))
+            if kind and (line.display_type or line.is_downpayment):
+                raise ValidationError(_('Discounts can only be applied to normal order lines.'))
+            if kind == 'percent' and value > 100:
+                raise ValidationError(_('Percentage discount must be between 0 and 100.'))
+            if kind == 'amount' and value > line.price_unit * line.product_uom_qty + 0.0000001:
+                raise ValidationError(_('Fixed discount cannot exceed the order line amount.'))
+
+    @api.onchange('nil_discount_type', 'nil_discount_value', 'price_unit', 'product_uom_qty')
+    def _onchange_nil_order_line_discount(self):
+        for line in self:
+            percent = line._nil_discount_percent()
+            if percent is not None:
+                if not line.nil_discount_managed:
+                    line.nil_original_discount_percent = line.discount
+                line.discount = percent
+                line.nil_discount_managed = True
+            elif line.nil_discount_managed:
+                line.discount = line.nil_original_discount_percent
+                line.nil_original_discount_percent = 0.0
+                line.nil_discount_managed = False
+                line.nil_discount_value = 0.0
+
+    def _nil_sync_order_line_discount(self):
+        # Never change unrelated lines; only sync an explicitly managed input.
+        for line in self:
+            percent = line._nil_discount_percent()
+            changes = {}
+            if percent is not None:
+                if not line.nil_discount_managed:
+                    changes['nil_original_discount_percent'] = line.discount
+                    changes['nil_discount_managed'] = True
+                if abs(line.discount - percent) > 0.00000001:
+                    changes['discount'] = percent
+            elif line.nil_discount_managed:
+                changes = {
+                    'discount': line.nil_original_discount_percent,
+                    'nil_discount_managed': False,
+                    'nil_original_discount_percent': 0.0,
+                    'nil_discount_value': 0.0,
+                }
+            if changes:
+                line.with_context(nil_skip_customer_discount_sync=True).write(changes)
+
+    @api.model_create_multi
+    def create(self, vals_list):
+        lines = super().create(vals_list)
+        if not self.env.context.get('nil_skip_customer_discount_sync'):
+            if any('nil_discount_type' in vals or 'nil_discount_value' in vals for vals in vals_list):
+                lines._nil_sync_order_line_discount()
+        return lines
+
+    def write(self, vals):
+        relevant = {
+            'nil_discount_type', 'nil_discount_value', 'price_unit',
+            'product_uom_qty', 'discount',
+        }
+        needs_sync = bool(relevant.intersection(vals)) and not self.env.context.get(
+            'nil_skip_customer_discount_sync'
+        )
+        if needs_sync:
+            for line in self:
+                if not (line.nil_discount_type or vals.get('nil_discount_type') or
+                        line.nil_discount_managed or 'nil_discount_value' in vals):
+                    continue
+                if any(inv.move_id.state == 'posted' for inv in line.invoice_lines):
+                    raise UserError(_(
+                        'Cannot change a managed order-line discount after its invoice is posted.'
+                    ))
+        result = super().write(vals)
+        if needs_sync:
+            self._nil_sync_order_line_discount()
+        return result
