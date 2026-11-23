@@ -41,7 +41,7 @@
                                     <t t-if="o.partner_id.is_company == True">
                                         <span t-if="o.partner_id.street" t-field="o.partner_id.street"/><br t-if="o.partner_id.street"/>
                                         <span t-if="o.partner_id.street2" t-field="o.partner_id.street2"/><br t-if="o.partner_id.street2"/>
-                                        <t t-if="o.company_id.country_id.code == 'SA' and 'NIL' in (o.company_id.name or '').upper() and o.partner_id.l10n_sa_edi_building_number">
+                                        <t t-if="o.company_id.country_id.code == 'SA' and o.partner_id.l10n_sa_edi_building_number">
                                             <strong>Building Number:</strong> <span t-field="o.partner_id.l10n_sa_edi_building_number"/><br/>
                                         </t>
                                         <t t-if="o.partner_id.city or o.partner_id.state_id or o.partner_id.zip">
@@ -56,8 +56,8 @@
                                     <t t-if="o.partner_id.is_company == False">
                                         <span t-if="o.partner_id.parent_id.street" t-field="o.partner_id.parent_id.street"/><br t-if="o.partner_id.parent_id.street"/>
                                         <span t-if="o.partner_id.parent_id.street2" t-field="o.partner_id.parent_id.street2"/><br t-if="o.partner_id.parent_id.street2"/>
-                                        <t t-if="o.company_id.country_id.code == 'SA' and 'NIL' in (o.company_id.name or '').upper() and o.partner_id.parent_id.l10n_sa_edi_building_number">
-                                            <strong>Building Number:</strong> <span t-field="o.partner_id.parent_id.l10n_sa_edi_building_number"/><br/>
+                                        <t t-if="o.company_id.country_id.code == 'SA' and (o.partner_id.parent_id.l10n_sa_edi_building_number or o.partner_id.l10n_sa_edi_building_number)">
+                                            <strong>Building Number:</strong> <span t-out="o.partner_id.parent_id.l10n_sa_edi_building_number or o.partner_id.l10n_sa_edi_building_number"/><br/>
                                         </t>
                                         <t t-if="o.partner_id.parent_id.city or o.partner_id.parent_id.state_id or o.partner_id.parent_id.zip">
                                             <span t-if="o.partner_id.parent_id.city" t-field="o.partner_id.parent_id.city"/>
