@@ -1,0 +1,3 @@
+# Cash Onsite catering | 2026-11-25
+
+Production baseline 36d9e786c171d4e448fa907f65b60feb09c979f5. Only clause 4 of new CRM-generated Cash Onsite quotation terms: Catering not included in NIL ME offer. Change list item and marker color from red to black; preserve bold heading, native numbering and special-clause validation. Other three mode generators, mixed section ordering, pricelist, existing saved quotations, WO/PO/invoice defaults and accounting unchanged. Version 17.0.1.105. Source diff assertions only; Odoo registry, editor and PDF not tested. Project reference files unavailable. Rollback isolated commit and authorized module upgrade.

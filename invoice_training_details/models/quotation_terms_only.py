@@ -52,7 +52,7 @@ CASH_ONSITE_TERMS = (
     "All NIL Middle East (NIL ME) terms and conditions apply.",
     "Trainees should use their own laptop for the training.",
     "Training Location: Onsite at customer office in XXXXXXXX. Customers must secure good internet access for the students and the instructor.",
-    "Catering included in NIL ME offer.",
+    "Catering not included in NIL ME offer.",
     "Cancellation Policy:",
     "Changes or replacements of participant names or email addresses are permitted only if requested at least 2 weeks before the start date.",
     "Schedule Changes: NIL Middle East reserves the right to modify program start dates, cohort schedules, or exam dates without prior notice. While every effort will be made to maintain the original schedule, NIL ME will provide alternative options if changes occur. Such changes will not result in any legal or financial liability for NIL Middle East.",
@@ -210,8 +210,8 @@ def _cash_onsite_terms_html():
 
     for clause in CASH_ONSITE_TERMS:
         # Color this list item, INCLUDING its automatically generated "4.".
-        is_catering = clause == 'Catering included in NIL ME offer.'
-        item_style = ' style="color:#ff0000;"' if is_catering else ''
+        is_catering = clause == 'Catering not included in NIL ME offer.'
+        item_style = ' style="color:#000000;"' if is_catering else ''
         catering_count += int(is_catering)
         html.append('<li%s>%s' % (item_style, _cash_heading_html(clause)))
 
