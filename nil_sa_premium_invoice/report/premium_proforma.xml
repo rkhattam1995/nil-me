@@ -13,48 +13,48 @@
                 @font-face {font-family:'NIL Lato';src:url('/web/static/fonts/lato/Lato-Reg-webfont.ttf') format('truetype');font-style:normal;font-weight:400;}
                 @font-face {font-family:'NIL Lato';src:url('/web/static/fonts/lato/Lato-Bol-webfont.ttf') format('truetype');font-style:normal;font-weight:700;}
                 .nil-sa-premium, .nil-sa-premium * {box-sizing:border-box;font-family:Calibri,Carlito,'NIL Lato','NIL Tajawal',sans-serif !important;}
-                .nil-sa-premium {font-size:11pt;color:#253038;line-height:1.25;}
+                .nil-sa-premium {font-size:9.5pt;color:#253038;line-height:1.2;}
                 .nil-sa-premium .ar, .nil-sa-premium .ar *, .nil-sa-premium .party, .nil-sa-premium .party * {font-family:'NIL Tajawal',Calibri,Carlito,sans-serif !important;}
                 .nil-sa-premium .en, .nil-sa-premium .en *, .nil-sa-premium .num, .nil-sa-premium .num *, .nil-sa-premium bdi {font-family:Calibri,Carlito,'NIL Lato','NIL Tajawal',sans-serif !important;}
-                .nil-sa-premium .en {font-size:10.5pt;color:#59636b;font-weight:400;display:block;direction:ltr;line-height:1.25;margin-top:2px;}
+                .nil-sa-premium .en {font-size:9pt;color:#59636b;font-weight:400;display:block;direction:ltr;line-height:1.25;margin-top:2px;}
                 .nil-sa-premium .page > table,.nil-sa-premium .totals {width:100%;table-layout:fixed;border-collapse:collapse;border:0 !important;}
                 .nil-sa-premium .page > table > tbody > tr > td,.nil-sa-premium .page > table > thead > tr > th,.nil-sa-premium .totals > tbody > tr > td {border:0 !important;}
-                .nil-sa-premium .top {margin-bottom:7px;}
+                .nil-sa-premium .top {margin-bottom:4px;}
                 .nil-sa-premium table.top,.nil-sa-premium table.title,
                 .nil-sa-premium table.top > tbody,.nil-sa-premium table.title > tbody,
                 .nil-sa-premium table.top > tr,.nil-sa-premium table.title > tr,
                 .nil-sa-premium table.top > tbody > tr,.nil-sa-premium table.title > tbody > tr,
                 .nil-sa-premium table.top > tr > td,.nil-sa-premium table.title > tr > td,
                 .nil-sa-premium table.top > tbody > tr > td,.nil-sa-premium table.title > tbody > tr > td {border:0 none transparent !important;outline:0 none !important;box-shadow:none !important;background:transparent !important;}
-                .nil-sa-premium .top td {padding-bottom:5px;vertical-align:middle;}
-                .nil-sa-premium .title {margin-bottom:8px;}
+                .nil-sa-premium .top td {padding-bottom:3px;vertical-align:middle;}
+                .nil-sa-premium .title {margin-bottom:5px;}
                 .nil-sa-premium .title td {vertical-align:middle;}
-                .nil-sa-premium .title .en {font-size:11pt;}
-                .nil-sa-premium .party {background:#f3f4f5;border-top:2px solid #253038 !important;padding:8px 10px;vertical-align:top;width:49%;text-align:right;}
-                .nil-sa-premium .party-title {border-bottom:1px solid #cfd4d7;padding-bottom:4px;margin-bottom:5px;font-size:10pt;}
-                .nil-sa-premium .party-name {font-size:10pt;font-weight:700;margin-bottom:3px;}
-                .nil-sa-premium .address {margin-bottom:4px;font-size:9.5pt;line-height:1.25;}
-                .nil-sa-premium .id-line {margin-top:3px;font-size:9.5pt;}
+                .nil-sa-premium .title .en {font-size:10pt;}
+                .nil-sa-premium .party {background:#f3f4f5;border-top:2px solid #253038 !important;padding:5px 8px;vertical-align:top;width:49%;text-align:right;}
+                .nil-sa-premium .party-title {border-bottom:1px solid #cfd4d7;padding-bottom:3px;margin-bottom:3px;font-size:9.5pt;}
+                .nil-sa-premium .party-name {font-size:9.5pt;font-weight:700;margin-bottom:2px;}
+                .nil-sa-premium .address {margin-bottom:2px;font-size:9pt;line-height:1.2;}
+                .nil-sa-premium .id-line {margin-top:2px;font-size:9pt;}
                 .nil-sa-premium .id-line bdi {display:inline-block;direction:ltr;font-weight:400 !important;}
                 .nil-sa-premium .party .party-label {font-weight:700 !important;}
                 .nil-sa-premium .party .party-value,.nil-sa-premium .party .party-value * {font-weight:400 !important;}
-                .nil-sa-premium .meta {margin:7px 0 7px;}
-                .nil-sa-premium .meta td {width:50%;padding:4px 5px;vertical-align:middle;text-align:center !important;border:1px solid #d7dbde !important;}
+                .nil-sa-premium .meta {margin:4px 0;}
+                .nil-sa-premium .meta td {width:50%;padding:3px 5px;vertical-align:middle;text-align:center !important;border:1px solid #d7dbde !important;}
                 .nil-sa-premium .meta strong {display:inline;font-size:9.5pt;line-height:1.3;}
                 .nil-sa-premium .meta .en {display:inline-block;text-align:center !important;font-size:8.5pt;margin:0 3px;white-space:nowrap;}
                 .nil-sa-premium .meta .num {display:inline-block;margin:0 3px;font-size:9.5pt;white-space:nowrap;}
-                .nil-sa-premium .lines {direction:rtl;margin:0 0 6px;table-layout:fixed !important;}
+                .nil-sa-premium .lines {direction:rtl;margin:0 0 4px;table-layout:fixed !important;}
                 .nil-sa-premium .lines thead {display:table-header-group;}
-                .nil-sa-premium .lines th {background:#253038;color:white;font-weight:700;padding:4px 3px;text-align:center !important;vertical-align:middle !important;font-size:9.5pt;line-height:1.25;border:1px solid #253038 !important;}
+                .nil-sa-premium .lines th {background:#253038;color:white;font-weight:700;padding:3px 3px;text-align:center !important;vertical-align:middle !important;font-size:9pt;line-height:1.15;border:1px solid #253038 !important;}
                 .nil-sa-premium .lines th .ar {display:block;min-height:2em;}
-                .nil-sa-premium .lines th .en {color:#e6e9eb;font-size:9.5pt;text-align:center !important;margin-top:1px;}
-                .nil-sa-premium .lines td {padding:5px 3px;border:1px solid #d7dbde !important;vertical-align:middle;text-align:center;font-size:11pt;line-height:1.25;}
+                .nil-sa-premium .lines th .en {color:#e6e9eb;font-size:8.5pt;text-align:center !important;margin-top:1px;}
+                .nil-sa-premium .lines td {padding:3px 3px;border:1px solid #d7dbde !important;vertical-align:middle;text-align:center;font-size:9.5pt;line-height:1.2;}
                 .nil-sa-premium .lines tbody tr:nth-child(even) {background:#f3f4f5;}
                 .nil-sa-premium .lines tr {page-break-inside:avoid;}
-                .nil-sa-premium .lines .desc {text-align:right;word-wrap:break-word;padding:5px 6px;}
-                .nil-sa-premium .lines .desc .en {font-size:10.5pt;line-height:1.25;margin-top:2px;}
+                .nil-sa-premium .lines .desc {text-align:right;word-wrap:break-word;padding:3px 5px;}
+                .nil-sa-premium .lines .desc .en {font-size:9pt;line-height:1.2;margin-top:1px;}
                 .nil-sa-premium .num {direction:ltr;unicode-bidi:embed;white-space:nowrap;}
-                .nil-sa-premium .totals td {padding:5px 6px;border-bottom:1px solid #e1e4e6 !important;font-size:10pt;vertical-align:middle;}
+                .nil-sa-premium .totals td {padding:3px 5px;border-bottom:1px solid #e1e4e6 !important;font-size:10pt;vertical-align:middle;}
                 .nil-sa-premium .totals td:first-child {text-align:right !important;}
                 .nil-sa-premium .totals td:first-child .ar {display:block;direction:rtl;text-align:right !important;}
                 .nil-sa-premium .totals td:first-child .en {display:block;direction:ltr;text-align:right !important;margin:2px 0 0;}
@@ -62,14 +62,15 @@
                 .nil-sa-premium .grand .en {color:#e6e9eb;}
                 .nil-sa-premium .closing {page-break-inside:avoid;margin-top:5px;}
                 .nil-sa-premium .fine {font-size:9pt;color:#59636b;}
-                .nil-sa-premium .training-extra {margin:5px 0 0;font-size:11pt;line-height:1.25;word-wrap:break-word;}
-                .nil-sa-premium .training-extra p {margin:0 0 3px;line-height:1.25;}
-                .nil-sa-premium table.proforma-totals {width:65% !important;margin:5px 0 5px auto;page-break-inside:avoid;}
-                .nil-sa-premium .proforma-totals td {font-size:11pt;}
-                .nil-sa-premium .proforma-totals .grand td {font-size:12pt;}
-                .nil-sa-premium .training-extra ul,.nil-sa-premium .training-extra ol {margin-top:2px;margin-bottom:3px;}
+                .nil-sa-premium .training-extra {margin:3px 0 0;font-size:9.5pt;line-height:1.2;word-wrap:break-word;}
+                .nil-sa-premium .training-extra p,.nil-sa-premium .training-extra div,.nil-sa-premium .training-extra span,.nil-sa-premium .training-extra li,.nil-sa-premium .training-extra td,.nil-sa-premium .training-extra th,.nil-sa-premium .training-extra font,.nil-sa-premium .training-extra strong,.nil-sa-premium .training-extra b,.nil-sa-premium .training-extra em {font-size:9.5pt !important;line-height:1.2 !important;}
+                .nil-sa-premium .training-extra p {margin:0 0 2px;line-height:1.2;}
+                .nil-sa-premium table.proforma-totals {width:65% !important;margin:3px 0 3px auto;page-break-inside:avoid;}
+                .nil-sa-premium .proforma-totals td {font-size:9.5pt;}
+                .nil-sa-premium .proforma-totals .grand td {font-size:10.5pt;}
+                .nil-sa-premium .training-extra ul,.nil-sa-premium .training-extra ol {margin-top:1px;margin-bottom:2px;}
                 .nil-sa-premium .training-extra li {margin-top:0;margin-bottom:1px;}
-                .nil-sa-premium .training-extra h1,.nil-sa-premium .training-extra h2,.nil-sa-premium .training-extra h3,.nil-sa-premium .training-extra h4,.nil-sa-premium .training-extra h5,.nil-sa-premium .training-extra h6 {font-size:10pt;line-height:1.25;margin:3px 0;page-break-after:avoid;}
+                .nil-sa-premium .training-extra h1,.nil-sa-premium .training-extra h2,.nil-sa-premium .training-extra h3,.nil-sa-premium .training-extra h4,.nil-sa-premium .training-extra h5,.nil-sa-premium .training-extra h6 {font-size:9.5pt !important;line-height:1.2;margin:2px 0;page-break-after:avoid;}
                 .nil-sa-premium .training-extra table {max-width:100%;border-collapse:collapse;}
                 .nil-sa-premium .training-extra tr {page-break-inside:avoid;}
             </style>
@@ -80,11 +81,11 @@
                 </tr></table>
                 <table class="title" dir="rtl" style="border:0 none transparent !important;outline:0 none !important;box-shadow:none !important;"><tr>
                     <td style="text-align:right; width:60%;">
-                        <strong class="ar" style="font-size:17pt;">فاتورة مبدئية</strong>
-                        <div class="en" style="font-size:11pt;">PRO-FORMA INVOICE</div>
+                        <strong class="ar" style="font-size:15pt;">فاتورة مبدئية</strong>
+                        <div class="en" style="font-size:10pt;">PRO-FORMA INVOICE</div>
                         <div class="ar fine">ليست فاتورة ضريبية</div><div class="en">Not a tax invoice</div>
                     </td>
-                    <td style="text-align:left;"><strong style="font-size:13pt;" class="num" t-field="o.name"/></td>
+                    <td style="text-align:left;"><strong style="font-size:12pt;" class="num" t-field="o.name"/></td>
                 </tr></table>
                 <table dir="rtl"><tr>
                     <td class="party">
@@ -101,11 +102,10 @@
                     <td t-att-colspan="1 if o.validity_date and o.state in ('draft','sent') else 2"><strong class="ar">التاريخ:</strong><span class="en" dir="ltr">Date</span><span class="num" dir="ltr" t-out="context_timestamp(o.date_order).date().isoformat() if o.date_order else ''"/></td>
                     <td t-if="o.validity_date and o.state in ('draft','sent')"><strong class="ar">صالح حتى:</strong><span class="en" dir="ltr">Valid until</span><span class="num" dir="ltr" t-out="o.validity_date.isoformat()"/></td>
                 </tr></table>
-                <div dir="rtl" class="fine" t-if="o.client_order_ref or o.partner_id.ref or o.payment_term_id or o.user_id">
+                <div dir="rtl" class="fine" t-if="o.client_order_ref or o.partner_id.ref or o.payment_term_id">
                     <span t-if="o.client_order_ref">المرجع / Reference: <bdi t-field="o.client_order_ref"/> </span>
-                    <span t-if="o.partner_id.ref"> | رمز العميل / Customer Code: <bdi t-field="o.partner_id.ref"/> </span>
-                    <span t-if="o.payment_term_id"> | شروط الدفع / Payment terms: <bdi t-field="o.payment_term_id"/> </span>
-                    <span t-if="o.user_id"> | مسؤول المبيعات / Salesperson: <bdi t-field="o.user_id"/></span>
+                    <span t-if="o.partner_id.ref"><t t-if="o.client_order_ref"> | </t>رمز العميل / Customer Code: <bdi t-field="o.partner_id.ref"/> </span>
+                    <span t-if="o.payment_term_id"><t t-if="o.client_order_ref or o.partner_id.ref"> | </t>شروط الدفع / Payment terms: <bdi t-field="o.payment_term_id"/> </span>
                 </div>
                 <t t-set="native_lines" t-value="o._get_order_lines_to_report()"/>
                 <t t-set="visible_downpayments" t-value="native_lines.filtered(lambda l: l.is_downpayment and not l.display_type and (l.product_uom_qty or l.price_subtotal or l.price_tax or l.price_total))"/>
