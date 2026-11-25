@@ -25,19 +25,19 @@
     </record>
 
     <template id="party">
-        <div class="party-title"><strong t-out="party_ar"/> <span class="en" t-out="party_en"/></div>
+        <div class="party-title" dir="rtl"><strong t-out="party_ar"/></div>
         <div class="party-name" dir="auto" t-out="p.name"/>
-        <div class="address" dir="auto">
+        <div class="address" dir="rtl">
             <span t-if="p.street" t-field="p.street"/><br t-if="p.street"/>
             <span t-if="p.street2" t-field="p.street2"/><br t-if="p.street2"/>
-            <div t-if="p.l10n_sa_edi_building_number">رقم المبنى / Building No.: <bdi dir="ltr" t-field="p.l10n_sa_edi_building_number"/></div>
+            <div t-if="p.l10n_sa_edi_building_number">رقم المبنى: <bdi dir="ltr" t-field="p.l10n_sa_edi_building_number"/></div>
             <span t-if="p.city" t-field="p.city"/> <span t-if="p.state_id" t-field="p.state_id.name"/> <span t-if="p.zip" t-field="p.zip"/>
-            <div t-if="p.l10n_sa_edi_plot_identification">الرقم الإضافي / Additional No.: <span dir="ltr" t-field="p.l10n_sa_edi_plot_identification"/></div>
+            <div t-if="p.l10n_sa_edi_plot_identification">الرقم الإضافي: <span dir="ltr" t-field="p.l10n_sa_edi_plot_identification"/></div>
             <br t-if="p.country_id"/><span t-if="p.country_id" t-field="p.country_id.name"/>
         </div>
-        <div t-if="p.vat" class="id-line" dir="rtl">الرقم الضريبي / VAT No.: <bdi dir="ltr" t-field="p.vat"/></div>
-        <div t-if="p.l10n_sa_additional_identification_number and p.l10n_sa_additional_identification_scheme == 'CRN'" class="id-line" dir="rtl">السجل التجاري / CR No.: <bdi dir="ltr" t-field="p.l10n_sa_additional_identification_number"/></div>
-        <div t-elif="p.l10n_sa_additional_identification_number and p.l10n_sa_additional_identification_scheme" class="id-line" dir="rtl">رقم التعريف / <span t-field="p.l10n_sa_additional_identification_scheme"/>: <bdi dir="ltr" t-field="p.l10n_sa_additional_identification_number"/></div>
+        <div t-if="p.vat" class="id-line" dir="rtl">الرقم الضريبي: <bdi dir="ltr" t-field="p.vat"/></div>
+        <div t-if="p.l10n_sa_additional_identification_number and p.l10n_sa_additional_identification_scheme == 'CRN'" class="id-line" dir="rtl">السجل التجاري: <bdi dir="ltr" t-field="p.l10n_sa_additional_identification_number"/></div>
+        <div t-elif="p.l10n_sa_additional_identification_number and p.l10n_sa_additional_identification_scheme" class="id-line" dir="rtl"><span t-out="{'TIN': 'الرقم الضريبي', 'MOM': 'رخصة البلدية', 'MLS': 'رخصة وزارة الموارد البشرية', '700': 'الرقم الموحد 700', 'SAG': 'رخصة الاستثمار', 'NAT': 'رقم الهوية الوطنية', 'GCC': 'هوية مجلس التعاون الخليجي', 'IQA': 'رقم الإقامة', 'PAS': 'رقم جواز السفر', 'OTH': 'رقم تعريف آخر'}.get(p.l10n_sa_additional_identification_scheme, 'رقم التعريف')"/>: <bdi dir="ltr" t-field="p.l10n_sa_additional_identification_number"/></div>
     </template>
 
     <template id="premium_invoice">
@@ -51,8 +51,8 @@
         <t t-set="o" t-value="doc.with_context(lang='en_US')"/>
         <t t-set="o_ar" t-value="doc.with_context(lang='ar_001')"/>
         <t t-set="company" t-value="o.company_id"/>
-        <t t-set="seller" t-value="company.partner_id"/>
-        <t t-set="buyer" t-value="o.partner_id"/>
+        <t t-set="seller" t-value="company.partner_id.with_context(lang='ar_001')"/>
+        <t t-set="buyer" t-value="o.partner_id.with_context(lang='ar_001')"/>
         <div class="article nil-sa-premium" t-att-data-oe-model="o._name" t-att-data-oe-id="o.id" data-oe-lang="en_US">
             <style>
                 @font-face {font-family:'NIL Tajawal';src:url('/web/static/fonts/google/Tajawal/Tajawal-Regular.ttf') format('truetype');font-style:normal;font-weight:400;}
@@ -71,7 +71,6 @@
                 .nil-sa-premium .title .en {font-size:11pt;}
                 .nil-sa-premium .party {background:#f3f4f5;border-top:2px solid #253038 !important;padding:8px 10px;vertical-align:top;width:49%;text-align:right;}
                 .nil-sa-premium .party-title {border-bottom:1px solid #cfd4d7;padding-bottom:4px;margin-bottom:5px;font-size:10pt;}
-                .nil-sa-premium .party-title .en {float:none;display:inline-block;margin:0 6px;}
                 .nil-sa-premium .party-name {font-size:10pt;font-weight:700;margin-bottom:3px;}
                 .nil-sa-premium .address {margin-bottom:4px;font-size:9.5pt;line-height:1.25;}
                 .nil-sa-premium .id-line {margin-top:3px;font-size:9.5pt;}
@@ -123,11 +122,11 @@
                 </tr></table>
                 <table dir="rtl"><tr>
                     <td class="party">
-                        <t t-call="nil_sa_premium_invoice.party"><t t-set="p" t-value="buyer"/><t t-set="party_ar" t-value="'المشتري'"/><t t-set="party_en" t-value="'Buyer'"/></t>
+                        <t t-call="nil_sa_premium_invoice.party"><t t-set="p" t-value="buyer"/><t t-set="party_ar" t-value="'المشتري'"/></t>
                         <div t-if="buyer != buyer.commercial_partner_id" class="fine" dir="auto" t-field="buyer.commercial_partner_id.name"/>
                     </td>
                     <td style="width:2%;"/>
-                    <td class="party"><t t-call="nil_sa_premium_invoice.party"><t t-set="p" t-value="seller"/><t t-set="party_ar" t-value="'البائع'"/><t t-set="party_en" t-value="'Seller'"/></t></td>
+                    <td class="party"><t t-call="nil_sa_premium_invoice.party"><t t-set="p" t-value="seller"/><t t-set="party_ar" t-value="'البائع'"/></t></td>
                 </tr></table>
                 <div t-if="o.partner_shipping_id and o.partner_shipping_id != o.partner_id" groups="account.group_delivery_invoice_address" dir="rtl" class="fine" style="margin-top:6px;">
                     عنوان الشحن / Shipping Address: <span t-field="o.partner_shipping_id" t-options='{"widget":"contact","fields":["address","name"],"no_marker":True}'/>
