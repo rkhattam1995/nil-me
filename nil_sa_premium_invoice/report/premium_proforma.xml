@@ -1,0 +1,213 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <template id="premium_proforma_document">
+        <t t-set="o" t-value="doc.with_context(lang='en_US')"/>
+        
+        <t t-set="company" t-value="o.company_id"/>
+        <t t-set="seller" t-value="company.partner_id.with_context(lang='ar_001')"/>
+        <t t-set="buyer" t-value="o.partner_invoice_id.with_context(lang='ar_001')"/>
+        <div class="article nil-sa-premium" t-att-data-oe-model="o._name" t-att-data-oe-id="o.id" data-oe-lang="en_US">
+            <style>
+                @font-face {font-family:'NIL Tajawal';src:url('/web/static/fonts/google/Tajawal/Tajawal-Regular.ttf') format('truetype');font-style:normal;font-weight:400;}
+                @font-face {font-family:'NIL Tajawal';src:url('/web/static/fonts/google/Tajawal/Tajawal-Bold.ttf') format('truetype');font-style:normal;font-weight:700;}
+                .nil-sa-premium, .nil-sa-premium * {box-sizing:border-box;font-family:Calibri,Carlito,'NIL Tajawal',sans-serif !important;}
+                .nil-sa-premium {font-size:10pt;color:#253038;line-height:1.25;}
+                .nil-sa-premium .ar, .nil-sa-premium .ar *, .nil-sa-premium .party, .nil-sa-premium .party * {font-family:'NIL Tajawal',Calibri,Carlito,sans-serif !important;}
+                .nil-sa-premium .en, .nil-sa-premium .en *, .nil-sa-premium .num, .nil-sa-premium .num *, .nil-sa-premium bdi {font-family:Calibri,Carlito,'NIL Tajawal',sans-serif !important;}
+                .nil-sa-premium .en {font-size:9pt;color:#59636b;font-weight:400;display:block;direction:ltr;line-height:1.25;margin-top:2px;}
+                .nil-sa-premium .page > table,.nil-sa-premium .totals {width:100%;table-layout:fixed;border-collapse:collapse;border:0 !important;}
+                .nil-sa-premium .page > table > tbody > tr > td,.nil-sa-premium .page > table > thead > tr > th,.nil-sa-premium .totals > tbody > tr > td {border:0 !important;}
+                .nil-sa-premium .top {margin-bottom:7px;}
+                .nil-sa-premium table.top,.nil-sa-premium table.title,
+                .nil-sa-premium table.top > tbody,.nil-sa-premium table.title > tbody,
+                .nil-sa-premium table.top > tr,.nil-sa-premium table.title > tr,
+                .nil-sa-premium table.top > tbody > tr,.nil-sa-premium table.title > tbody > tr,
+                .nil-sa-premium table.top > tr > td,.nil-sa-premium table.title > tr > td,
+                .nil-sa-premium table.top > tbody > tr > td,.nil-sa-premium table.title > tbody > tr > td {border:0 none transparent !important;outline:0 none !important;box-shadow:none !important;background:transparent !important;}
+                .nil-sa-premium .top td {padding-bottom:5px;vertical-align:middle;}
+                .nil-sa-premium .title {margin-bottom:8px;}
+                .nil-sa-premium .title td {vertical-align:middle;}
+                .nil-sa-premium .title .en {font-size:11pt;}
+                .nil-sa-premium .party {background:#f3f4f5;border-top:2px solid #253038 !important;padding:8px 10px;vertical-align:top;width:49%;text-align:right;}
+                .nil-sa-premium .party-title {border-bottom:1px solid #cfd4d7;padding-bottom:4px;margin-bottom:5px;font-size:10pt;}
+                .nil-sa-premium .party-name {font-size:10pt;font-weight:700;margin-bottom:3px;}
+                .nil-sa-premium .address {margin-bottom:4px;font-size:9.5pt;line-height:1.25;}
+                .nil-sa-premium .id-line {margin-top:3px;font-size:9.5pt;}
+                .nil-sa-premium .id-line bdi {display:inline-block;direction:ltr;font-weight:400 !important;}
+                .nil-sa-premium .party .party-label {font-weight:700 !important;}
+                .nil-sa-premium .party .party-value,.nil-sa-premium .party .party-value * {font-weight:400 !important;}
+                .nil-sa-premium .meta {margin:7px 0 7px;}
+                .nil-sa-premium .meta td {width:50%;padding:4px 5px;vertical-align:middle;text-align:center !important;border:1px solid #d7dbde !important;}
+                .nil-sa-premium .meta strong {display:inline;font-size:9.5pt;line-height:1.3;}
+                .nil-sa-premium .meta .en {display:inline-block;text-align:center !important;font-size:8.5pt;margin:0 3px;white-space:nowrap;}
+                .nil-sa-premium .meta .num {display:inline-block;margin:0 3px;font-size:9.5pt;white-space:nowrap;}
+                .nil-sa-premium .lines {direction:rtl;margin:0 0 6px;table-layout:fixed !important;}
+                .nil-sa-premium .lines thead {display:table-header-group;}
+                .nil-sa-premium .lines th {background:#253038;color:white;font-weight:700;padding:4px 3px;text-align:center !important;vertical-align:middle !important;font-size:9.5pt;line-height:1.25;border:1px solid #253038 !important;}
+                .nil-sa-premium .lines th .ar {display:block;min-height:2.35em;}
+                .nil-sa-premium .lines th .en {color:#e6e9eb;font-size:8.5pt;text-align:center !important;margin-top:1px;}
+                .nil-sa-premium .lines td {padding:5px 3px;border:1px solid #d7dbde !important;vertical-align:middle;text-align:center;font-size:9.5pt;line-height:1.35;}
+                .nil-sa-premium .lines tbody tr:nth-child(even) {background:#f3f4f5;}
+                .nil-sa-premium .lines tr {page-break-inside:avoid;}
+                .nil-sa-premium .lines .desc {text-align:right;word-wrap:break-word;padding:5px 6px;}
+                .nil-sa-premium .lines .desc .en {font-size:9pt;line-height:1.25;margin-top:2px;}
+                .nil-sa-premium .num {direction:ltr;unicode-bidi:embed;white-space:nowrap;}
+                .nil-sa-premium .totals td {padding:5px 6px;border-bottom:1px solid #e1e4e6 !important;font-size:10pt;vertical-align:middle;}
+                .nil-sa-premium .totals td:first-child {text-align:right !important;}
+                .nil-sa-premium .totals td:first-child .ar {display:block;direction:rtl;text-align:right !important;}
+                .nil-sa-premium .totals td:first-child .en {display:block;direction:ltr;text-align:right !important;margin:2px 0 0;}
+                .nil-sa-premium .grand td {background:#253038;color:white;font-size:11pt;}
+                .nil-sa-premium .grand .en {color:#e6e9eb;}
+                .nil-sa-premium .closing {page-break-inside:avoid;margin-top:5px;}
+                .nil-sa-premium .fine {font-size:9pt;color:#59636b;}
+                .nil-sa-premium .training-extra {margin:5px 0 0;font-size:9pt;line-height:1.25;word-wrap:break-word;}
+                .nil-sa-premium .training-extra p {margin:0 0 3px;line-height:1.25;}
+                .nil-sa-premium .training-extra ul,.nil-sa-premium .training-extra ol {margin-top:2px;margin-bottom:3px;}
+                .nil-sa-premium .training-extra li {margin-top:0;margin-bottom:1px;}
+                .nil-sa-premium .training-extra h1,.nil-sa-premium .training-extra h2,.nil-sa-premium .training-extra h3,.nil-sa-premium .training-extra h4,.nil-sa-premium .training-extra h5,.nil-sa-premium .training-extra h6 {font-size:10pt;line-height:1.25;margin:3px 0;page-break-after:avoid;}
+                .nil-sa-premium .training-extra table {max-width:100%;border-collapse:collapse;}
+                .nil-sa-premium .training-extra tr {page-break-inside:avoid;}
+            </style>
+            <div class="page" style="margin: 0; padding: 0; min-height: 0;">
+                <table class="top" dir="ltr" style="border:0 none transparent !important;outline:0 none !important;box-shadow:none !important;"><tr>
+                    <td style="width:72%; text-align:left;"><strong t-field="company.name"/><div class="en">NIL Middle East</div></td>
+                    <td style="text-align:right;"><img t-if="company.logo" t-att-src="image_data_uri(company.logo)" style="max-width:35mm; max-height:17mm;" alt="Company logo"/></td>
+                </tr></table>
+                <table class="title" dir="rtl" style="border:0 none transparent !important;outline:0 none !important;box-shadow:none !important;"><tr>
+                    <td style="text-align:right; width:60%;">
+                        <strong class="ar" style="font-size:17pt;">فاتورة مبدئية</strong>
+                        <div class="en" style="font-size:11pt;">PRO-FORMA INVOICE</div>
+                        <div class="ar fine">ليست فاتورة ضريبية</div><div class="en">Not a tax invoice</div>
+                    </td>
+                    <td style="text-align:left;"><strong style="font-size:13pt;" class="num" t-field="o.name"/></td>
+                </tr></table>
+                <table dir="rtl"><tr>
+                    <td class="party">
+                        <t t-call="nil_sa_premium_invoice.party"><t t-set="p" t-value="buyer"/><t t-set="party_ar" t-value="'المشتري'"/></t>
+                        <div t-if="buyer != buyer.commercial_partner_id" class="fine" dir="auto" t-field="buyer.commercial_partner_id.name"/>
+                    </td>
+                    <td style="width:2%;"/>
+                    <td class="party"><t t-call="nil_sa_premium_invoice.party"><t t-set="p" t-value="seller"/><t t-set="party_ar" t-value="'البائع'"/></t></td>
+                </tr></table>
+                <div t-if="o.partner_shipping_id and o.partner_shipping_id != o.partner_invoice_id" dir="rtl" class="fine" style="margin-top:6px;">
+                    عنوان الشحن: <span t-field="o.partner_shipping_id" t-options='{"widget":"contact","fields":["address","name"],"no_marker":True}'/>
+                </div>
+                <table class="meta" dir="rtl"><colgroup><col style="width:50%"/><col style="width:50%"/></colgroup><tr>
+                    <td><strong class="ar">التاريخ:</strong><span class="en" dir="ltr">Date</span><span class="num" dir="ltr" t-field="o.date_order" t-options="{'widget':'date'}"/></td>
+                    <td><t t-if="o.validity_date and o.state in ('draft','sent')"><strong class="ar">صالح حتى:</strong><span class="en" dir="ltr">Valid until</span><span class="num" dir="ltr" t-field="o.validity_date"/></t></td>
+                </tr></table>
+                <div dir="rtl" class="fine" t-if="o.client_order_ref or o.partner_id.ref or o.payment_term_id or o.user_id">
+                    <span t-if="o.client_order_ref">المرجع / Reference: <bdi t-field="o.client_order_ref"/> </span>
+                    <span t-if="o.partner_id.ref"> | رمز العميل / Customer Code: <bdi t-field="o.partner_id.ref"/> </span>
+                    <span t-if="o.payment_term_id"> | شروط الدفع / Payment terms: <bdi t-field="o.payment_term_id"/> </span>
+                    <span t-if="o.user_id"> | مسؤول المبيعات / Salesperson: <bdi t-field="o.user_id"/></span>
+                </div>
+                <t t-set="lines" t-value="o._get_order_lines_to_report()"/>
+                <t t-set="display_discount" t-value="any(l.discount > 0 for l in lines)"/>
+                <table class="lines" dir="rtl" name="invoice_line_table">
+                    <colgroup><col t-att-style="'width:27%' if display_discount else 'width:34%'"/><col style="width:7%"/><col style="width:14%"/><col t-if="display_discount" style="width:7%"/><col style="width:12%"/><col style="width:9%"/><col style="width:12%"/><col style="width:12%"/></colgroup>
+                    <thead><tr>
+                        <th><span class="ar">البند / الوصف</span><div class="en">Item / Description</div></th>
+                        <th><span class="ar">الكمية</span><div class="en">Qty</div></th><th><span class="ar">سعر الوحدة</span><div class="en">Unit price</div></th>
+                        <th t-if="display_discount"><span class="ar">الخصم %</span><div class="en">Disc. %</div></th>
+                        <th><span class="ar">قبل الضريبة</span><div class="en">Excl. VAT</div></th><th><span class="ar">نسبة الضريبة</span><div class="en">VAT rate</div></th>
+                        <th><span class="ar">قيمة الضريبة</span><div class="en">VAT amount</div></th><th><span class="ar">شامل الضريبة</span><div class="en">Incl. VAT</div></th>
+                    </tr></thead>
+                    <tbody>
+
+                        <t t-set="section" t-value="False"/><t t-set="section_total" t-value="0"/>
+                        <t t-foreach="lines" t-as="line">
+                            <tr t-if="line.display_type in ('line_section', 'line_note')"><td colspan="99" class="desc" t-att-style="'font-weight:bold;' if line.display_type == 'line_section' else ''"><span t-field="line.name" t-options="{'widget':'text'}"/></td></tr>
+                            <t t-if="line.display_type == 'line_section'"><t t-set="section" t-value="True"/><t t-set="section_total" t-value="0"/></t>
+                            <tr t-if="not line.display_type">
+                                <td class="desc">
+                                    <t t-if="line.product_id"><strong class="ar" dir="rtl" t-out="line.product_id.with_context(lang='ar_001').name"/></t>
+                                    <div dir="ltr" class="en" style="text-align:right; white-space:pre-wrap;" t-field="line.name"/>
+                                </td>
+                                <td><span class="num" t-field="line.product_uom_qty"/></td>
+                                <td><span class="num" t-if="line.discount &lt; 0" t-out="(1 - line.discount / 100.0) * line.price_unit" t-options="{'widget':'float','decimal_precision':'Product Price'}"/><span class="num" t-else="" t-field="line.price_unit" t-options="{'widget':'float','decimal_precision':'Product Price'}"/></td>
+                                <td t-if="display_discount"><span class="num" t-if="line.discount > 0" t-field="line.discount"/></td>
+                                <td><span t-if="not line.is_downpayment" class="num" t-field="line.price_subtotal" t-options="{'widget':'monetary','display_currency':o.currency_id}"/></td>
+                                <td><span t-out="', '.join((tax.invoice_label or tax.name) for tax in line.tax_id)"/></td>
+                                <td><span t-if="not line.is_downpayment" class="num" t-field="line.price_tax" t-options="{'widget':'monetary','display_currency':o.currency_id}"/></td>
+                                <td><strong t-if="not line.is_downpayment" class="num" t-field="line.price_total" t-options="{'widget':'monetary','display_currency':o.currency_id}"/></td>
+                            </tr>
+                            <t t-set="section_total" t-value="section_total + line.price_subtotal"/>
+                            <tr t-if="section and (line_last or lines[line_index+1].display_type == 'line_section') and not line.is_downpayment"><td colspan="99" class="desc">الإجمالي الفرعي / Subtotal: <span class="num" t-out="section_total" t-options="{'widget':'monetary','display_currency':o.currency_id}"/></td></tr>
+                        </t>
+                    </tbody>
+                </table>
+                <table class="closing" dir="rtl"><tr>
+                    <td style="width:65%; vertical-align:top;">
+                        <table class="totals" dir="rtl"><colgroup><col style="width:60%"/><col style="width:40%"/></colgroup>
+                            <tr><td><span class="ar">المبلغ الخاضع للضريبة غير شامل الضريبة</span><div class="en">Taxable amount (excl. VAT)</div></td><td style="text-align:left;"><span class="num" t-field="o.amount_untaxed"/></td></tr>
+                            <t t-set="tax_totals" t-value="o.tax_totals or {}"/>
+                            <t t-foreach="tax_totals.get('subtotals', [])" t-as="subtotal">
+                                <t t-foreach="tax_totals['groups_by_subtotal'][subtotal['name']]" t-as="group">
+                                    <tr><td><span class="ar">ضريبة القيمة المضافة</span><div class="en" t-out="group['tax_group_name']"/><div t-if="tax_totals.get('display_tax_base')" class="fine" t-out="group['formatted_tax_group_base_amount']"/></td><td style="text-align:left;"><span class="num" t-out="group['formatted_tax_group_amount']"/></td></tr>
+                                </t>
+                            </t>
+                            <tr class="grand"><td><span class="ar">إجمالي الفاتورة المبدئية شامل الضريبة</span><div class="en">Pro-forma total (incl. VAT)</div></td><td style="text-align:left;"><strong class="num" t-field="o.amount_total"/></td></tr>
+                        </table>
+                    </td>
+                    <td style="width:35%;"/>
+                </tr></table>
+                <div t-if="not is_html_empty(o.note)" dir="auto" class="training-extra" t-field="o.note"/>
+                <div t-if="not is_html_empty(o.payment_term_id.note)" dir="auto" class="training-extra" t-field="o.payment_term_id.note"/>
+                <div t-if="o.fiscal_position_id and not is_html_empty(o.fiscal_position_id.note)" dir="auto" class="training-extra" t-field="o.fiscal_position_id.note"/>
+                <!-- Existing invoice Training tab fields; keep the same order as the KSA custom report. -->
+                <div t-if="not is_html_empty(o.term_and_cond)" class="training-extra" dir="auto" t-field="o.term_and_cond"/>
+                <div t-if="not is_html_empty(o.bank_details)" class="training-extra" dir="auto" t-field="o.bank_details"/>
+                <div t-if="o.signature and o.env.context.get('sale_include_signature')" style="text-align:right;page-break-inside:avoid;margin-top:5px;">
+                    <div class="ar">التوقيع / Signature</div><img t-att-src="image_data_uri(o.signature)" style="max-height:25mm;max-width:60mm;" alt="Signature"/><div t-field="o.signed_by"/>
+                </div>
+ 
+            </div>
+        </div>
+        <div class="footer nil-sa-premium-footer" dir="ltr" style="font-family:Calibri,Carlito,sans-serif;font-size:8pt;color:#59636b;text-align:center;">
+            <style>
+                .nil-sa-premium-footer p,.nil-sa-premium-footer div {margin:0 !important;padding:0 !important;min-height:0 !important;line-height:1.2 !important;}
+            </style>
+            <div style="border-top:1px solid #253038;padding-top:3px !important;">
+                <div t-if="company.report_footer" t-field="company.report_footer"/>
+            </div>
+        </div>
+    </template>
+    <!-- Native sale print and pro-forma email context. Keep the original document
+         and all of its inheritance anchors for ordinary quotations and non-SA companies. -->
+    <template id="sale_document_sa_proforma" inherit_id="sale.report_saleorder_document" priority="90">
+        <xpath expr="//t[@t-call='web.external_layout']" position="before">
+            <t t-if="doc.company_id.country_id.code == 'SA' and (env.context.get('proforma', False) or is_pro_forma)">
+                <t t-call="nil_sa_premium_invoice.premium_proforma_document" t-lang="'en_US'"/>
+            </t>
+        </xpath>
+        <xpath expr="//t[@t-call='web.external_layout']" position="attributes">
+            <attribute name="t-if">not (doc.company_id.country_id.code == 'SA' and (env.context.get('proforma', False) or is_pro_forma))</attribute>
+        </xpath>
+    </template>
+
+    <!-- Standalone layout only for all-SA native pro-forma print batches.
+         Other companies and mixed-country batches keep the native paper format. -->
+    <template id="sa_proforma_pdf_layout" inherit_id="web.report_layout" primary="True">
+        <xpath expr="//html" position="attributes">
+            <attribute name="data-report-margin-top">8</attribute>
+            <attribute name="data-report-margin-bottom">11</attribute>
+            <attribute name="data-report-header-spacing">0</attribute>
+        </xpath>
+    </template>
+    <template id="sa_proforma_print_layout" inherit_id="sale.report_saleorder_pro_forma" priority="90">
+        <xpath expr="//t[@t-call='web.html_container']" position="before">
+            <t t-if="docs and all(d.company_id.country_id.code == 'SA' for d in docs)">
+                <t t-call="nil_sa_premium_invoice.sa_proforma_pdf_layout">
+                    <t t-set="is_pro_forma" t-value="True"/>
+                    <t t-foreach="docs.with_context(proforma=True)" t-as="doc">
+                        <t t-call="sale.report_saleorder_document" t-lang="doc.partner_id.lang"/>
+                    </t>
+                </t>
+            </t>
+        </xpath>
+        <xpath expr="//t[@t-call='web.html_container']" position="attributes">
+            <attribute name="t-if">not (docs and all(d.company_id.country_id.code == 'SA' for d in docs))</attribute>
+        </xpath>
+    </template>
+</odoo>
