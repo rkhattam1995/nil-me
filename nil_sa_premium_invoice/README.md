@@ -1,0 +1,11 @@
+# NIL Saudi Premium Invoice | 2026-11-25
+
+Review candidate only. Standalone Odoo 17 add-on, with a separate Saudi posted customer invoice/credit-note print button and server-side read-access and company/country/state/type checks. No change to the official ZATCA PDF, signed XML, existing report actions, send/print workflow, invoice calculations or training records.
+
+Arabic-first RTL design; Arabic product name from Odoo translation and stored invoice-line description beneath (English when stored in English). VAT and CR on separate lines with colons; alternative identification schemes keep their own labels. Separate A4 paper format with 8 mm bottom margin and no fixed spacer. QR from native localization. Calibri requested, Carlito/system fallback if unavailable. No proprietary fonts bundled.
+
+Source review: upstream main 38e0b5cbc3ea20f336eafbb05e34292c54c2e270 and Production 0619341abcc49e0081186ae8cffa9e5f65441ee7; fork main 0863e648c3e4eb5f5688a6e282dbe50a00891fb3. Odoo 17 account, l10n_gcc_invoice, l10n_sa and l10n_sa_edi sources inspected. Project reference markdown files unavailable. Live installed versions, build, inherited views, font availability and PDF rendering unverified.
+
+Prepared candidate received Python/XML/expression syntax checks only; no Odoo runtime or QR scan. Validate exact descriptions and Arabic translations, seller/buyer CR and VAT/building numbers, standard/simplified/credit notes, QR payload, tax groups and amounts vs native report, discounts and zero/multiple tax groups, currencies, sections/notes, multiple pages, shipping, fonts, permissions and UAE/other reports. Current partner and product master data are used; this does not replace the immutable issued invoice. Payment reconciliation detail is not included; original payment reports remain unchanged. Verify approved delivery workflow and ZATCA compliance separately.
+
+Release: separate feature branch based on upstream main, no merge of divergent branches. Module installation is a distinct authorized deployment action. Verify recovery route before release, then build, install and PDF output independently. Rollback: stop using new report, and if authorized uninstall only this new module after dependency and recovery checks; revert isolated commit. Do not uninstall l10n_sa_edi.
