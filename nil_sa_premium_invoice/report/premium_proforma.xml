@@ -27,7 +27,9 @@
                 .nil-sa-premium .party-name {font-size:10pt;font-weight:700;margin-bottom:3px;}
                 .nil-sa-premium .address {margin-bottom:4px;font-size:9.5pt;line-height:1.25;}
                 .nil-sa-premium .id-line {margin-top:3px;font-size:9.5pt;}
-                .nil-sa-premium .id-line bdi {display:inline-block;direction:ltr;font-weight:700;}
+                .nil-sa-premium .id-line bdi {display:inline-block;direction:ltr;font-weight:400 !important;}
+                .nil-sa-premium .party .party-label {font-weight:700 !important;}
+                .nil-sa-premium .party .party-value,.nil-sa-premium .party .party-value * {font-weight:400 !important;}
                 .nil-sa-premium .meta {margin:7px 0 7px;}
                 .nil-sa-premium .meta td {width:50%;padding:4px 5px;vertical-align:middle;text-align:center !important;border:1px solid #d7dbde !important;}
                 .nil-sa-premium .meta strong {display:inline;font-size:9.5pt;line-height:1.3;}

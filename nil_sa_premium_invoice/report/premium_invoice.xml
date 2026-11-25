@@ -30,14 +30,14 @@
         <div class="address" dir="rtl">
             <span t-if="p.street" t-field="p.street"/><br t-if="p.street"/>
             <span t-if="p.street2" t-field="p.street2"/><br t-if="p.street2"/>
-            <div t-if="p.l10n_sa_edi_building_number">رقم المبنى: <bdi dir="ltr" t-field="p.l10n_sa_edi_building_number"/></div>
+            <div t-if="p.l10n_sa_edi_building_number"><strong class="party-label">رقم المبنى:</strong> <bdi class="party-value" dir="ltr" t-field="p.l10n_sa_edi_building_number"/></div>
             <span t-if="p.city" t-field="p.city"/> <span t-if="p.state_id" t-field="p.state_id.name"/> <span t-if="p.zip" t-field="p.zip"/>
-            <div t-if="p.l10n_sa_edi_plot_identification">الرقم الإضافي: <span dir="ltr" t-field="p.l10n_sa_edi_plot_identification"/></div>
+            <div t-if="p.l10n_sa_edi_plot_identification"><strong class="party-label">الرقم الإضافي:</strong> <span class="party-value" dir="ltr" t-field="p.l10n_sa_edi_plot_identification"/></div>
             <br t-if="p.country_id"/><span t-if="p.country_id" t-field="p.country_id.name"/>
         </div>
-        <div t-if="p.vat" class="id-line" dir="rtl">الرقم الضريبي: <bdi dir="ltr" t-field="p.vat"/></div>
-        <div t-if="p.l10n_sa_additional_identification_number and p.l10n_sa_additional_identification_scheme == 'CRN'" class="id-line" dir="rtl">السجل التجاري: <bdi dir="ltr" t-field="p.l10n_sa_additional_identification_number"/></div>
-        <div t-elif="p.l10n_sa_additional_identification_number and p.l10n_sa_additional_identification_scheme" class="id-line" dir="rtl"><span t-out="{'TIN': 'الرقم الضريبي', 'MOM': 'رخصة البلدية', 'MLS': 'رخصة وزارة الموارد البشرية', '700': 'الرقم الموحد 700', 'SAG': 'رخصة الاستثمار', 'NAT': 'رقم الهوية الوطنية', 'GCC': 'هوية مجلس التعاون الخليجي', 'IQA': 'رقم الإقامة', 'PAS': 'رقم جواز السفر', 'OTH': 'رقم تعريف آخر'}.get(p.l10n_sa_additional_identification_scheme, 'رقم التعريف')"/>: <bdi dir="ltr" t-field="p.l10n_sa_additional_identification_number"/></div>
+        <div t-if="p.vat" class="id-line" dir="rtl"><strong class="party-label">الرقم الضريبي:</strong> <bdi class="party-value" dir="ltr" t-field="p.vat"/></div>
+        <div t-if="p.l10n_sa_additional_identification_number and p.l10n_sa_additional_identification_scheme == 'CRN'" class="id-line" dir="rtl"><strong class="party-label">السجل التجاري:</strong> <bdi class="party-value" dir="ltr" t-field="p.l10n_sa_additional_identification_number"/></div>
+        <div t-elif="p.l10n_sa_additional_identification_number and p.l10n_sa_additional_identification_scheme" class="id-line" dir="rtl"><strong class="party-label"><span t-out="{'TIN': 'الرقم الضريبي', 'MOM': 'رخصة البلدية', 'MLS': 'رخصة وزارة الموارد البشرية', '700': 'الرقم الموحد 700', 'SAG': 'رخصة الاستثمار', 'NAT': 'رقم الهوية الوطنية', 'GCC': 'هوية مجلس التعاون الخليجي', 'IQA': 'رقم الإقامة', 'PAS': 'رقم جواز السفر', 'OTH': 'رقم تعريف آخر'}.get(p.l10n_sa_additional_identification_scheme, 'رقم التعريف')"/>:</strong> <bdi class="party-value" dir="ltr" t-field="p.l10n_sa_additional_identification_number"/></div>
     </template>
 
     <template id="premium_invoice">
@@ -74,7 +74,9 @@
                 .nil-sa-premium .party-name {font-size:10pt;font-weight:700;margin-bottom:3px;}
                 .nil-sa-premium .address {margin-bottom:4px;font-size:9.5pt;line-height:1.25;}
                 .nil-sa-premium .id-line {margin-top:3px;font-size:9.5pt;}
-                .nil-sa-premium .id-line bdi {display:inline-block;direction:ltr;font-weight:700;}
+                .nil-sa-premium .id-line bdi {display:inline-block;direction:ltr;font-weight:400 !important;}
+                .nil-sa-premium .party .party-label {font-weight:700 !important;}
+                .nil-sa-premium .party .party-value,.nil-sa-premium .party .party-value * {font-weight:400 !important;}
                 .nil-sa-premium .meta {margin:7px 0 7px;}
                 .nil-sa-premium .meta td {width:50%;padding:4px 5px;vertical-align:middle;text-align:center !important;border:1px solid #d7dbde !important;}
                 .nil-sa-premium .meta strong {display:inline;font-size:9.5pt;line-height:1.3;}
@@ -95,6 +97,8 @@
                 .nil-sa-premium .grand td {background:#253038;color:white;font-size:11pt;}
                 .nil-sa-premium .grand .en {color:#e6e9eb;}
                 .nil-sa-premium .closing {page-break-inside:avoid;margin-top:5px;}
+                .nil-sa-premium table.nil-sa-qr-layout,.nil-sa-premium table.nil-sa-qr-layout > tbody,.nil-sa-premium table.nil-sa-qr-layout > tr,.nil-sa-premium table.nil-sa-qr-layout > tbody > tr,.nil-sa-premium table.nil-sa-qr-layout > tr > td,.nil-sa-premium table.nil-sa-qr-layout > tbody > tr > td,.nil-sa-premium .nil-sa-qr-cell,.nil-sa-premium .nil-sa-qr-cell img {border:0 none transparent !important;outline:0 none !important;box-shadow:none !important;}
+                .nil-sa-premium .nil-sa-qr-cell {background:transparent !important;}
                 .nil-sa-premium .fine {font-size:9pt;color:#59636b;}
                 .nil-sa-premium .training-extra {margin:5px 0 0;font-size:9pt;line-height:1.25;word-wrap:break-word;}
                 .nil-sa-premium .training-extra p {margin:0 0 3px;line-height:1.25;}
@@ -174,7 +178,7 @@
                         </t>
                     </tbody>
                 </table>
-                <table class="closing" dir="rtl"><tr>
+                <table class="closing nil-sa-qr-layout" dir="rtl"><tr>
                     <td style="width:61%; vertical-align:top;">
                         <table class="totals" dir="rtl"><colgroup><col style="width:60%"/><col style="width:40%"/></colgroup>
                             <tr><td><span class="ar">المبلغ الخاضع للضريبة غير شامل الضريبة</span><div class="en">Invoice taxable amount (excl. VAT)</div></td><td style="text-align:left;"><span class="num" t-field="o.amount_untaxed"/></td></tr>
@@ -187,8 +191,8 @@
                             <tr class="grand"><td><span class="ar">إجمالي الفاتورة شامل الضريبة</span><div class="en">Invoice total (incl. VAT)</div></td><td style="text-align:left;"><strong class="num" t-field="o.amount_total"/></td></tr>
                         </table>
                     </td>
-                    <td style="width:39%; text-align:center; vertical-align:top;">
-                        <img t-att-src="'/report/barcode/?barcode_type=%s&amp;value=%s&amp;width=%s&amp;height=%s' % ('QR', quote_plus(o.l10n_sa_qr_code_str), 300, 300)" style="width:40mm; height:40mm;" alt="ZATCA QR"/>
+                    <td class="nil-sa-qr-cell" style="width:39%; text-align:center; vertical-align:top; border:0 none transparent !important; outline:0 none !important; box-shadow:none !important;">
+                        <img t-att-src="'/report/barcode/?barcode_type=%s&amp;value=%s&amp;width=%s&amp;height=%s' % ('QR', quote_plus(o.l10n_sa_qr_code_str), 300, 300)" style="width:40mm; height:40mm; border:0 none transparent !important; outline:0 none !important; box-shadow:none !important;" alt="ZATCA QR"/>
                     </td>
                 </tr></table>
                 <div t-if="o.currency_id != company.currency_id" dir="rtl" class="closing">

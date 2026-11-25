@@ -1,6 +1,6 @@
 {
     'name': 'NIL Saudi Premium Invoice',
-    'version': '17.0.1.0.4',
+    'version': '17.0.1.0.5',
     'category': 'Accounting/Localizations',
     'license': 'LGPL-3',
     'depends': ['l10n_sa_edi', 'invoice_training_details', 'sale'],
