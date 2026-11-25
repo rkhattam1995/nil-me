@@ -31,3 +31,6 @@ Same pending pro-forma feature branch based on Production eda49b1cc67fba7827847d
 
 ## 2026-11-25 | Borderless Saudi headers
 Same feature branch based on Production eda49b1cc67fba7827847d91f074f92def3101ae. Remove all borders (including the former lower separator), backgrounds, outlines and shadows of the company/logo and document title/number header tables and their structural cells, in Saudi premium invoice and Saudi sales pro-forma only. Retain item, totals and address table styling. Earlier bold-label/regular-value changes and borderless tax invoice QR preserved. Version 17.0.1.0.6. Source checks only; actual PDF and build not tested. Rollback by reverting isolated commit and authorized upgrade.
+
+## 2026-11-25 | Bilingual totals alignment
+Same pending Production-based feature branch. Align Arabic and English totals labels to the same right edge; English remains LTR on its own line immediately underneath Arabic. No changes to amount cells, financial expressions, tax labels, QR, or other reports. Version 17.0.1.0.7. Source-only check; PDF rendering and live upgrade not tested. Reference markdown files unavailable. Rollback: revert isolated commit and upgrade only after authorization.

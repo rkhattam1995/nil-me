@@ -100,6 +100,9 @@
                 .nil-sa-premium .lines .desc .en {font-size:9pt;line-height:1.25;margin-top:2px;}
                 .nil-sa-premium .num {direction:ltr;unicode-bidi:embed;white-space:nowrap;}
                 .nil-sa-premium .totals td {padding:5px 6px;border-bottom:1px solid #e1e4e6 !important;font-size:10pt;vertical-align:middle;}
+                .nil-sa-premium .totals td:first-child {text-align:right !important;}
+                .nil-sa-premium .totals td:first-child .ar {display:block;direction:rtl;text-align:right !important;}
+                .nil-sa-premium .totals td:first-child .en {display:block;direction:ltr;text-align:right !important;margin:2px 0 0;}
                 .nil-sa-premium .grand td {background:#253038;color:white;font-size:11pt;}
                 .nil-sa-premium .grand .en {color:#e6e9eb;}
                 .nil-sa-premium .closing {page-break-inside:avoid;margin-top:5px;}
