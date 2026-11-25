@@ -83,7 +83,6 @@
                     <td style="text-align:right; width:60%;">
                         <strong class="ar" style="font-size:15pt;">فاتورة مبدئية</strong>
                         <div class="en" style="font-size:10pt;">PRO-FORMA INVOICE</div>
-                        <div class="ar fine">ليست فاتورة ضريبية</div><div class="en">Not a tax invoice</div>
                     </td>
                     <td style="text-align:left;"><strong style="font-size:12pt;" class="num" t-field="o.name"/></td>
                 </tr></table>
