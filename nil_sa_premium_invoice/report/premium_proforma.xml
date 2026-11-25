@@ -98,9 +98,11 @@
                 <div t-if="o.partner_shipping_id and o.partner_shipping_id != o.partner_invoice_id" dir="rtl" class="fine" style="margin-top:6px;">
                     عنوان الشحن: <span t-field="o.partner_shipping_id" t-options='{"widget":"contact","fields":["address","name"],"no_marker":True}'/>
                 </div>
+                <t t-set="proforma_date" t-value="context_timestamp(o.date_order).date() if o.date_order else False"/>
+                <t t-set="proforma_due_date" t-value="max([term._get_due_date(proforma_date) for term in o.payment_term_id.line_ids], default=False) if proforma_date and o.payment_term_id else False"/>
                 <table class="meta" dir="rtl"><colgroup><col style="width:50%"/><col style="width:50%"/></colgroup><tr>
-                    <td t-att-colspan="1 if o.validity_date and o.state in ('draft','sent') else 2"><strong class="ar">التاريخ:</strong><span class="en" dir="ltr">Date</span><span class="num" dir="ltr" t-out="context_timestamp(o.date_order).date().isoformat() if o.date_order else ''"/></td>
-                    <td t-if="o.validity_date and o.state in ('draft','sent')"><strong class="ar">صالح حتى:</strong><span class="en" dir="ltr">Valid until</span><span class="num" dir="ltr" t-out="o.validity_date.isoformat()"/></td>
+                    <td><strong class="ar">التاريخ:</strong><span class="en" dir="ltr">Date</span><span class="num" dir="ltr" t-out="proforma_date.isoformat() if proforma_date else ''"/></td>
+                    <td><strong class="ar">تاريخ الاستحقاق:</strong><span class="en" dir="ltr">Due Date</span><span class="num" dir="ltr" t-out="proforma_due_date.isoformat() if proforma_due_date else '—'"/></td>
                 </tr></table>
                 <div dir="rtl" class="fine" t-if="o.client_order_ref or o.partner_id.ref or o.payment_term_id">
                     <span t-if="o.client_order_ref">المرجع / Reference: <bdi t-field="o.client_order_ref"/> </span>
