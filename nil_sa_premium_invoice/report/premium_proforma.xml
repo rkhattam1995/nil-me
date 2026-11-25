@@ -5,16 +5,18 @@
         
         <t t-set="company" t-value="o.company_id"/>
         <t t-set="seller" t-value="company.partner_id.with_context(lang='ar_001')"/>
-        <t t-set="buyer" t-value="o.partner_invoice_id.with_context(lang='ar_001')"/>
+        <t t-set="buyer" t-value="o.partner_invoice_id.commercial_partner_id.with_context(lang='ar_001')"/>
         <div class="article nil-sa-premium" t-att-data-oe-model="o._name" t-att-data-oe-id="o.id" data-oe-lang="en_US">
             <style>
                 @font-face {font-family:'NIL Tajawal';src:url('/web/static/fonts/google/Tajawal/Tajawal-Regular.ttf') format('truetype');font-style:normal;font-weight:400;}
                 @font-face {font-family:'NIL Tajawal';src:url('/web/static/fonts/google/Tajawal/Tajawal-Bold.ttf') format('truetype');font-style:normal;font-weight:700;}
-                .nil-sa-premium, .nil-sa-premium * {box-sizing:border-box;font-family:Calibri,Carlito,'NIL Tajawal',sans-serif !important;}
-                .nil-sa-premium {font-size:10pt;color:#253038;line-height:1.25;}
+                @font-face {font-family:'NIL Lato';src:url('/web/static/fonts/lato/Lato-Reg-webfont.ttf') format('truetype');font-style:normal;font-weight:400;}
+                @font-face {font-family:'NIL Lato';src:url('/web/static/fonts/lato/Lato-Bol-webfont.ttf') format('truetype');font-style:normal;font-weight:700;}
+                .nil-sa-premium, .nil-sa-premium * {box-sizing:border-box;font-family:Calibri,Carlito,'NIL Lato','NIL Tajawal',sans-serif !important;}
+                .nil-sa-premium {font-size:11pt;color:#253038;line-height:1.25;}
                 .nil-sa-premium .ar, .nil-sa-premium .ar *, .nil-sa-premium .party, .nil-sa-premium .party * {font-family:'NIL Tajawal',Calibri,Carlito,sans-serif !important;}
-                .nil-sa-premium .en, .nil-sa-premium .en *, .nil-sa-premium .num, .nil-sa-premium .num *, .nil-sa-premium bdi {font-family:Calibri,Carlito,'NIL Tajawal',sans-serif !important;}
-                .nil-sa-premium .en {font-size:9pt;color:#59636b;font-weight:400;display:block;direction:ltr;line-height:1.25;margin-top:2px;}
+                .nil-sa-premium .en, .nil-sa-premium .en *, .nil-sa-premium .num, .nil-sa-premium .num *, .nil-sa-premium bdi {font-family:Calibri,Carlito,'NIL Lato','NIL Tajawal',sans-serif !important;}
+                .nil-sa-premium .en {font-size:10.5pt;color:#59636b;font-weight:400;display:block;direction:ltr;line-height:1.25;margin-top:2px;}
                 .nil-sa-premium .page > table,.nil-sa-premium .totals {width:100%;table-layout:fixed;border-collapse:collapse;border:0 !important;}
                 .nil-sa-premium .page > table > tbody > tr > td,.nil-sa-premium .page > table > thead > tr > th,.nil-sa-premium .totals > tbody > tr > td {border:0 !important;}
                 .nil-sa-premium .top {margin-bottom:7px;}
@@ -44,13 +46,13 @@
                 .nil-sa-premium .lines {direction:rtl;margin:0 0 6px;table-layout:fixed !important;}
                 .nil-sa-premium .lines thead {display:table-header-group;}
                 .nil-sa-premium .lines th {background:#253038;color:white;font-weight:700;padding:4px 3px;text-align:center !important;vertical-align:middle !important;font-size:9.5pt;line-height:1.25;border:1px solid #253038 !important;}
-                .nil-sa-premium .lines th .ar {display:block;min-height:2.35em;}
-                .nil-sa-premium .lines th .en {color:#e6e9eb;font-size:8.5pt;text-align:center !important;margin-top:1px;}
-                .nil-sa-premium .lines td {padding:5px 3px;border:1px solid #d7dbde !important;vertical-align:middle;text-align:center;font-size:9.5pt;line-height:1.35;}
+                .nil-sa-premium .lines th .ar {display:block;min-height:2em;}
+                .nil-sa-premium .lines th .en {color:#e6e9eb;font-size:9.5pt;text-align:center !important;margin-top:1px;}
+                .nil-sa-premium .lines td {padding:5px 3px;border:1px solid #d7dbde !important;vertical-align:middle;text-align:center;font-size:11pt;line-height:1.25;}
                 .nil-sa-premium .lines tbody tr:nth-child(even) {background:#f3f4f5;}
                 .nil-sa-premium .lines tr {page-break-inside:avoid;}
                 .nil-sa-premium .lines .desc {text-align:right;word-wrap:break-word;padding:5px 6px;}
-                .nil-sa-premium .lines .desc .en {font-size:9pt;line-height:1.25;margin-top:2px;}
+                .nil-sa-premium .lines .desc .en {font-size:10.5pt;line-height:1.25;margin-top:2px;}
                 .nil-sa-premium .num {direction:ltr;unicode-bidi:embed;white-space:nowrap;}
                 .nil-sa-premium .totals td {padding:5px 6px;border-bottom:1px solid #e1e4e6 !important;font-size:10pt;vertical-align:middle;}
                 .nil-sa-premium .totals td:first-child {text-align:right !important;}
@@ -60,8 +62,11 @@
                 .nil-sa-premium .grand .en {color:#e6e9eb;}
                 .nil-sa-premium .closing {page-break-inside:avoid;margin-top:5px;}
                 .nil-sa-premium .fine {font-size:9pt;color:#59636b;}
-                .nil-sa-premium .training-extra {margin:5px 0 0;font-size:9pt;line-height:1.25;word-wrap:break-word;}
+                .nil-sa-premium .training-extra {margin:5px 0 0;font-size:11pt;line-height:1.25;word-wrap:break-word;}
                 .nil-sa-premium .training-extra p {margin:0 0 3px;line-height:1.25;}
+                .nil-sa-premium table.proforma-totals {width:65% !important;margin:5px 0 5px auto;page-break-inside:avoid;}
+                .nil-sa-premium .proforma-totals td {font-size:11pt;}
+                .nil-sa-premium .proforma-totals .grand td {font-size:12pt;}
                 .nil-sa-premium .training-extra ul,.nil-sa-premium .training-extra ol {margin-top:2px;margin-bottom:3px;}
                 .nil-sa-premium .training-extra li {margin-top:0;margin-bottom:1px;}
                 .nil-sa-premium .training-extra h1,.nil-sa-premium .training-extra h2,.nil-sa-premium .training-extra h3,.nil-sa-premium .training-extra h4,.nil-sa-premium .training-extra h5,.nil-sa-premium .training-extra h6 {font-size:10pt;line-height:1.25;margin:3px 0;page-break-after:avoid;}
@@ -84,7 +89,7 @@
                 <table dir="rtl"><tr>
                     <td class="party">
                         <t t-call="nil_sa_premium_invoice.party"><t t-set="p" t-value="buyer"/><t t-set="party_ar" t-value="'المشتري'"/></t>
-                        <div t-if="buyer != buyer.commercial_partner_id" class="fine" dir="auto" t-field="buyer.commercial_partner_id.name"/>
+                        <div t-if="o.partner_invoice_id != o.partner_invoice_id.commercial_partner_id" class="fine" dir="rtl" style="margin-top:3px;"><strong class="ar">جهة الاتصال:</strong> <span t-field="o.partner_invoice_id.name"/></div>
                     </td>
                     <td style="width:2%;"/>
                     <td class="party"><t t-call="nil_sa_premium_invoice.party"><t t-set="p" t-value="seller"/><t t-set="party_ar" t-value="'البائع'"/></t></td>
@@ -93,8 +98,8 @@
                     عنوان الشحن: <span t-field="o.partner_shipping_id" t-options='{"widget":"contact","fields":["address","name"],"no_marker":True}'/>
                 </div>
                 <table class="meta" dir="rtl"><colgroup><col style="width:50%"/><col style="width:50%"/></colgroup><tr>
-                    <td><strong class="ar">التاريخ:</strong><span class="en" dir="ltr">Date</span><span class="num" dir="ltr" t-field="o.date_order" t-options="{'widget':'date'}"/></td>
-                    <td><t t-if="o.validity_date and o.state in ('draft','sent')"><strong class="ar">صالح حتى:</strong><span class="en" dir="ltr">Valid until</span><span class="num" dir="ltr" t-field="o.validity_date"/></t></td>
+                    <td t-att-colspan="1 if o.validity_date and o.state in ('draft','sent') else 2"><strong class="ar">التاريخ:</strong><span class="en" dir="ltr">Date</span><span class="num" dir="ltr" t-out="context_timestamp(o.date_order).date().isoformat() if o.date_order else ''"/></td>
+                    <td t-if="o.validity_date and o.state in ('draft','sent')"><strong class="ar">صالح حتى:</strong><span class="en" dir="ltr">Valid until</span><span class="num" dir="ltr" t-out="o.validity_date.isoformat()"/></td>
                 </tr></table>
                 <div dir="rtl" class="fine" t-if="o.client_order_ref or o.partner_id.ref or o.payment_term_id or o.user_id">
                     <span t-if="o.client_order_ref">المرجع / Reference: <bdi t-field="o.client_order_ref"/> </span>
@@ -102,7 +107,9 @@
                     <span t-if="o.payment_term_id"> | شروط الدفع / Payment terms: <bdi t-field="o.payment_term_id"/> </span>
                     <span t-if="o.user_id"> | مسؤول المبيعات / Salesperson: <bdi t-field="o.user_id"/></span>
                 </div>
-                <t t-set="lines" t-value="o._get_order_lines_to_report()"/>
+                <t t-set="native_lines" t-value="o._get_order_lines_to_report()"/>
+                <t t-set="visible_downpayments" t-value="native_lines.filtered(lambda l: l.is_downpayment and not l.display_type and (l.product_uom_qty or l.price_subtotal or l.price_tax or l.price_total))"/>
+                <t t-set="lines" t-value="native_lines.filtered(lambda l: not l.is_downpayment or l in visible_downpayments or (l.display_type and visible_downpayments))"/>
                 <t t-set="display_discount" t-value="any(l.discount > 0 for l in lines)"/>
                 <table class="lines" dir="rtl" name="invoice_line_table">
                     <colgroup><col t-att-style="'width:27%' if display_discount else 'width:34%'"/><col style="width:7%"/><col style="width:14%"/><col t-if="display_discount" style="width:7%"/><col style="width:12%"/><col style="width:9%"/><col style="width:12%"/><col style="width:12%"/></colgroup>
@@ -137,9 +144,7 @@
                         </t>
                     </tbody>
                 </table>
-                <table class="closing" dir="rtl"><tr>
-                    <td style="width:65%; vertical-align:top;">
-                        <table class="totals" dir="rtl"><colgroup><col style="width:60%"/><col style="width:40%"/></colgroup>
+                <table class="totals proforma-totals" dir="rtl"><colgroup><col style="width:60%"/><col style="width:40%"/></colgroup>
                             <tr><td><span class="ar">المبلغ الخاضع للضريبة غير شامل الضريبة</span><div class="en">Taxable amount (excl. VAT)</div></td><td style="text-align:left;"><span class="num" t-field="o.amount_untaxed"/></td></tr>
                             <t t-set="tax_totals" t-value="o.tax_totals or {}"/>
                             <t t-foreach="tax_totals.get('subtotals', [])" t-as="subtotal">
@@ -148,10 +153,7 @@
                                 </t>
                             </t>
                             <tr class="grand"><td><span class="ar">إجمالي الفاتورة المبدئية شامل الضريبة</span><div class="en">Pro-forma total (incl. VAT)</div></td><td style="text-align:left;"><strong class="num" t-field="o.amount_total"/></td></tr>
-                        </table>
-                    </td>
-                    <td style="width:35%;"/>
-                </tr></table>
+                </table>
                 <div t-if="not is_html_empty(o.note)" dir="auto" class="training-extra" t-field="o.note"/>
                 <div t-if="not is_html_empty(o.payment_term_id.note)" dir="auto" class="training-extra" t-field="o.payment_term_id.note"/>
                 <div t-if="o.fiscal_position_id and not is_html_empty(o.fiscal_position_id.note)" dir="auto" class="training-extra" t-field="o.fiscal_position_id.note"/>
@@ -190,9 +192,10 @@
          Other companies and mixed-country batches keep the native paper format. -->
     <template id="sa_proforma_pdf_layout" inherit_id="web.report_layout" primary="True">
         <xpath expr="//html" position="attributes">
-            <attribute name="data-report-margin-top">8</attribute>
-            <attribute name="data-report-margin-bottom">11</attribute>
-            <attribute name="data-report-header-spacing">0</attribute>
+            <attribute name="t-att-data-report-margin-top">8</attribute>
+            <attribute name="t-att-data-report-margin-bottom">11</attribute>
+            <attribute name="t-att-data-report-header-spacing">'0'</attribute>
+            <attribute name="t-att-data-report-dpi">90</attribute>
         </xpath>
     </template>
     <template id="sa_proforma_print_layout" inherit_id="sale.report_saleorder_pro_forma" priority="90">
