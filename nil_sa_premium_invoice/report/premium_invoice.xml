@@ -64,7 +64,13 @@
                 .nil-sa-premium .en {font-size:9pt;color:#59636b;font-weight:400;display:block;direction:ltr;line-height:1.25;margin-top:2px;}
                 .nil-sa-premium .page > table,.nil-sa-premium .totals {width:100%;table-layout:fixed;border-collapse:collapse;border:0 !important;}
                 .nil-sa-premium .page > table > tbody > tr > td,.nil-sa-premium .page > table > thead > tr > th,.nil-sa-premium .totals > tbody > tr > td {border:0 !important;}
-                .nil-sa-premium .top {border-bottom:2px solid #253038 !important;margin-bottom:7px;}
+                .nil-sa-premium .top {margin-bottom:7px;}
+                .nil-sa-premium table.top,.nil-sa-premium table.title,
+                .nil-sa-premium table.top > tbody,.nil-sa-premium table.title > tbody,
+                .nil-sa-premium table.top > tr,.nil-sa-premium table.title > tr,
+                .nil-sa-premium table.top > tbody > tr,.nil-sa-premium table.title > tbody > tr,
+                .nil-sa-premium table.top > tr > td,.nil-sa-premium table.title > tr > td,
+                .nil-sa-premium table.top > tbody > tr > td,.nil-sa-premium table.title > tbody > tr > td {border:0 none transparent !important;outline:0 none !important;box-shadow:none !important;background:transparent !important;}
                 .nil-sa-premium .top td {padding-bottom:5px;vertical-align:middle;}
                 .nil-sa-premium .title {margin-bottom:8px;}
                 .nil-sa-premium .title td {vertical-align:middle;}
@@ -109,11 +115,11 @@
                 .nil-sa-premium .training-extra tr {page-break-inside:avoid;}
             </style>
             <div class="page" style="margin: 0; padding: 0; min-height: 0;">
-                <table class="top" dir="ltr"><tr>
+                <table class="top" dir="ltr" style="border:0 none transparent !important;outline:0 none !important;box-shadow:none !important;"><tr>
                     <td style="width:72%; text-align:left;"><strong t-field="company.name"/><div class="en">NIL Middle East</div></td>
                     <td style="text-align:right;"><img t-if="company.logo" t-att-src="image_data_uri(company.logo)" style="max-width:35mm; max-height:17mm;" alt="Company logo"/></td>
                 </tr></table>
-                <table class="title" dir="rtl"><tr>
+                <table class="title" dir="rtl" style="border:0 none transparent !important;outline:0 none !important;box-shadow:none !important;"><tr>
                     <td style="text-align:right; width:60%;">
                         <strong class="ar" style="font-size:17pt;" t-if="o.move_type == 'out_refund'">إشعار دائن</strong>
                         <strong class="ar" style="font-size:17pt;" t-elif="o._l10n_sa_is_simplified()">فاتورة ضريبية مبسطة</strong>
