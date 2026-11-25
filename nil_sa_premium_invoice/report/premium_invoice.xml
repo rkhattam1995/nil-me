@@ -6,7 +6,7 @@
         <field name="format">A4</field>
         <field name="orientation">Portrait</field>
         <field name="margin_top">10</field>
-        <field name="margin_bottom">5</field>
+        <field name="margin_bottom">15</field>
         <field name="margin_left">10</field>
         <field name="margin_right">10</field>
         <field name="header_spacing">0</field>
@@ -55,41 +55,50 @@
         <t t-set="buyer" t-value="o.partner_id"/>
         <div class="article nil-sa-premium" t-att-data-oe-model="o._name" t-att-data-oe-id="o.id" data-oe-lang="en_US">
             <style>
-                .nil-sa-premium, .nil-sa-premium * {font-family: Calibri, Carlito, 'Noto Sans Arabic', 'DejaVu Sans', sans-serif !important; box-sizing: border-box;}
-                .nil-sa-premium {font-size: 11pt; color: #253038; line-height: 1.22;}
-                .nil-sa-premium .en {font-size: 9pt; color: #59636b; font-weight: normal; display: block; direction: ltr;}
-                .nil-sa-premium table {width: 100%; border-collapse: collapse;}
-                .nil-sa-premium .top {border-bottom: 2px solid #253038; margin-bottom: 10px; padding-bottom: 8px;}
-                .nil-sa-premium .top td, .nil-sa-premium .title td {vertical-align: middle;}
-                .nil-sa-premium .title {margin-bottom: 12px;}
-                .nil-sa-premium .party {background: #f3f4f5; border-top: 2px solid #253038; padding: 10px; vertical-align: top; width: 49%;}
-                .nil-sa-premium .party-title {border-bottom: 1px solid #cfd4d7; padding-bottom: 5px; margin-bottom: 6px;}
-                .nil-sa-premium .party-title .en {float: left;}
-                .nil-sa-premium .party-name {font-weight: bold; margin-bottom: 4px;}
-                .nil-sa-premium .address {margin-bottom: 7px;}
-                .nil-sa-premium .id-line {margin-top: 4px; font-size: 9.5pt;}
-                .nil-sa-premium .id-line bdi {display: inline-block; direction: ltr; font-weight: bold;}
-                .nil-sa-premium .dates {margin-top: 10px; margin-bottom: 10px; border-bottom: 1px solid #cfd4d7;}
-                .nil-sa-premium .dates td {padding: 7px 5px; border-left: 1px solid #e3e5e7; vertical-align: top;}
-                .nil-sa-premium .lines {table-layout: fixed; direction: rtl; margin: 5px 0 12px;}
-                .nil-sa-premium .lines thead {display: table-header-group;}
-                .nil-sa-premium .lines th {background: #253038; color: white; font-weight: bold; padding: 8px 3px; font-size: 9pt; text-align: center; vertical-align: middle;}
-                .nil-sa-premium .lines th .en {color: #e6e9eb; font-size: 8pt;}
-                .nil-sa-premium .lines td {padding: 9px 4px; border-bottom: 1px solid #d7dbde; vertical-align: middle; text-align: center; font-size: 10pt;}
-                .nil-sa-premium .lines tbody tr:nth-child(even) {background: #f3f4f5;}
-                .nil-sa-premium .lines tr {page-break-inside: avoid;}
-                .nil-sa-premium .lines .desc {text-align: right; overflow-wrap: break-word; word-wrap: break-word;}
-                .nil-sa-premium .num {direction: ltr; unicode-bidi: embed; white-space: nowrap;}
-                .nil-sa-premium .totals td {padding: 8px 6px; border-bottom: 1px solid #e1e4e6;}
-                .nil-sa-premium .grand td {background: #253038; color: white; font-size: 13pt;}
-                .nil-sa-premium .grand .en {color: #e6e9eb;}
-                .nil-sa-premium .closing {page-break-inside: avoid; margin-top: 8px;}
-                .nil-sa-premium .fine {font-size: 9pt; color: #59636b;}
-                .nil-sa-premium [dir="rtl"], .nil-sa-premium [dir="rtl"] * {font-family: 'Noto Sans Arabic', 'Noto Naskh Arabic', Calibri, 'DejaVu Sans', sans-serif !important;}
-                .nil-sa-premium .en, .nil-sa-premium .en *, .nil-sa-premium .num, .nil-sa-premium [dir="ltr"] {font-family: Calibri, Carlito, 'Noto Sans Arabic', 'DejaVu Sans', sans-serif !important;}
-                .nil-sa-premium .nil-footer {border-top:1px solid #253038; margin:5px 0 0; padding:3px 0 0; text-align:center; line-height:1.15; page-break-inside:avoid;}
-                .nil-sa-premium .nil-footer p, .nil-sa-premium .nil-footer div {margin:0 !important; padding:0 !important; min-height:0 !important; line-height:1.15 !important;}
-                .nil-sa-premium .nil-footer .issue-time {margin-top:2px !important; font-size:8pt;}
+                @font-face {font-family:'NIL Tajawal';src:url('/web/static/fonts/google/Tajawal/Tajawal-Regular.ttf') format('truetype');font-style:normal;font-weight:400;}
+                @font-face {font-family:'NIL Tajawal';src:url('/web/static/fonts/google/Tajawal/Tajawal-Bold.ttf') format('truetype');font-style:normal;font-weight:700;}
+                .nil-sa-premium, .nil-sa-premium * {box-sizing:border-box;font-family:Calibri,Carlito,'NIL Tajawal',sans-serif !important;}
+                .nil-sa-premium {font-size:10pt;color:#253038;line-height:1.35;}
+                .nil-sa-premium .ar, .nil-sa-premium .ar *, .nil-sa-premium .party, .nil-sa-premium .party * {font-family:'NIL Tajawal',Calibri,Carlito,sans-serif !important;}
+                .nil-sa-premium .en, .nil-sa-premium .en *, .nil-sa-premium .num, .nil-sa-premium .num *, .nil-sa-premium bdi {font-family:Calibri,Carlito,'NIL Tajawal',sans-serif !important;}
+                .nil-sa-premium .en {font-size:9pt;color:#59636b;font-weight:400;display:block;direction:ltr;line-height:1.25;margin-top:2px;}
+                .nil-sa-premium table {width:100%;table-layout:fixed;border-collapse:collapse;border:0 !important;}
+                .nil-sa-premium table td,.nil-sa-premium table th {border:0 !important;}
+                .nil-sa-premium .top {border-bottom:2px solid #253038 !important;margin-bottom:15px;}
+                .nil-sa-premium .top td {padding-bottom:10px;vertical-align:middle;}
+                .nil-sa-premium .title {margin-bottom:18px;}
+                .nil-sa-premium .title td {vertical-align:middle;}
+                .nil-sa-premium .title .en {font-size:11pt;}
+                .nil-sa-premium .party {background:#f3f4f5;border-top:2px solid #253038 !important;padding:14px 12px;vertical-align:top;width:49%;text-align:right;}
+                .nil-sa-premium .party-title {border-bottom:1px solid #cfd4d7;padding-bottom:7px;margin-bottom:9px;font-size:10pt;}
+                .nil-sa-premium .party-title .en {float:none;display:inline-block;margin:0 6px;}
+                .nil-sa-premium .party-name {font-size:10pt;font-weight:700;margin-bottom:6px;}
+                .nil-sa-premium .address {margin-bottom:8px;font-size:9.5pt;line-height:1.4;}
+                .nil-sa-premium .id-line {margin-top:5px;font-size:9.5pt;}
+                .nil-sa-premium .id-line bdi {display:inline-block;direction:ltr;font-weight:700;}
+                .nil-sa-premium .meta {margin:16px 0 14px;}
+                .nil-sa-premium .meta td {width:50%;padding:11px 8px;vertical-align:middle;text-align:center !important;border:1px solid #d7dbde !important;}
+                .nil-sa-premium .meta strong {display:block;font-size:10pt;line-height:1.3;}
+                .nil-sa-premium .meta .en {text-align:center !important;font-size:9pt;}
+                .nil-sa-premium .meta .num {display:block;margin-top:5px;font-size:10pt;}
+                .nil-sa-premium .section-bar {margin:14px 0 10px;}
+                .nil-sa-premium .section-bar td {padding:8px 7px;background:#f3f4f5;}
+                .nil-sa-premium .lines {direction:rtl;margin:0 0 18px;table-layout:fixed !important;}
+                .nil-sa-premium .lines thead {display:table-header-group;}
+                .nil-sa-premium .lines th {background:#253038;color:white;font-weight:700;padding:10px 3px;text-align:center !important;vertical-align:middle !important;font-size:9.5pt;line-height:1.25;border:1px solid #253038 !important;}
+                .nil-sa-premium .lines th .ar {display:block;min-height:2.5em;}
+                .nil-sa-premium .lines th .en {color:#e6e9eb;font-size:8.5pt;text-align:center !important;min-height:2.5em;margin-top:3px;}
+                .nil-sa-premium .lines td {padding:13px 3px;border:1px solid #d7dbde !important;vertical-align:middle;text-align:center;font-size:9.5pt;line-height:1.35;}
+                .nil-sa-premium .lines tbody tr:nth-child(even) {background:#f3f4f5;}
+                .nil-sa-premium .lines tr {page-break-inside:avoid;}
+                .nil-sa-premium .lines .desc {text-align:right;word-wrap:break-word;padding:13px 7px;}
+                .nil-sa-premium .lines .desc .en {font-size:9pt;line-height:1.35;margin-top:4px;}
+                .nil-sa-premium .num {direction:ltr;unicode-bidi:embed;white-space:nowrap;}
+                .nil-sa-premium .totals td {padding:10px 7px;border-bottom:1px solid #e1e4e6 !important;font-size:10pt;vertical-align:middle;}
+                .nil-sa-premium .grand td {background:#253038;color:white;font-size:11pt;}
+                .nil-sa-premium .grand .en {color:#e6e9eb;}
+                .nil-sa-premium .closing {page-break-inside:avoid;margin-top:14px;}
+                .nil-sa-premium .fine {font-size:9pt;color:#59636b;}
             </style>
             <div class="page" style="margin: 0; padding: 0; min-height: 0;">
                 <table class="top" dir="ltr"><tr>
@@ -98,14 +107,14 @@
                 </tr></table>
                 <table class="title" dir="rtl"><tr>
                     <td style="text-align:right; width:60%;">
-                        <strong style="font-size:24pt;" t-if="o.move_type == 'out_refund'">إشعار دائن</strong>
-                        <strong style="font-size:24pt;" t-elif="o._l10n_sa_is_simplified()">فاتورة ضريبية مبسطة</strong>
-                        <strong style="font-size:24pt;" t-else="">فاتورة ضريبية</strong>
-                        <div class="en" style="font-size:12pt;" t-if="o.move_type == 'out_refund'">CREDIT NOTE</div>
-                        <div class="en" style="font-size:12pt;" t-elif="o._l10n_sa_is_simplified()">SIMPLIFIED TAX INVOICE</div>
-                        <div class="en" style="font-size:12pt;" t-else="">TAX INVOICE</div>
+                        <strong class="ar" style="font-size:17pt;" t-if="o.move_type == 'out_refund'">إشعار دائن</strong>
+                        <strong class="ar" style="font-size:17pt;" t-elif="o._l10n_sa_is_simplified()">فاتورة ضريبية مبسطة</strong>
+                        <strong class="ar" style="font-size:17pt;" t-else="">فاتورة ضريبية</strong>
+                        <div class="en" style="font-size:11pt;" t-if="o.move_type == 'out_refund'">CREDIT NOTE</div>
+                        <div class="en" style="font-size:11pt;" t-elif="o._l10n_sa_is_simplified()">SIMPLIFIED TAX INVOICE</div>
+                        <div class="en" style="font-size:11pt;" t-else="">TAX INVOICE</div>
                     </td>
-                    <td style="text-align:left;"><strong style="font-size:17pt;" class="num" t-field="o.name"/></td>
+                    <td style="text-align:left;"><strong style="font-size:13pt;" class="num" t-field="o.name"/></td>
                 </tr></table>
                 <table dir="rtl"><tr>
                     <td class="party">
@@ -118,26 +127,25 @@
                 <div t-if="o.partner_shipping_id and o.partner_shipping_id != o.partner_id" groups="account.group_delivery_invoice_address" dir="rtl" class="fine" style="margin-top:6px;">
                     عنوان الشحن / Shipping Address: <span t-field="o.partner_shipping_id" t-options='{"widget":"contact","fields":["address","name"],"no_marker":True}'/>
                 </div>
-                <table class="dates" dir="rtl"><tr>
-                    <td><strong>تاريخ الفاتورة</strong><div class="en">Invoice Date</div><span class="num" t-out="o.invoice_date.isoformat() if o.invoice_date else ''"/></td>
-                    <td t-if="o.invoice_date_due"><strong>تاريخ الاستحقاق</strong><div class="en">Due Date</div><span class="num" t-out="o.invoice_date_due.isoformat()"/></td>
-                    <td t-if="o.delivery_date and o.delivery_date != o.invoice_date"><strong>تاريخ التوريد</strong><div class="en">Supply Date</div><span class="num" t-out="o.delivery_date.isoformat()"/></td>
-                </tr></table>
+                <table class="meta" dir="rtl"><colgroup><col style="width:50%"/><col style="width:50%"/></colgroup><tr>
+                    <td><strong class="ar">تاريخ الفاتورة</strong><div class="en">Invoice Date</div><span class="num" t-out="o.invoice_date.isoformat() if o.invoice_date else ''"/></td>
+                    <td><strong class="ar">تاريخ الاستحقاق</strong><div class="en">Due Date</div><span class="num" t-out="o.invoice_date_due.isoformat() if o.invoice_date_due else ''"/></td>
+                </tr><tr t-if="o.delivery_date and o.delivery_date != o.invoice_date"><td colspan="2"><strong class="ar">تاريخ التوريد</strong><div class="en">Supply Date</div><span class="num" t-out="o.delivery_date.isoformat()"/></td></tr></table>
                 <div dir="rtl" class="fine" t-if="o.ref or o.partner_id.ref or o.reversed_entry_id">
                     <span t-if="o.ref">المرجع / Reference: <bdi t-field="o.ref"/></span>
                     <span t-if="o.partner_id.ref"> | رمز العميل / Customer Code: <bdi t-field="o.partner_id.ref"/></span>
                     <span t-if="o.reversed_entry_id"> | الفاتورة الأصلية / Original invoice: <bdi t-field="o.reversed_entry_id.name"/></span>
                 </div>
-                <table dir="rtl"><tr><td style="text-align:right;"><strong>تفاصيل الفاتورة</strong><div class="en">Invoice details</div></td><td style="text-align:left;" class="fine">العملة / Currency: <bdi t-field="o.currency_id.name"/></td></tr></table>
+                <table class="meta section-bar" dir="rtl"><colgroup><col style="width:50%"/><col style="width:50%"/></colgroup><tr><td><strong class="ar">تفاصيل الفاتورة</strong><div class="en">Invoice details</div></td><td><strong class="ar">العملة</strong><div class="en">Currency</div><span class="num" t-field="o.currency_id.name"/></td></tr></table>
                 <t t-set="display_discount" t-value="any(l.discount for l in o.invoice_line_ids)"/>
-                <table class="lines" name="invoice_line_table">
-                    <colgroup><col t-att-style="'width:27%' if display_discount else 'width:34%'"/><col style="width:9%"/><col style="width:12%"/><col t-if="display_discount" style="width:7%"/><col style="width:12%"/><col style="width:9%"/><col style="width:12%"/><col style="width:12%"/></colgroup>
+                <table class="lines" dir="rtl" name="invoice_line_table">
+                    <colgroup><col t-att-style="'width:27%' if display_discount else 'width:34%'"/><col style="width:7%"/><col style="width:14%"/><col t-if="display_discount" style="width:7%"/><col style="width:12%"/><col style="width:9%"/><col style="width:12%"/><col style="width:12%"/></colgroup>
                     <thead><tr>
-                        <th style="text-align:right;">البند / الوصف<div class="en">Item / Description</div></th>
-                        <th>الكمية<div class="en">Qty</div></th><th>سعر الوحدة<div class="en">Unit price</div></th>
-                        <th t-if="display_discount">الخصم %<div class="en">Disc. %</div></th>
-                        <th>قبل الضريبة<div class="en">Excl. VAT</div></th><th>نسبة الضريبة<div class="en">VAT rate</div></th>
-                        <th>قيمة الضريبة<div class="en">VAT amount</div></th><th>شامل الضريبة<div class="en">Incl. VAT</div></th>
+                        <th><span class="ar">البند / الوصف</span><div class="en">Item / Description</div></th>
+                        <th><span class="ar">الكمية</span><div class="en">Qty</div></th><th><span class="ar">سعر الوحدة</span><div class="en">Unit price</div></th>
+                        <th t-if="display_discount"><span class="ar">الخصم %</span><div class="en">Disc. %</div></th>
+                        <th><span class="ar">قبل الضريبة</span><div class="en">Excl. VAT</div></th><th><span class="ar">نسبة الضريبة</span><div class="en">VAT rate</div></th>
+                        <th><span class="ar">قيمة الضريبة</span><div class="en">VAT amount</div></th><th><span class="ar">شامل الضريبة</span><div class="en">Incl. VAT</div></th>
                     </tr></thead>
                     <tbody>
                         <t t-set="lines" t-value="o.invoice_line_ids.sorted(key=lambda l: (-l.sequence, l.date, l.move_name, -l.id), reverse=True)"/>
@@ -147,7 +155,7 @@
                             <t t-if="line.display_type == 'line_section'"><t t-set="section" t-value="True"/><t t-set="section_total" t-value="0"/></t>
                             <tr t-if="line.display_type not in ('line_section', 'line_note')">
                                 <td class="desc">
-                                    <t t-if="line.product_id"><strong dir="rtl" t-out="line.product_id.with_context(lang='ar_001').name"/></t>
+                                    <t t-if="line.product_id"><strong class="ar" dir="rtl" t-out="line.product_id.with_context(lang='ar_001').name"/></t>
                                     <div dir="ltr" class="en" style="text-align:right; white-space:pre-wrap;" t-field="line.name"/>
                                 </td>
                                 <td><span class="num" t-field="line.quantity"/></td>
@@ -165,15 +173,15 @@
                 </table>
                 <table class="closing" dir="rtl"><tr>
                     <td style="width:61%; vertical-align:top;">
-                        <table class="totals" dir="rtl">
-                            <tr><td>المبلغ الخاضع للضريبة غير شامل الضريبة<div class="en">Invoice taxable amount (excl. VAT)</div></td><td style="text-align:left;"><span class="num" t-field="o.amount_untaxed"/></td></tr>
+                        <table class="totals" dir="rtl"><colgroup><col style="width:60%"/><col style="width:40%"/></colgroup>
+                            <tr><td><span class="ar">المبلغ الخاضع للضريبة غير شامل الضريبة</span><div class="en">Invoice taxable amount (excl. VAT)</div></td><td style="text-align:left;"><span class="num" t-field="o.amount_untaxed"/></td></tr>
                             <t t-set="tax_totals" t-value="o.tax_totals or {}"/>
                             <t t-foreach="tax_totals.get('subtotals', [])" t-as="subtotal">
                                 <t t-foreach="tax_totals['groups_by_subtotal'][subtotal['name']]" t-as="group">
-                                    <tr><td>ضريبة القيمة المضافة<div class="en" t-out="group['tax_group_name']"/><div t-if="tax_totals.get('display_tax_base')" class="fine" t-out="group['formatted_tax_group_base_amount']"/></td><td style="text-align:left;"><span class="num" t-out="group['formatted_tax_group_amount']"/></td></tr>
+                                    <tr><td><span class="ar">ضريبة القيمة المضافة</span><div class="en" t-out="group['tax_group_name']"/><div t-if="tax_totals.get('display_tax_base')" class="fine" t-out="group['formatted_tax_group_base_amount']"/></td><td style="text-align:left;"><span class="num" t-out="group['formatted_tax_group_amount']"/></td></tr>
                                 </t>
                             </t>
-                            <tr class="grand"><td>إجمالي الفاتورة شامل الضريبة<div class="en">Invoice total (incl. VAT)</div></td><td style="text-align:left;"><strong class="num" t-field="o.amount_total"/></td></tr>
+                            <tr class="grand"><td><span class="ar">إجمالي الفاتورة شامل الضريبة</span><div class="en">Invoice total (incl. VAT)</div></td><td style="text-align:left;"><strong class="num" t-field="o.amount_total"/></td></tr>
                         </table>
                     </td>
                     <td style="width:39%; text-align:center; vertical-align:top;">
@@ -189,10 +197,16 @@
                 </div>
                 <div t-if="company.display_invoice_amount_total_words" dir="rtl" class="fine"><div t-out="o._num2words(o.amount_total, 'ar_001')"/><div class="en" t-field="o.amount_total_words"/></div>
                 <div t-if="o.narration" dir="auto" class="fine" t-field="o.narration"/>
-                <div class="fine nil-footer" dir="ltr">
-                    <div t-if="company.report_footer" t-field="company.report_footer"/>
-                    <div class="issue-time" t-if="o.l10n_sa_confirmation_datetime"><span t-out="o.get_l10n_sa_confirmation_datetime_sa_tz()"/></div>
-                </div>
+ 
+            </div>
+        </div>
+        <div class="footer nil-sa-premium-footer" dir="ltr" style="font-family:Calibri,Carlito,sans-serif;font-size:8pt;color:#59636b;text-align:center;">
+            <style>
+                .nil-sa-premium-footer p,.nil-sa-premium-footer div {margin:0 !important;padding:0 !important;min-height:0 !important;line-height:1.2 !important;}
+            </style>
+            <div style="border-top:1px solid #253038;padding-top:3px !important;">
+                <div t-if="company.report_footer" t-field="company.report_footer"/>
+                <div t-if="o.l10n_sa_confirmation_datetime"><span t-out="o.get_l10n_sa_confirmation_datetime_sa_tz()"/></div>
             </div>
         </div>
     </template>
