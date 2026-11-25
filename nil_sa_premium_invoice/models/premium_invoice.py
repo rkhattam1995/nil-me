@@ -1,5 +1,6 @@
 from odoo import _, api, models
 from odoo.exceptions import UserError
+from odoo.tools import is_html_empty
 
 
 class AccountMove(models.Model):
@@ -31,4 +32,4 @@ class PremiumInvoiceReport(models.AbstractModel):
         if not docs or len(docs) != len(set(docids)):
             raise UserError(_('Invoice not found.'))
         docs._nil_sa_check_premium_invoice()
-        return {'doc_ids': docs.ids, 'doc_model': 'account.move', 'docs': docs}
+        return {'doc_ids': docs.ids, 'doc_model': 'account.move', 'docs': docs, 'nil_is_html_empty': is_html_empty}

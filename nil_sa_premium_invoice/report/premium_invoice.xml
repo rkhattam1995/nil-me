@@ -76,10 +76,10 @@
                 .nil-sa-premium .id-line {margin-top:3px;font-size:9.5pt;}
                 .nil-sa-premium .id-line bdi {display:inline-block;direction:ltr;font-weight:700;}
                 .nil-sa-premium .meta {margin:7px 0 7px;}
-                .nil-sa-premium .meta td {width:50%;padding:5px 8px;vertical-align:middle;text-align:center !important;border:1px solid #d7dbde !important;}
-                .nil-sa-premium .meta strong {display:block;font-size:10pt;line-height:1.3;}
-                .nil-sa-premium .meta .en {text-align:center !important;font-size:9pt;}
-                .nil-sa-premium .meta .num {display:block;margin-top:2px;font-size:10pt;}
+                .nil-sa-premium .meta td {width:50%;padding:4px 5px;vertical-align:middle;text-align:center !important;border:1px solid #d7dbde !important;}
+                .nil-sa-premium .meta strong {display:inline;font-size:9.5pt;line-height:1.3;}
+                .nil-sa-premium .meta .en {display:inline-block;text-align:center !important;font-size:8.5pt;margin:0 3px;white-space:nowrap;}
+                .nil-sa-premium .meta .num {display:inline-block;margin:0 3px;font-size:9.5pt;white-space:nowrap;}
                 .nil-sa-premium .lines {direction:rtl;margin:0 0 6px;table-layout:fixed !important;}
                 .nil-sa-premium .lines thead {display:table-header-group;}
                 .nil-sa-premium .lines th {background:#253038;color:white;font-weight:700;padding:4px 3px;text-align:center !important;vertical-align:middle !important;font-size:9.5pt;line-height:1.25;border:1px solid #253038 !important;}
@@ -132,9 +132,9 @@
                     عنوان الشحن / Shipping Address: <span t-field="o.partner_shipping_id" t-options='{"widget":"contact","fields":["address","name"],"no_marker":True}'/>
                 </div>
                 <table class="meta" dir="rtl"><colgroup><col style="width:50%"/><col style="width:50%"/></colgroup><tr>
-                    <td><strong class="ar">تاريخ الفاتورة</strong><div class="en">Invoice Date</div><span class="num" t-out="o.invoice_date.isoformat() if o.invoice_date else ''"/></td>
-                    <td><strong class="ar">تاريخ الاستحقاق</strong><div class="en">Due Date</div><span class="num" t-out="o.invoice_date_due.isoformat() if o.invoice_date_due else ''"/></td>
-                </tr><tr t-if="o.delivery_date and o.delivery_date != o.invoice_date"><td colspan="2"><strong class="ar">تاريخ التوريد</strong><div class="en">Supply Date</div><span class="num" t-out="o.delivery_date.isoformat()"/></td></tr></table>
+                    <td><strong class="ar">تاريخ الفاتورة:</strong><span class="en" dir="ltr">Invoice Date</span><span class="num" dir="ltr" t-out="o.invoice_date.isoformat() if o.invoice_date else ''"/></td>
+                    <td><strong class="ar">تاريخ الاستحقاق:</strong><span class="en" dir="ltr">Due Date</span><span class="num" dir="ltr" t-out="o.invoice_date_due.isoformat() if o.invoice_date_due else ''"/></td>
+                </tr><tr t-if="o.delivery_date and o.delivery_date != o.invoice_date"><td colspan="2"><strong class="ar">تاريخ التوريد:</strong><span class="en" dir="ltr">Supply Date</span><span class="num" dir="ltr" t-out="o.delivery_date.isoformat()"/></td></tr></table>
                 <div dir="rtl" class="fine" t-if="o.ref or o.partner_id.ref or o.reversed_entry_id">
                     <span t-if="o.ref">المرجع / Reference: <bdi t-field="o.ref"/></span>
                     <span t-if="o.partner_id.ref"> | رمز العميل / Customer Code: <bdi t-field="o.partner_id.ref"/></span>
@@ -201,8 +201,8 @@
                 <div t-if="company.display_invoice_amount_total_words" dir="rtl" class="fine"><div t-out="o._num2words(o.amount_total, 'ar_001')"/><div class="en" t-field="o.amount_total_words"/></div>
                 <div t-if="o.narration" dir="auto" class="fine" t-field="o.narration"/>
                 <!-- Existing invoice Training tab fields; keep the same order as the KSA custom report. -->
-                <div t-if="not is_html_empty(o.term_and_cond)" class="training-extra" dir="auto" t-field="o.term_and_cond"/>
-                <div t-if="not is_html_empty(o.bank_details)" class="training-extra" dir="auto" t-field="o.bank_details"/>
+                <div t-if="not nil_is_html_empty(o.term_and_cond)" class="training-extra" dir="auto" t-field="o.term_and_cond"/>
+                <div t-if="not nil_is_html_empty(o.bank_details)" class="training-extra" dir="auto" t-field="o.bank_details"/>
  
             </div>
         </div>
