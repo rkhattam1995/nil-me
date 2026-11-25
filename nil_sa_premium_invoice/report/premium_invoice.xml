@@ -6,7 +6,7 @@
         <field name="format">A4</field>
         <field name="orientation">Portrait</field>
         <field name="margin_top">10</field>
-        <field name="margin_bottom">8</field>
+        <field name="margin_bottom">5</field>
         <field name="margin_left">10</field>
         <field name="margin_right">10</field>
         <field name="header_spacing">0</field>
@@ -20,7 +20,7 @@
         <field name="report_name">nil_sa_premium_invoice.premium_invoice</field>
         <field name="report_file">nil_sa_premium_invoice.premium_invoice</field>
         <field name="paperformat_id" ref="paperformat_premium_invoice"/>
-        <field name="print_report_name">'Saudi Premium - %s' % (object.name or '')</field>
+        <field name="print_report_name">object._get_report_base_filename()</field>
         <field name="attachment_use" eval="False"/>
     </record>
 
@@ -55,7 +55,7 @@
         <t t-set="buyer" t-value="o.partner_id"/>
         <div class="article nil-sa-premium" t-att-data-oe-model="o._name" t-att-data-oe-id="o.id" data-oe-lang="en_US">
             <style>
-                .nil-sa-premium, .nil-sa-premium * {font-family: Calibri, Carlito, sans-serif !important; box-sizing: border-box;}
+                .nil-sa-premium, .nil-sa-premium * {font-family: Calibri, Carlito, 'Noto Sans Arabic', 'DejaVu Sans', sans-serif !important; box-sizing: border-box;}
                 .nil-sa-premium {font-size: 11pt; color: #253038; line-height: 1.22;}
                 .nil-sa-premium .en {font-size: 9pt; color: #59636b; font-weight: normal; display: block; direction: ltr;}
                 .nil-sa-premium table {width: 100%; border-collapse: collapse;}
@@ -85,6 +85,11 @@
                 .nil-sa-premium .grand .en {color: #e6e9eb;}
                 .nil-sa-premium .closing {page-break-inside: avoid; margin-top: 8px;}
                 .nil-sa-premium .fine {font-size: 9pt; color: #59636b;}
+                .nil-sa-premium [dir="rtl"], .nil-sa-premium [dir="rtl"] * {font-family: 'Noto Sans Arabic', 'Noto Naskh Arabic', Calibri, 'DejaVu Sans', sans-serif !important;}
+                .nil-sa-premium .en, .nil-sa-premium .en *, .nil-sa-premium .num, .nil-sa-premium [dir="ltr"] {font-family: Calibri, Carlito, 'Noto Sans Arabic', 'DejaVu Sans', sans-serif !important;}
+                .nil-sa-premium .nil-footer {border-top:1px solid #253038; margin:5px 0 0; padding:3px 0 0; text-align:center; line-height:1.15; page-break-inside:avoid;}
+                .nil-sa-premium .nil-footer p, .nil-sa-premium .nil-footer div {margin:0 !important; padding:0 !important; min-height:0 !important; line-height:1.15 !important;}
+                .nil-sa-premium .nil-footer .issue-time {margin-top:2px !important; font-size:8pt;}
             </style>
             <div class="page" style="margin: 0; padding: 0; min-height: 0;">
                 <table class="top" dir="ltr"><tr>
@@ -116,8 +121,7 @@
                 <table class="dates" dir="rtl"><tr>
                     <td><strong>تاريخ الفاتورة</strong><div class="en">Invoice Date</div><span class="num" t-out="o.invoice_date.isoformat() if o.invoice_date else ''"/></td>
                     <td t-if="o.invoice_date_due"><strong>تاريخ الاستحقاق</strong><div class="en">Due Date</div><span class="num" t-out="o.invoice_date_due.isoformat()"/></td>
-                    <td t-if="o.delivery_date"><strong>تاريخ التوريد</strong><div class="en">Supply Date</div><span class="num" t-out="o.delivery_date.isoformat()"/></td>
-                    <td t-if="o.invoice_origin"><strong>المصدر</strong><div class="en">Source</div><span class="num" t-field="o.invoice_origin"/></td>
+                    <td t-if="o.delivery_date and o.delivery_date != o.invoice_date"><strong>تاريخ التوريد</strong><div class="en">Supply Date</div><span class="num" t-out="o.delivery_date.isoformat()"/></td>
                 </tr></table>
                 <div dir="rtl" class="fine" t-if="o.ref or o.partner_id.ref or o.reversed_entry_id">
                     <span t-if="o.ref">المرجع / Reference: <bdi t-field="o.ref"/></span>
@@ -146,7 +150,7 @@
                                     <t t-if="line.product_id"><strong dir="rtl" t-out="line.product_id.with_context(lang='ar_001').name"/></t>
                                     <div dir="ltr" class="en" style="text-align:right; white-space:pre-wrap;" t-field="line.name"/>
                                 </td>
-                                <td><span class="num" t-field="line.quantity"/><div class="en" groups="uom.group_uom"><span t-field="line.product_uom_id"/></div></td>
+                                <td><span class="num" t-field="line.quantity"/></td>
                                 <td><span class="num" t-field="line.price_unit" t-options="{'widget':'monetary','display_currency': o.currency_id}"/></td>
                                 <td t-if="display_discount"><span class="num" t-field="line.discount"/></td>
                                 <td><span class="num" t-field="line.price_subtotal" t-options="{'widget':'float','precision': o.currency_id.decimal_places}"/></td>
@@ -174,8 +178,6 @@
                     </td>
                     <td style="width:39%; text-align:center; vertical-align:top;">
                         <img t-att-src="'/report/barcode/?barcode_type=%s&amp;value=%s&amp;width=%s&amp;height=%s' % ('QR', quote_plus(o.l10n_sa_qr_code_str), 300, 300)" style="width:40mm; height:40mm;" alt="ZATCA QR"/>
-                        <div class="fine">رمز الاستجابة السريعة / ZATCA QR</div>
-                        <div t-if="o.payment_reference" style="margin-top:6px;">مرجع الدفع<div class="en">Payment Reference</div><strong class="num" t-field="o.payment_reference"/></div>
                     </td>
                 </tr></table>
                 <div t-if="o.currency_id != company.currency_id" dir="rtl" class="closing">
@@ -187,14 +189,11 @@
                 </div>
                 <div t-if="company.display_invoice_amount_total_words" dir="rtl" class="fine"><div t-out="o._num2words(o.amount_total, 'ar_001')"/><div class="en" t-field="o.amount_total_words"/></div>
                 <div t-if="o.narration" dir="auto" class="fine" t-field="o.narration"/>
-                <div class="fine" style="border-top:1px solid #253038; margin-top:10px; padding-top:5px; text-align:center;" dir="ltr">
+                <div class="fine nil-footer" dir="ltr">
                     <div t-if="company.report_footer" t-field="company.report_footer"/>
-                    <div t-if="o.l10n_sa_confirmation_datetime">تاريخ الإصدار / Issue date: <span t-out="o.get_l10n_sa_confirmation_datetime_sa_tz()"/></div>
+                    <div class="issue-time" t-if="o.l10n_sa_confirmation_datetime"><span t-out="o.get_l10n_sa_confirmation_datetime_sa_tz()"/></div>
                 </div>
             </div>
-        </div>
-        <div class="footer" style="text-align:center; font-family:Calibri,Carlito,sans-serif; font-size:8pt; color:#59636b;">
-            <span class="page"/> / <span class="topage"/>
         </div>
     </template>
 </odoo>
