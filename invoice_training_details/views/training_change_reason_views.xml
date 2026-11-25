@@ -21,8 +21,11 @@
         <field name="inherit_id" ref="invoice_training_details.view_move_form_inherit_training"/>
         <field name="active" eval="True"/>
         <field name="arch" type="xml">
+            <xpath expr="//page[@name='Training']//field[@name='training_course_ids']" position="before">
+                <field name="nil_can_edit_posted_training" invisible="1"/>
+            </xpath>
             <xpath expr="//page[@name='Training']//field[@name='training_course_ids']" position="attributes">
-                <attribute name="readonly">state == 'posted' and move_type in ('out_invoice', 'out_refund')</attribute>
+                <attribute name="readonly">state == 'posted' and move_type in ('out_invoice', 'out_refund') and not nil_can_edit_posted_training</attribute>
             </xpath>
         </field>
     </record>
