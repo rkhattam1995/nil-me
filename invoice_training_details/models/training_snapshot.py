@@ -244,6 +244,14 @@ class TrainingCourse(models.Model):
         for rec in self:
             move = rec._nil_posted_customer_invoice()
             if move:
+                if vals is not None:
+                    # Import here to avoid an import cycle with model registration.
+                    from .invoice_posted_training_lock import POSTED_TRAINING_EDIT_FIELDS
+                    if (
+                        set(vals) <= POSTED_TRAINING_EDIT_FIELDS
+                        and move._nil_is_posted_training_editor()
+                    ):
+                        continue
                 raise UserError(_(
                     'Training details are locked because customer invoice %s '
                     'is already posted.'
