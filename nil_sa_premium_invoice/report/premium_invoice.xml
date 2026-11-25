@@ -5,8 +5,8 @@
         <field name="default" eval="False"/>
         <field name="format">A4</field>
         <field name="orientation">Portrait</field>
-        <field name="margin_top">10</field>
-        <field name="margin_bottom">15</field>
+        <field name="margin_top">8</field>
+        <field name="margin_bottom">11</field>
         <field name="margin_left">10</field>
         <field name="margin_right">10</field>
         <field name="header_spacing">0</field>
@@ -58,47 +58,52 @@
                 @font-face {font-family:'NIL Tajawal';src:url('/web/static/fonts/google/Tajawal/Tajawal-Regular.ttf') format('truetype');font-style:normal;font-weight:400;}
                 @font-face {font-family:'NIL Tajawal';src:url('/web/static/fonts/google/Tajawal/Tajawal-Bold.ttf') format('truetype');font-style:normal;font-weight:700;}
                 .nil-sa-premium, .nil-sa-premium * {box-sizing:border-box;font-family:Calibri,Carlito,'NIL Tajawal',sans-serif !important;}
-                .nil-sa-premium {font-size:10pt;color:#253038;line-height:1.35;}
+                .nil-sa-premium {font-size:10pt;color:#253038;line-height:1.25;}
                 .nil-sa-premium .ar, .nil-sa-premium .ar *, .nil-sa-premium .party, .nil-sa-premium .party * {font-family:'NIL Tajawal',Calibri,Carlito,sans-serif !important;}
                 .nil-sa-premium .en, .nil-sa-premium .en *, .nil-sa-premium .num, .nil-sa-premium .num *, .nil-sa-premium bdi {font-family:Calibri,Carlito,'NIL Tajawal',sans-serif !important;}
                 .nil-sa-premium .en {font-size:9pt;color:#59636b;font-weight:400;display:block;direction:ltr;line-height:1.25;margin-top:2px;}
-                .nil-sa-premium table {width:100%;table-layout:fixed;border-collapse:collapse;border:0 !important;}
-                .nil-sa-premium table td,.nil-sa-premium table th {border:0 !important;}
-                .nil-sa-premium .top {border-bottom:2px solid #253038 !important;margin-bottom:15px;}
-                .nil-sa-premium .top td {padding-bottom:10px;vertical-align:middle;}
-                .nil-sa-premium .title {margin-bottom:18px;}
+                .nil-sa-premium .page > table,.nil-sa-premium .totals {width:100%;table-layout:fixed;border-collapse:collapse;border:0 !important;}
+                .nil-sa-premium .page > table > tbody > tr > td,.nil-sa-premium .page > table > thead > tr > th,.nil-sa-premium .totals > tbody > tr > td {border:0 !important;}
+                .nil-sa-premium .top {border-bottom:2px solid #253038 !important;margin-bottom:7px;}
+                .nil-sa-premium .top td {padding-bottom:5px;vertical-align:middle;}
+                .nil-sa-premium .title {margin-bottom:8px;}
                 .nil-sa-premium .title td {vertical-align:middle;}
                 .nil-sa-premium .title .en {font-size:11pt;}
-                .nil-sa-premium .party {background:#f3f4f5;border-top:2px solid #253038 !important;padding:14px 12px;vertical-align:top;width:49%;text-align:right;}
-                .nil-sa-premium .party-title {border-bottom:1px solid #cfd4d7;padding-bottom:7px;margin-bottom:9px;font-size:10pt;}
+                .nil-sa-premium .party {background:#f3f4f5;border-top:2px solid #253038 !important;padding:8px 10px;vertical-align:top;width:49%;text-align:right;}
+                .nil-sa-premium .party-title {border-bottom:1px solid #cfd4d7;padding-bottom:4px;margin-bottom:5px;font-size:10pt;}
                 .nil-sa-premium .party-title .en {float:none;display:inline-block;margin:0 6px;}
-                .nil-sa-premium .party-name {font-size:10pt;font-weight:700;margin-bottom:6px;}
-                .nil-sa-premium .address {margin-bottom:8px;font-size:9.5pt;line-height:1.4;}
-                .nil-sa-premium .id-line {margin-top:5px;font-size:9.5pt;}
+                .nil-sa-premium .party-name {font-size:10pt;font-weight:700;margin-bottom:3px;}
+                .nil-sa-premium .address {margin-bottom:4px;font-size:9.5pt;line-height:1.25;}
+                .nil-sa-premium .id-line {margin-top:3px;font-size:9.5pt;}
                 .nil-sa-premium .id-line bdi {display:inline-block;direction:ltr;font-weight:700;}
-                .nil-sa-premium .meta {margin:16px 0 14px;}
-                .nil-sa-premium .meta td {width:50%;padding:11px 8px;vertical-align:middle;text-align:center !important;border:1px solid #d7dbde !important;}
+                .nil-sa-premium .meta {margin:7px 0 7px;}
+                .nil-sa-premium .meta td {width:50%;padding:5px 8px;vertical-align:middle;text-align:center !important;border:1px solid #d7dbde !important;}
                 .nil-sa-premium .meta strong {display:block;font-size:10pt;line-height:1.3;}
                 .nil-sa-premium .meta .en {text-align:center !important;font-size:9pt;}
-                .nil-sa-premium .meta .num {display:block;margin-top:5px;font-size:10pt;}
-                .nil-sa-premium .section-bar {margin:14px 0 10px;}
-                .nil-sa-premium .section-bar td {padding:8px 7px;background:#f3f4f5;}
-                .nil-sa-premium .lines {direction:rtl;margin:0 0 18px;table-layout:fixed !important;}
+                .nil-sa-premium .meta .num {display:block;margin-top:2px;font-size:10pt;}
+                .nil-sa-premium .lines {direction:rtl;margin:0 0 6px;table-layout:fixed !important;}
                 .nil-sa-premium .lines thead {display:table-header-group;}
-                .nil-sa-premium .lines th {background:#253038;color:white;font-weight:700;padding:10px 3px;text-align:center !important;vertical-align:middle !important;font-size:9.5pt;line-height:1.25;border:1px solid #253038 !important;}
-                .nil-sa-premium .lines th .ar {display:block;min-height:2.5em;}
-                .nil-sa-premium .lines th .en {color:#e6e9eb;font-size:8.5pt;text-align:center !important;min-height:2.5em;margin-top:3px;}
-                .nil-sa-premium .lines td {padding:13px 3px;border:1px solid #d7dbde !important;vertical-align:middle;text-align:center;font-size:9.5pt;line-height:1.35;}
+                .nil-sa-premium .lines th {background:#253038;color:white;font-weight:700;padding:4px 3px;text-align:center !important;vertical-align:middle !important;font-size:9.5pt;line-height:1.25;border:1px solid #253038 !important;}
+                .nil-sa-premium .lines th .ar {display:block;min-height:2.35em;}
+                .nil-sa-premium .lines th .en {color:#e6e9eb;font-size:8.5pt;text-align:center !important;margin-top:1px;}
+                .nil-sa-premium .lines td {padding:5px 3px;border:1px solid #d7dbde !important;vertical-align:middle;text-align:center;font-size:9.5pt;line-height:1.35;}
                 .nil-sa-premium .lines tbody tr:nth-child(even) {background:#f3f4f5;}
                 .nil-sa-premium .lines tr {page-break-inside:avoid;}
-                .nil-sa-premium .lines .desc {text-align:right;word-wrap:break-word;padding:13px 7px;}
-                .nil-sa-premium .lines .desc .en {font-size:9pt;line-height:1.35;margin-top:4px;}
+                .nil-sa-premium .lines .desc {text-align:right;word-wrap:break-word;padding:5px 6px;}
+                .nil-sa-premium .lines .desc .en {font-size:9pt;line-height:1.25;margin-top:2px;}
                 .nil-sa-premium .num {direction:ltr;unicode-bidi:embed;white-space:nowrap;}
-                .nil-sa-premium .totals td {padding:10px 7px;border-bottom:1px solid #e1e4e6 !important;font-size:10pt;vertical-align:middle;}
+                .nil-sa-premium .totals td {padding:5px 6px;border-bottom:1px solid #e1e4e6 !important;font-size:10pt;vertical-align:middle;}
                 .nil-sa-premium .grand td {background:#253038;color:white;font-size:11pt;}
                 .nil-sa-premium .grand .en {color:#e6e9eb;}
-                .nil-sa-premium .closing {page-break-inside:avoid;margin-top:14px;}
+                .nil-sa-premium .closing {page-break-inside:avoid;margin-top:5px;}
                 .nil-sa-premium .fine {font-size:9pt;color:#59636b;}
+                .nil-sa-premium .training-extra {margin:5px 0 0;font-size:9pt;line-height:1.25;word-wrap:break-word;}
+                .nil-sa-premium .training-extra p {margin:0 0 3px;line-height:1.25;}
+                .nil-sa-premium .training-extra ul,.nil-sa-premium .training-extra ol {margin-top:2px;margin-bottom:3px;}
+                .nil-sa-premium .training-extra li {margin-top:0;margin-bottom:1px;}
+                .nil-sa-premium .training-extra h1,.nil-sa-premium .training-extra h2,.nil-sa-premium .training-extra h3,.nil-sa-premium .training-extra h4,.nil-sa-premium .training-extra h5,.nil-sa-premium .training-extra h6 {font-size:10pt;line-height:1.25;margin:3px 0;page-break-after:avoid;}
+                .nil-sa-premium .training-extra table {max-width:100%;border-collapse:collapse;}
+                .nil-sa-premium .training-extra tr {page-break-inside:avoid;}
             </style>
             <div class="page" style="margin: 0; padding: 0; min-height: 0;">
                 <table class="top" dir="ltr"><tr>
@@ -136,7 +141,6 @@
                     <span t-if="o.partner_id.ref"> | رمز العميل / Customer Code: <bdi t-field="o.partner_id.ref"/></span>
                     <span t-if="o.reversed_entry_id"> | الفاتورة الأصلية / Original invoice: <bdi t-field="o.reversed_entry_id.name"/></span>
                 </div>
-                <table class="meta section-bar" dir="rtl"><colgroup><col style="width:50%"/><col style="width:50%"/></colgroup><tr><td><strong class="ar">تفاصيل الفاتورة</strong><div class="en">Invoice details</div></td><td><strong class="ar">العملة</strong><div class="en">Currency</div><span class="num" t-field="o.currency_id.name"/></td></tr></table>
                 <t t-set="display_discount" t-value="any(l.discount for l in o.invoice_line_ids)"/>
                 <table class="lines" dir="rtl" name="invoice_line_table">
                     <colgroup><col t-att-style="'width:27%' if display_discount else 'width:34%'"/><col style="width:7%"/><col style="width:14%"/><col t-if="display_discount" style="width:7%"/><col style="width:12%"/><col style="width:9%"/><col style="width:12%"/><col style="width:12%"/></colgroup>
@@ -197,6 +201,9 @@
                 </div>
                 <div t-if="company.display_invoice_amount_total_words" dir="rtl" class="fine"><div t-out="o._num2words(o.amount_total, 'ar_001')"/><div class="en" t-field="o.amount_total_words"/></div>
                 <div t-if="o.narration" dir="auto" class="fine" t-field="o.narration"/>
+                <!-- Existing invoice Training tab fields; keep the same order as the KSA custom report. -->
+                <div t-if="not is_html_empty(o.term_and_cond)" class="training-extra" dir="auto" t-field="o.term_and_cond"/>
+                <div t-if="not is_html_empty(o.bank_details)" class="training-extra" dir="auto" t-field="o.bank_details"/>
  
             </div>
         </div>
